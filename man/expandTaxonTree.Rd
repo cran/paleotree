@@ -14,11 +14,11 @@ expandTaxonTree(taxonTree, taxaData, collapse = NULL, plot = F)
   \item{plot}{If true, plots a comparison between input and output trees}
 }
 \details{
-The result tree will probably be a rough unresolved view of the relationships among the taxa, full of soft polytomies. This is somewhat similar to the methods used in Webb et al. (2006) and Friedman (2009). Obviously, buyer beware: any analyses one wishes to do should be done by resolving this tree with \code{\link{multi2di}} in the ape package.
+The result tree will probably be a rough unresolved view of the relationships among the taxa, full of soft polytomies. This is somewhat similar to the methods used in Webb and Donoghue (2005) and Friedman (2009). Obviously, any analyses one wishes to do should be done by resolving this tree with \code{\link{multi2di}} in the ape package or the various time-scaling functions found in this package (paleotree).
 
 The taxaData vector should have one element per lower taxon that is to be added to the tree. The names of each elements should be the desired names for the tips of the resulting lower-taxon tree that is output by this function.
 
-The collapse vector should be used if there is doubt about the monophyly of higher taxon on the input taxontree.
+The collapse vector should be used if there is doubt about the monophyly of higher taxon on the input taxontree. By default, all higher taxa are treated as monophyletic if not otherwise specified.
 
 The output tree will always lack branch lengths and thus will not be time-scaled.
 }

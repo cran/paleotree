@@ -27,18 +27,23 @@ Ackerly, D. 2009. Conservatism and diversification of plant functional traits: E
 }
 \author{David W. Bapst}
 \note{
-One should probably never do ancestral trait estimation without looking at the confidence intervals, as estimate tend to be very uncertain.
+One should probably never do ancestral trait estimation without looking at the confidence intervals, as these estimates tend to be very uncertain.
 }
 \seealso{
-\code{\link{ace}},\code{\link{getAncStates}},
+\code{\link{ace}}
 
-Also see the function traitgram in the library picante.
+Also see the function \code{traitgram} in the library picante.
 }
 \examples{
 require(geiger)
 set.seed(444)
 tree<-rtree(10)
 trait<-rTraitCont(tree)
+#first, traitgram without conf intervals
+plotTraitgram(trait,tree,conf.int=FALSE)
+
+#now, with
 plotTraitgram(trait,tree)
+#not much confidence, eh?
 }
 \keyword{hplot}

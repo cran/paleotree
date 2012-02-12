@@ -1,4 +1,4 @@
-\name{ConvSampEst}
+\name{SamplingConv}
 \alias{sProb2sRate}
 \alias{sRate2sProb}
 \alias{pqsRate2sProb}
@@ -6,7 +6,7 @@
 \alias{qsRate2Comp}
 \alias{probAnc}
 \title{Converting Sampling Estimates}
-\description{Various functions for converting between various sampling estimates}
+\description{Various functions for converting between estimates of sampling in the fossil record}
 \usage{
 sProb2sRate(R, int.length = 1)
 sRate2sProb(r, int.length = 1)
@@ -16,7 +16,7 @@ qsRate2Comp(r, q)
 probAnc(p, q, R)
 }
 \arguments{
-  \item{R}{Per-interval probability of sampling}
+  \item{R}{Per-interval probability of sampling a taxon at least once}
   \item{r}{Instantaneous rate of sampling}
   \item{p}{Instantaneous rate of speciation (lambda)}
   \item{q}{Instantaneous rate of extinction (mu)}
@@ -32,9 +32,9 @@ sProb2sRate() and sRate2sProb() give very rough conversions for converting betwe
 
 qsProb2Comp() and qsRate2Comp() are different calculations for "Pp" or the probability/proportion of taxa sampled in a clade. Theoretically, one could use it to extrapolate out the 'true' diversity, assuming the sampling rate model was correct. See Foote and Raup, 1996.
 
-probAnc() obtains the probability of sampling indirect ancestors for a group as given by Foote (1996), assuming budding cladogenesis, given the sampling probability and estimates of the diversification rate.
+probAnc() obtains the probability of sampling indirect ancestors for a group as given by Foote (1996), assuming only budding cladogenesis, given the sampling probability and estimates of the diversification rate.
 
-See the references below for a more detailed explanation of the methods and formulae used. The relevant equations are generally in the appendices.
+See the references below for a more detailed explanation of the methods and formulae used. The relevant equations are generally found in the appendices of those papers.
 }
 \value{
 The converted sampling estimate, depending on the function used. See details above.
@@ -50,7 +50,7 @@ Foote, M., and D. M. Raup. 1996. Fossil preservation and the stratigraphic range
 
 Solow, A. R., and W. Smith. 1997. On Fossil Preservation and the Stratigraphic Ranges of Taxa. Paleobiology 23(3):271-277.
 }
-\author{David W. Bapst, with assistance from Michael Foote}
+\author{David W. Bapst, with advice from Michael Foote}
 \seealso{
 \code{\link{sampleRanges}},\code{\link{getSampRateCont}},\code{\link{getSampProbDisc}}
 }
@@ -62,4 +62,4 @@ qsProb2Comp(R=0.1,q=0.1)
 qsRate2Comp(r=0.1,q=0.1)
 probAnc(p=0.1,q=0.1,R=0.5)
 }
-\keyword{univar}
+\keyword{datagen}

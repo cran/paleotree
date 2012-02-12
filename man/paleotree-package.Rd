@@ -2,17 +2,17 @@
 \alias{paleotree-package}
 \alias{paleotree}
 \docType{package}
-\title{paleotree: Analyses for Paleontological Phylogenies}
+\title{paleotree: Paleontological and Phylogenetic Analyses of Evolution}
 \description{
-Analyzes, time-scales and simulates phylogenies of extinct/fossil lineages. Also plots diversity curves for stratigraphic range data and phylogenies, including combinations of the those two data types.
+Analyzes, time-scales and simulates phylogenies of extinct/fossil lineages. Also plots diversity curves for stratigraphic range data and phylogenies, including combinations of these two data types.
 }
 \details{
 \tabular{ll}{
 Package: \tab paleotree\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2012-01-18\cr
-License: \tab What license is it under?\cr
+Version: \tab 1.1\cr
+Date: \tab 2012-02-01\cr
+License: \tab GPL version 2 or newer\cr
 }
 This package contains functions for analyzing sampling rates given ranges of fossil taxa, in both continuous and discrete time, functions for time-scaling phylogenies of fossil taxa and functions for simulating the fossil record in both a taxic and phylogenetic varieties and converting between these.
 }
@@ -22,7 +22,9 @@ David W. Bapst
 Maintainer: David W. Bapst <dwbapst@gmail.com>
 }
 \references{
-The SRC method of time-scaling will be fully described in an upcoming paper (Bapst, in prep).
+Bapst, in prep. paleotree: an R package for paleontological and phylogenetic analyses of evolution. To be submitted to Methods in Ecology and Evolution.
+
+Bapst, in prep. Time-scaling Trees of Fossil Taxa. To be submitted to Paleobiology.
 }
 \keyword{datagen}
 \seealso{
@@ -31,12 +33,11 @@ This package relies extensively on the phylogenetic toolkit offered by the 'ape'
 }
 \examples{
 ##Simulate some fossil ranges with simFossilTaxa()
-##Simulate some fossil ranges with simFossilTaxa()
 set.seed(444)
-taxa<-simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,nExtant=0)
+taxa<-simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
 #let's see what the 'true' diversity curve looks like in this case
 #plot the FADs and LADs with taxicDivCont()
-taxicDivCont(taxa[,3:4])
+taxicDivCont(taxa)
 
 #simulate a fossil record with imperfect sampling with sampleRanges()
 rangesCont<-sampleRanges(taxa,r=0.5)

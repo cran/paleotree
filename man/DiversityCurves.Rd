@@ -5,26 +5,24 @@
 \title{Diversity Curves}
 \description{Plots diversity curves based on taxic range data (in both discrete and continuous time) and for phylogenies.}
 \usage{
-	taxicDivCont(timeData, int.length = 1, int.times = NULL, plot = T, output = F)
-	taxicDivDisc(timeList, int.times = NULL, plot = T, output = F)
-	phyloDiv(ttree, int.length = 1, int.times = NULL, output = F, plot = T, plotLogRich = F, drop.ZLB=T)
+	taxicDivCont(timeData, int.length = 1, int.times = NULL, plot = T, plotLogRich = F)
+	taxicDivDisc(timeList, int.times = NULL, plot = T, plotLogRich = F)
+	phyloDiv(tree, int.length = 1, int.times = NULL, plot = T, plotLogRich = F, drop.ZLB=T)
 }
 \arguments{
-  \item{timeData}{Two-column matrix giving the per-taxon first and last appearances in absolute time}
+  \item{timeData}{Two-column matrix giving the per-taxon first and last appearances in absolute time. The matrix resulting from a single simFossilTaxon run can also be supplied to taxicDivCont, in which case all columns except the third and the fourth are ignored.}
   \item{timeList}{A list giving interval data. See details below.}
-  \item{ttree}{a time-scaled phylogeny object of class phylo}
+  \item{tree}{a time-scaled phylogeny object of class phylo}
   \item{int.length}{The length of intervals used to make the diversity curve. Ignored if int.times is given.}
   \item{int.times}{A two-column matrix of the interval start and end times for calculating the diversity curve. If NULL, calculated internally.}
-  \item{output}{If true, per-interval diversity data matrix is output, see details below}
   \item{plot}{If true, diversity curve is plotted}
   \item{plotLogRich}{If true, taxic diversity plotted on log scale}
   \item{drop.ZLB}{If true, zero-length terminal branches are dropped from the input tree}
 }
 \details{
-Background: Diversity curves are just plots of how species richness changes over time for a particular group of organisms. In the fossil record, these are based on per-taxon range data while more recently molecular phylogenies have been used to plot lineage-through-time plots (LTTs). Neither of these are without their weaknesses; reconstructing the true history of biodiversity is exceedingly difficult for any group.
+Background: Diversity curves are plots of species/taxon/lineage richness over time for a particular group of organisms. For paleontological studies, these are generally based on per-taxon range data while more recently in evolutionary biology, molecular phylogenies have been used to calculate lineage-through-time plots (LTTs). Neither of these are without their weaknesses; reconstructing the true history of biodiversity is exceedingly difficult for any group.
 
-The diversity curves produced by these functions will always measure diversity within binned time intervals. For continuous-time data or phylogenies, one could decrease the int.length used to get what is essentially almost an 'instantaneous' estimate of diversity. This is warned against, however, as most historical diversity data will have some time-averaging or uncertain temporal resolution and thus should not be used to calculate instantaneous estimates of diversity.
-
+The diversity curves produced by these functions will always measure diversity within binned time intervals (and plot them as rectangular bins). For continuous-time data or phylogenies, one could decrease the int.length used to get what is essentially an 'instantaneous' estimate of diversity. This is warned against, however, as most historical diversity data will have some time-averaging or uncertain temporal resolution and thus probably is not finely-resolved enough to calculate instantaneous estimates of diversity.
 
 As with many functions in the paleotree library, absolute time is always decreasing, i.e. the present day is zero.
 
@@ -35,20 +33,21 @@ The timeList object should be a list composed of two matrices, one giving by-int
 phyloDiv will resolve polytomies to be dichotomous nodes seperated by zero-length branches prior to calculating the diversity curve. There is not option to change this, but it should not affect the use of the function. phyloDiv will also drop zero-length terminal branches, as with the function dropZLB. This is done by default but can be turned off by setting the argument drop.zlb to false.
 }
 \value{
-If output=TRUE, then these functions will output a three-column matrix, where the first two columns are interval start and end times and the third column is the number of taxa/lineages counted in that interval.
+These functions will invisibly return a three-column matrix, where the first two columns are interval start and end times and the third column is the number of taxa/lineages counted in that interval.
 }
 \author{David W. Bapst}
 \seealso{
-\code{\link{multiDiv}},\code{\link{ltt.plot}},
+\code{
+\link{multiDiv}},\code{\link{timeSliceTree}},
 
-Also see the function ltt() in the package phytools. The packages TreeSim and LASER also have similar functions.
+There are several different functions for traditional LTT plots (phylogenetic diversity curves), such as the function ,\code{\link{ltt.plot}} in the package ape, the function ltt() in the package phytools, the function plotLtt() in the package laser and the function LTT.average.root() in the package TreeSim.
 }
 \examples{
 set.seed(444)
-taxa<-simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,nExtant=0)
+taxa<-simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
 #let's see what the 'true' diversity curve looks like in this case
 #plot the FADs and LADs with taxicDivCont()
-taxicDivCont(taxa[,3:4])
+taxicDivCont(taxa)
 #simulate a fossil record with imperfect sampling with sampleRanges()
 rangesCont<-sampleRanges(taxa,r=0.5)
 #plot the diversity curve based on the sampled ranges
@@ -64,16 +63,20 @@ tree<-taxa2phylo(taxa,obs_time=rangesCont[,2])
 phyloDiv(tree)
 
 #a simple example with phyloDiv
+  #using a tree from rtree in ape
 set.seed(444)
 tree<-rtree(100)
 phyloDiv(tree)
 
-#a neat example of using phyDiv with timeSliceTree to simulate doing molecular-phylogeny studies of diverification... in the past
+#a neat example of using phyDiv with timeSliceTree 
+ #to simulate doing molecular-phylogeny studies 
+ #of diverification...in the past
 set.seed(444)
-taxa<-simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,nExtant=0)
-taxicDivCont(taxa[,3:4])
+taxa<-simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
+taxicDivCont(taxa)
 #that's the whole diversity curve
-#with timeSliceTree we could look at the lineage accumulation curve we'd get of species sampled at a point in time
+#with timeSliceTree we could look at the lineage accumulation curve 
+ #we'd get of species sampled at a point in time
 tree<-taxa2phylo(taxa)
 #use timeSliceTree to make tree of relationships up until time=950 
 tree950<-timeSliceTree(tree,sliceTime=950,plot=TRUE,drop.extinct=FALSE)

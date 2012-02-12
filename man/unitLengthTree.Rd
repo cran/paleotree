@@ -10,17 +10,20 @@
 No additional details.
 }
 \value{
-Returns the modified phylogeny as an object of class phylo
+Returns the modified phylogeny as an object of class phylo. Any $root.time element is removed.
 }
 \author{David W. Bapst}
 \seealso{
-\code{\link{speciationalTree}},\code{\link{timePaleoPhy}},
+\code{\link{timePaleoPhy}},
+
+See also \code{speciationalTree} in the package geiger, which does essentially the same thing.
 }
 \examples{
 set.seed(444)
 tree<-rtree(10)
 layout(matrix(1:2,,2))
-plot(tree);plot(unitLengthTree(tree))
+plot(tree)
+plot(unitLengthTree(tree))
 }
 \keyword{datagen}
 
