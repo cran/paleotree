@@ -26,7 +26,7 @@ simPaleoTrees essentially uses simFossilTaxa with no.cond=T and other minimal co
 Because the divergence times are known perfectly, yet tips are at the apparent time of extinction and unsampled taxa are dropped, one should not use the output of this analysis except for very specialized simulation analyses. The results are probably not anything like real data, at least in most qualities.
 }
 \value{
-Output is an object of class multiphylo containing the simulated phylogenies. Additionally, each of these simulated phylogenies will have the original simulated taxa data (from simFossilTaxa) and sampled ranges (from sampleRanges) attached as the elements $taxa and $ranges.
+Output is an object of class multiphylo containing the simulated phylogenies, unless ntrees=1 in which case the output is a phylogeny of class 'phylo'. Additionally, each of these simulated phylogenies will have the original simulated taxa data (from simFossilTaxa) and sampled ranges (from sampleRanges) attached as the elements $taxa and $ranges.
 }
 \author{David W. Bapst}
 \seealso{
@@ -44,4 +44,3 @@ trees<-simPaleoTrees(p=0.1,q=0.1,r=0.5,ntrees=10,all.extinct=FALSE,maxtime=100,m
 #number of tips
 sapply(trees,Ntip)
 }
-\keyword{datagen}

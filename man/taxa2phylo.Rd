@@ -36,4 +36,3 @@ rangesCont<-sampleRanges(taxa,r=0.5)
 tree<-taxa2phylo(taxa,obs_time=rangesCont[,2])
 phyloDiv(tree,drop.ZLB=FALSE)
 }
-\keyword{datagen}

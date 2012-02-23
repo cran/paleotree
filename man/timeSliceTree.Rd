@@ -43,4 +43,3 @@ tree950<-timeSliceTree(tree,sliceTime=950,plot=TRUE,drop.extinct=TRUE)
 #lets plot the lineage accumulation plot on a log scale
 phyloDiv(tree950,plotLogRich=TRUE)
 }
-\keyword{datagen}

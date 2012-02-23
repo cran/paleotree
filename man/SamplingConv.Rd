@@ -62,4 +62,3 @@ qsProb2Comp(R=0.1,q=0.1)
 qsRate2Comp(r=0.1,q=0.1)
 probAnc(p=0.1,q=0.1,R=0.5)
 }
-\keyword{datagen}

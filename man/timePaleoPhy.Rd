@@ -27,7 +27,7 @@ bin_timePaleoPhy(tree, timeList, type = "basic", vartime = NULL, ntrees = 1,
 
   \item{rand.obs}{Should the tips represent observation times uniform distributed within taxon ranges? If rand.obs=T but add.term=F, the function fails and a warning is issued. If rand.obs=TRUE, tips are placed randomly within taxon ranges, as if uniformly distributed. This serves those users that wish for tips to represent observations made with some temporal uncertainty, such that they might have come from any point within a taxon's range. This might be the case, for example, if a user is interested in applying phylogeny-based approaches to studying trait evolution, but have per-taxon measurements of traits that come from museum specimens with uncertain temporal placement. As with randres, multiple trees should be created and then analyzed. }
 
-  \item{node.mins}{Minimum ages of nodes on the tree. The minimum dates of nodes can be set using node.mins; this argument takes a vector of the same length as the number of nodes, with dates given in the same order as nodes are number in the tree$edge matrix. Not all nodes need be set; those without minimum dates can be given as NA in node.mins.}
+  \item{node.mins}{Minimum ages of nodes on the tree. The minimum dates of nodes can be set using node.mins; this argument takes a vector of the same length as the number of nodes, with dates given in the same order as nodes are they are numbered in the tree$edge matrix (note that in tree$edge, the tips are given first Ntip numbers and these are ignored here). Not all nodes need be set; those without minimum dates can be given as NA in node.mins.}
 
   \item{plot}{If true, plots the input and output phylogenies}
 
@@ -93,13 +93,24 @@ ttree<-timePaleoPhy(cladogram,rangesCont,type="basic",add.term=TRUE,plot=TRUE)
 phyloDiv(ttree)
 
 #that tree didn't look very resolved, does it? (The curse of sampled ancestry!)
-#if we set ntrees>1, timePaleoPhy() will make multiple time-trees
+#can randomly resolve trees using the argument randres
 #each resulting tree will have polytomies randomly resolved in different ways using multi2di()
 ttree<-timePaleoPhy(cladogram,rangesCont,type="basic",ntrees=1,randres=TRUE,add.term=TRUE,plot=TRUE)
 #notice well the warning it prints!
 #now let's plot the first tree (both trees will be identical because we used set.seed)
 phyloDiv(ttree)
 #we would need to set ntrees to a large number to get a fair sample of trees
+
+
+#if we set ntrees>1, timePaleoPhy() will make multiple time-trees
+ttrees<-timePaleoPhy(cladogram,rangesCont,type="basic",ntrees=9,randres=TRUE,add.term=TRUE,plot=TRUE)
+#let's compare nine of them at once in a plot
+layout(matrix(1:9,3,3))
+for(i in 1:9){plot(ladderize(ttrees[[i]]),show.tip.label=FALSE,no.margin=TRUE)}
+#they are all a bit different!
+#can plot the median diversity curve with multiDiv
+graphics.off()
+multiDiv(ttrees)
 
 #compare different methods of timePaleoPhy
 layout(matrix(1:6,3,2));par(mar=c(3,2,1,2))
@@ -114,11 +125,20 @@ plot(ladderize(timePaleoPhy(cladogram,rangesCont,type="zlba",vartime=1,add.term=
 plot(ladderize(timePaleoPhy(cladogram,rangesCont,type="mbl",vartime=1,add.term=TRUE)));axisPhylo()
 	axisPhylo();text(x=55,y=23,"type=mbl",adj=c(0,0.5),cex=1.2)
 
+#using node.mins
+#let's say we have (molecular??) evidence that node #5 is at least 1200 time-units ago
+nodeDates<-rep(NA,(Nnode(cladogram)-1))
+nodeDates[5]<-1200
+ttree<-timePaleoPhy(cladogram,rangesCont,type="basic",
+	randres=FALSE,node.mins=nodeDates,plot=TRUE)
+ttree<-timePaleoPhy(cladogram,rangesCont,type="basic",
+	randres=TRUE,node.mins=nodeDates,plot=TRUE)
+
 #Using bin_timePaleoPhy to timescale with discrete interval data
 #first let's use binTimeData() to bin in intervals of 1 time unit
 rangesDisc<-binTimeData(rangesCont,int.length=1)
 ttree<-bin_timePaleoPhy(cladogram,rangesDisc,type="basic",ntrees=1,randres=TRUE,add.term=TRUE,plot=FALSE)
 #notice the warning it prints!
 phyloDiv(ttree)
+graphics.off()
 }
-\keyword{datagen}

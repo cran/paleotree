@@ -2,7 +2,7 @@
 \alias{dropZLB}
 \alias{dropExtinct}
 \alias{dropExtant}
-\title{Drop Terminal Zero-Length Branches}
+\title{Drop Terminal Branches of Various Types}
 \description{
 Drops all terminal branches and tip nodes of a tree that is zero-length. Useful for paleo-trees, as ancestral taxa will often come out as these "ZLBS".
 }
@@ -51,5 +51,5 @@ tree1<-dropExtinct(tree)
 phyloDiv(tree1)
 tree2<-dropExtant(tree)
 phyloDiv(tree2)
+graphics.off()
 }
-\keyword{datagen}

@@ -61,4 +61,3 @@ multiDiv(taxa)
 #increasing cone of diversity! Even better on a log scale:
 multiDiv(taxa,plotLogRich=TRUE)
 }
-\keyword{datagen}

@@ -24,4 +24,3 @@ set.seed(444)
 tree<-rtree(500)
 depthRainbow(tree)
 }
-\keyword{hplot}

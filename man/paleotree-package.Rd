@@ -10,8 +10,8 @@ Analyzes, time-scales and simulates phylogenies of extinct/fossil lineages. Also
 \tabular{ll}{
 Package: \tab paleotree\cr
 Type: \tab Package\cr
-Version: \tab 1.1\cr
-Date: \tab 2012-02-01\cr
+Version: \tab 1.2\cr
+Date: \tab 2012-02-23\cr
 License: \tab GPL version 2 or newer\cr
 }
 This package contains functions for analyzing sampling rates given ranges of fossil taxa, in both continuous and discrete time, functions for time-scaling phylogenies of fossil taxa and functions for simulating the fossil record in both a taxic and phylogenetic varieties and converting between these.
@@ -26,10 +26,8 @@ Bapst, in prep. paleotree: an R package for paleontological and phylogenetic ana
 
 Bapst, in prep. Time-scaling Trees of Fossil Taxa. To be submitted to Paleobiology.
 }
-\keyword{datagen}
 \seealso{
-This package relies extensively on the phylogenetic toolkit offered by the 'ape' package.
-\code{\link[ape:ape-package]{ape}}
+This package relies extensively on the phylogenetic toolkit offered by the \code{\link[ape:ape-package]{ape}} package.
 }
 \examples{
 ##Simulate some fossil ranges with simFossilTaxa()

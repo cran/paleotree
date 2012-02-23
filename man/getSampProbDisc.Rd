@@ -26,7 +26,7 @@ This function does not implement the finite window of observation modification f
 
 The timeData should be non-overlapping sequential intervals of roughly equal length. They should be in relative time, so the earliest interval should be 1 and it should increase as the intervals go up with age. This is so differences in interval numbers represents the same rough difference in interval timing. For example, a dataset where all taxa are listed from a set of sequential intervals of similar length, such as North American Mammal assemblage zones, microfossil faunal zones or graptolite biozones can be given as long as they are correctly numbered in sequential order in the input. As a counter example, a dataset which includes taxa resolved only to intervals as wide as the whole Jurassic and taxa resolved to biozones within the Jurassic should not be included in the same input. Drop the taxa from less poorly resolved intervals from such datasets if you want to apply this function, as long as this retains a large enough sample of taxa from the sequential intervals. Note that taxicDivDisc and the "bin_" timescaling methods do not require that intervals be truly sequential (they can be overlapping; see their helpfiles). The output from binTimeData is always sequential, at least by default.
 
-Please check the $message element of the output to make sure that convergence occurred.
+Please check the $message element of the output to make sure that convergence occurred. The likelihood surface can be very flat in some cases, particularly for small datasets (<100 taxa).
 }
 \value{
 If est_only=T, a matrix of per-taxon sampling and extinction parameters is output.
@@ -110,4 +110,3 @@ print(rangesDisc[[1]][SPres2$t_ends[2],1])
 #the parameter values it found are less great. Finds variation in q	
 }
 }
-\keyword{datagen}

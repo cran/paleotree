@@ -10,9 +10,11 @@
 }
 \details{
 The nodes are removed at random using sample(). This function can be conditioned to remove nodes of a particular depth with greater probability/frequency by setting node.depth to some value between zero (deep nodes close to the root) or one (shallow nodes far from the root). Depth is evaluated based on the number of descendant tips. If node.depth is not NA, the relative proportion of descendants from each node is calculated, summed to 1 and the node.depth value subtracted from this proportion. These values are then squared, normalized again to equal to 1 and then used as the probabilities for sampling nodes for removal.
+
+Branch lengths are removed from the input tree prior to degradation and entirely absent from the output tree.
 }
 \value{
-Returns the modified tree as an object of class phylo
+Returns the modified tree as an object of class phylo, with no edge lengths.
 }
 \author{David W. Bapst}
 
@@ -26,4 +28,3 @@ layout(matrix(1:2,,2))
 plot(tree,show.tip.label=FALSE,use.edge.length=FALSE)
 plot(tree1,show.tip.label=FALSE,use.edge.length=FALSE)
 }
-\keyword{datagen}

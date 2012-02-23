@@ -47,21 +47,30 @@ timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=
 	saveTD<-timeData
 	for(ntr in 1:ntrees){
 		#resolve nodes, if tree is not binary
-		if(!is.binary.tree(tree) & randres){tree<-multi2di(savetree)}else{tree<-savetree}
+		if(!is.binary.tree(savetree) & randres){tree<-multi2di(savetree)}else{tree<-savetree}
 		if(rand.obs){timeData[,2]<-apply(timeData,1,function(x) runif(1,x[2],x[1]))}else{timeData<-saveTD}
 		ntime<-sapply(1:Nnode(tree),function(x) 
 			max(timeData[tree$tip.label[unlist(prop.part(tree)[x])],1]))	#first, get node times
 		ntime<-c(timeData[tree$tip.label,1],ntime)
 		if(length(node.mins)>0){	#if there are node.mins, alter ntime as necessary
+			#of course, node.mins is referring to nodes in unresolved savetree
+			#need to figure out which nodes are which now if randres; remake node.mins
+			if(!is.binary.tree(savetree) & randres){
+				node_changes<-match(prop.part(savetree),prop.part(tree))
+				node.mins1<-rep(NA,Nnode(tree))
+				node.mins1[node_changes]<-node.mins
+			}else{
+				node.mins1<-node.mins
+				}
 			#require(phangorn)
 			for(i in (Ntip(tree)+1):length(ntime)){	#all internal nodes
 				desc_all<-unlist(Descendants(tree,i,type="all"))
 				desc_nodes<-c(desc_all[desc_all>Ntip(tree)],i)-Ntip(tree)	#INCLUDING ITSELF			
-				node_times<-node.mins[desc_nodes]
+				node_times<-node.mins1[desc_nodes]
 				ntime[i]<-max(ntime[i],node_times[!is.na(node_times)])
 				}
 			}
-		if(type=="equal" & length(vartime)>0){				#add to root, if method="equal"
+		if(type=="equal" & !is.null(vartime)){				#add to root, if method="equal"
 			ntime[Ntip(tree)+1]<-vartime+ntime[Ntip(tree)+1]
 			#anchor_adjust<-vartime+anchor_adjust
 			}	
@@ -160,6 +169,7 @@ bin_timePaleoPhy<-function(tree,timeList,type="basic",vartime=NULL,ntrees=1,rand
 		#this is useful when you have a specimen or measurement but you don't know its placement in the species' range
 	require(ape)
 	if(class(tree)!="phylo"){stop("Error: tree is not of class phylo")}
+	if(ntrees==1){message("Warning: Do not interpret a single tree; dates are stochastically pulled from uniform distributions")}
 	if(ntrees<1){stop("Error: ntrees<1")}
 	#clean out all taxa which are NA or missing for timeData
 	if(ntrees==1 & randres){message("Warning: Do not interpret a single randomly-resolved tree")}
@@ -176,22 +186,21 @@ bin_timePaleoPhy<-function(tree,timeList,type="basic",vartime=NULL,ntrees=1,rand
 		sites[,1]<-sapply(sites[,1],function(x) which(x==sort(unique(as.vector(sites)))))
 		sites[,2]<-sapply(sites[,2],function(x) which(x==sort(unique(as.vector(sites)))))
 		}
-	rownames(sites)<-rownames(timeList[[2]])
 	ttrees<-rmtree(ntrees,3)
+	siteTime<-matrix(,max(sites),2)
+	for (i in unique(as.vector(sites))){		#build two-col matrix of site's FADs and LADs
+		go<-timeList[[2]][which(sites==i)[1]]	#find an interval for this site
+		siteTime[i,]<-timeList[[1]][go,]
+		}
 	for(ntrb in 1:ntrees){
-		no_bad_dates<-F
-		while(!no_bad_dates){
-			siteTime<-matrix(,max(sites),2)
-			#build two-col matrix of site's FADs and LADs
-			for (i in unique(as.vector(sites))){
-				go<-timeList[[2]][which(sites==i)[1]]	#find an interval for this site
-				siteTime[i,]<-timeList[[1]][go,]
-				}
-			siteDates<-apply(siteTime,1,function(x) runif(1,x[2],x[1]))
-			timeData<-cbind(siteDates[sites[,1]],siteDates[sites[,2]])
-			rownames(timeData)<-rownames(timeList[[2]])
-			no_bad_dates<-all((timeData[,1]-timeData[,2])>=0)	#make sure that all no LADs come before FADs
+		bad_sites<-unique(as.vector(sites))
+		siteDates<-apply(siteTime,1,function(x) runif(1,x[2],x[1]))
+		while(length(bad_sites)>0){
+			siteDates[bad_sites]<-apply(siteTime[bad_sites,],1,function(x) runif(1,x[2],x[1]))
+			bad_sites<-unique(as.vector(sites[(siteDates[sites[,1]]-siteDates[sites[,2]])<0,]))
 			}
+		timeData<-cbind(siteDates[sites[,1]],siteDates[sites[,2]])
+		rownames(timeData)<-rownames(timeList[[2]])
 		if(rand.obs){timeData[,2]<-apply(timeData,1,function(x) runif(1,x[2],x[1]))}
 		if(!is.binary.tree(tree) & randres){tree1<-multi2di(tree)}else{tree1<-tree}
 		ttrees[[ntrb]]<-suppressMessages(timePaleoPhy(tree1,timeData,type=type,vartime=vartime,ntrees=1,
@@ -483,6 +492,7 @@ bin_srcTimePaleoPhy<-function(tree,timeList,sampRate,ntrees=1,sites=NULL,anc.wt=
 	if(class(tree)!="phylo"){stop("Error: tree is not of class phylo")}
 	if(ntrees<1){stop("Error: ntrees<1")}
 	if(ntrees==1){message("Warning: Do not interpret a single SRC time-scaled tree")}
+	if(ntrees==1){message("Warning: Do not interpret a single tree; dates are stochastically pulled from uniform distributions")}
 	#clean out all taxa which are NA or missing for timeData
 	tree<-drop.tip(tree,tree$tip.label[is.na(match(tree$tip.label,names(which(!is.na(timeList[[2]][,1])))))])
 	timeList[[2]]<-timeList[[2]][!is.na(timeList[[2]][,1]),]
@@ -497,22 +507,21 @@ bin_srcTimePaleoPhy<-function(tree,timeList,sampRate,ntrees=1,sites=NULL,anc.wt=
 		sites[,1]<-sapply(sites[,1],function(x) which(x==sort(unique(as.vector(sites)))))
 		sites[,2]<-sapply(sites[,2],function(x) which(x==sort(unique(as.vector(sites)))))
 		}
-	rownames(sites)<-rownames(timeList[[2]])
 	ttrees<-rmtree(ntrees,3)
+	siteTime<-matrix(,max(sites),2)
+	for (i in unique(as.vector(sites))){		#build two-col matrix of site's FADs and LADs
+		go<-timeList[[2]][which(sites==i)[1]]	#find an interval for this site
+		siteTime[i,]<-timeList[[1]][go,]
+		}
 	for(ntrb in 1:ntrees){
-		no_bad_dates<-F
-		while(!no_bad_dates){
-			siteTime<-matrix(,max(sites),2)
-			#build two-col matrix of site's FADs and LADs
-			for (i in unique(as.vector(sites))){
-				go<-timeList[[2]][which(sites==i)[1]]	#find an interval for this site
-				siteTime[i,]<-timeList[[1]][go,]
-				}
-			siteDates<-apply(siteTime,1,function(x) runif(1,x[2],x[1]))
-			timeData<-cbind(siteDates[sites[,1]],siteDates[sites[,2]])
-			rownames(timeData)<-rownames(timeList[[2]])
-			no_bad_dates<-all((timeData[,1]-timeData[,2])>=0)	#make sure that all no LADs come before FADs
+		bad_sites<-unique(as.vector(sites))
+		siteDates<-apply(siteTime,1,function(x) runif(1,x[2],x[1]))
+		while(length(bad_sites)>0){
+			siteDates[bad_sites]<-apply(siteTime[bad_sites,],1,function(x) runif(1,x[2],x[1]))
+			bad_sites<-unique(as.vector(sites[(siteDates[sites[,1]]-siteDates[sites[,2]])<0,]))
 			}
+		timeData<-cbind(siteDates[sites[,1]],siteDates[sites[,2]])
+		rownames(timeData)<-rownames(timeList[[2]])
 		if(rand.obs){timeData[,2]<-apply(timeData,1,function(x) runif(1,x[2],x[1]))}
 		ttrees[[ntrb]]<-suppressMessages(srcTimePaleoPhy(tree,timeData,sampRate,ntrees=1,
 			anc.wt=anc.wt,node.mins=node.mins,root.max=root.max,rand.obs=F,plot=plot))
@@ -571,6 +580,7 @@ degradeTree<-function(tree,prop_collapse,node.depth=NA){
 		#node.depth conditions on depth of edge in tree
 			# 1 removes more shallow nodes, 0 removes deeper nodes
 	if(class(tree)!="phylo"){stop("Error: tree is not of class phylo")}
+	tree$edge.length<-NULL
 	tree<-collapse.singles(tree)
 	edge<-(1:length(tree$edge))[which(tree$edge[,2]>Ntip(tree))]	#internal edges
 	if(is.na(node.depth)){

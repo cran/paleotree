@@ -32,7 +32,7 @@ One should probably never do ancestral trait estimation without looking at the c
 \seealso{
 \code{\link{ace}}
 
-Also see the function \code{traitgram} in the library picante.
+Also see the functions \code{traitgram} in the library picante and \code{phenogram} in the library phytools.
 }
 \examples{
 require(geiger)
@@ -46,4 +46,3 @@ plotTraitgram(trait,tree,conf.int=FALSE)
 plotTraitgram(trait,tree)
 #not much confidence, eh?
 }
-\keyword{hplot}

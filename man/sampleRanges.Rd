@@ -43,6 +43,5 @@ taxicDivCont(taxa)
 rangesCont<-sampleRanges(taxa,r=0.5)
 #plot the diversity curve based on the sampled ranges
 taxicDivCont(rangesCont)
-#compare the true history to what we would observe!
+#compare the true history to what we might observe!
 }
-\keyword{datagen}

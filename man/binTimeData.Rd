@@ -39,4 +39,3 @@ rangesDisc<-binTimeData(rangesCont,int.length=1)
 #plot with taxicDivDisc()
 taxicDivDisc(rangesDisc)
 }
-\keyword{datagen}

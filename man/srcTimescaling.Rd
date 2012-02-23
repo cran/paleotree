@@ -24,7 +24,7 @@ bin_srcTimePaleoPhy(tree, timeList, sampRate, ntrees = 1, sites = NULL, anc.wt =
 
   \item{rand.obs}{Should the tips represent observation times uniform distributed within taxon ranges? If rand.obs=T, then it is assumed that users wish the tips to represent observations made with some temporal uncertainty, such that they might have come from any point within a taxon's range. This might be the case, for example, if a user is interested in applying phylogeny-based approaches to studying trait evolution, but have per-taxon measurements of traits that come from museum specimens with uncertain temporal placement. When rand.obs=T, the tips are placed randomly within taxon ranges, as if uniformly distributed.}
 
-  \item{node.mins}{Minimum ages of nodes on the tree. The minimum dates of nodes can be set using node.mins; this argument takes a vector of the same length as the number of nodes, with dates given in the same order as nodes are number in the tree$edge matrix. Not all nodes need be set; those without minimum dates can be given as NA in node.mins. These nodes will be frozen and will not be shifted by the SRC algorithm. If the dates refer to a polytomy, then the first divergence will be frozen with additional divergence able to occur after the minimum date.}
+  \item{node.mins}{Minimum ages of nodes on the tree. The minimum dates of nodes can be set using node.mins; this argument takes a vector of the same length as the number of nodes, with dates given in the same order as nodes are they are numbered in the tree$edge matrix (note that in tree$edge, the tips are given first Ntip numbers and these are ignored here). Not all nodes need be set; those without minimum dates can be given as NA in node.mins. These nodes will be frozen and will not be shifted by the SRC algorithm. If the dates refer to a polytomy, then the first divergence will be frozen with additional divergence able to occur after the minimum date.}
 
   \item{root.max}{Maximum time before the first FAD that the root can be pushed back to}
 
@@ -85,9 +85,20 @@ phyloDiv(ttree)
 ttree<-srcTimePaleoPhy(cladogram,rangesCont,sampRate=sRate,ntrees=1,anc.wt=0,plot=TRUE)
 
 #to get a fair sample of trees, let's increse ntrees
-#can do an example of such an analysis via multDiv
-ttrees<-srcTimePaleoPhy(cladogram,rangesCont,sampRate=sRate,ntrees=10,plot=FALSE)
+ttrees<-srcTimePaleoPhy(cladogram,rangesCont,sampRate=sRate,ntrees=9,plot=FALSE)
+#let's compare nine of them at once in a plot
+layout(matrix(1:9,3,3))
+for(i in 1:9){plot(ladderize(ttrees[[i]]),show.tip.label=FALSE,no.margin=TRUE)}
+#they are all a bit different!
+#can plot the median diversity curve with multiDiv
+graphics.off()
 multiDiv(ttrees)
+
+#using node.mins
+#let's say we have (molecular??) evidence that node #5 is at least 1200 time-units ago
+nodeDates<-rep(NA,(Nnode(cladogram)-1))
+nodeDates[5]<-1200
+ttree<-srcTimePaleoPhy(cladogram,rangesCont,sampRate=sRate,ntrees=1,node.mins=nodeDates,plot=TRUE)
 
 #example with time in discrete intervals
 set.seed(444)
@@ -108,5 +119,5 @@ sRate1<-sProb2sRate(sProb,int.length=1)
 #Note: for real data, you may need to use an average int.length (no constant length)
 ttree<-bin_srcTimePaleoPhy(cladogram,rangesDisc,sampRate=sRate1,ntrees=1,plot=TRUE)
 phyloDiv(ttree)
+graphics.off()
 }
-\keyword{datagen}

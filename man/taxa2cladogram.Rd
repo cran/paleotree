@@ -31,4 +31,3 @@ cladogram<-taxa2cladogram(taxa,plot=TRUE)
 #compare the real relationships (taxa2phylo) to the ideal cladogram
 tree<-taxa2phylo(taxa,plot=TRUE)
 }
-\keyword{datagen}

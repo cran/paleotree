@@ -41,4 +41,3 @@ names(taxd)<-paste(taxd,"_x",1:30,sep="")
 coll<-sample(taxtr$tip.label,3)	#what to collapse?
 expandTaxonTree(taxonTree=taxtr,taxaData=taxd,collapse=coll,plot=TRUE)
 }
-\keyword{datagen}

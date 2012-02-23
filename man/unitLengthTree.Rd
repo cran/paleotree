@@ -25,5 +25,3 @@ layout(matrix(1:2,,2))
 plot(tree)
 plot(unitLengthTree(tree))
 }
-\keyword{datagen}
-

@@ -44,10 +44,14 @@ If maxExtant is 0, then the function will be limited to only accepting simulatio
 
 If conditions are such that a clade survives to maxtime, then maxtime will become the time of first appearance for the first taxa. Unless maxtime is very low, however, it is more likely the maxtaxa limit will be reached first, in which case the point in time at which maxtaxa is reached will become the present data and the entire length of the simulation will be the time of the first appearance of the first taxon.
 
-simFossilTaxa_SRCond is a wrapper for simFossilTaxa for when you want clades of a particular size, post-sampling. This function accomplishes this task by calculating the probability of sampling per-taxon and calculating the average clade size needed to produce the number of sampled taxa given by avgtaxa. We will call that quantity N. Then, it uses simFossilTaxa, with mintaxa set to N and maxtaxa set to 2*N. It will generally produce simulated datasets that are generally of that size or larger post-sampling (although there can be some variance). Some combinations of p, q, r and avgtaxa may take an extremely long time to find large enough datasets. Some combinations may produce very strange datasets that may have weird structure that is only a result of the conditioning (for example, the only clades that have many taxa when net diversification is low or negative will have lots of very early divergences, which could impact analyses). Needless to say, conditioning can be very difficult.
+simFossilTaxa_SRCond is a wrapper for simFossilTaxa for when you want clades of a particular size, post-sampling. This function accomplishes this task by first calculating the expected proportion of taxa sampled, given the extinction and sampling rates, and then calculating the average original clade size needed to produce the number of sampled taxa given by avgtaxa. This is given by:
+
+\eqn{N = (average number of taxa desired) / (1 - exp( -r / q))}
+
+We will call that quantity N. Then, it uses simFossilTaxa, with mintaxa set to N and maxtaxa set to 2*N. It will generally produce simulated datasets that are generally of that size or larger post-sampling (although there can be some variance). Some combinations of p, q, r and avgtaxa may take an extremely long time to find large enough datasets. Some combinations may produce very strange datasets that may have weird structure that is only a result of the conditioning (for example, the only clades that have many taxa when net diversification is low or negative will have lots of very early divergences, which could impact analyses). Needless to say, conditioning can be very difficult.
 }
 \value{
-Both of these functions give back a list containing nruns number of taxa datasets. Sampling has not been simulated in the output for either function; the output represents the 'true' history of the simualted clade.
+Both of these functions give back a list containing nruns number of taxa datasets, where each element is a matrix. If nruns=1, the output is  not a list but just a single matrix. Sampling has not been simulated in the output for either function; the output represents the 'true' history of the simualted clade.
 
 For each dataset, the output is a five column per-taxon matrix where all entries are numbers, with the first column being the taxon ID, the second being the ancestral taxon ID (the first taxon is NA for ancestor), the third column is the first appearance date of a species in absolute time, the fourth column is the last appearance data and the fifth column records whether a species is still extant at the time the simulation terminated (a value of 1 indicates a taxon is still alive, a value of 0 indicates the taxon is extinct).
 
@@ -55,7 +59,11 @@ As with many functions in the paleotree library, absolute time is always decreas
 }
 \references{
 Foote, M. 1996. On the Probability of Ancestors in the Fossil Record. Paleobiology 22(2):141-151.
+
+Hartmann, K., D. Wong, and T. Stadler. 2010. Sampling Trees from Evolutionary Models. Systematic Biology 59(4):465-476.
+
 Kendall, D. G. 1948. On the Generalized "Birth-and-Death" Process. The Annals of Mathematical Statistics 19(1):1-15.
+
 Nee, S. 2006. Birth-Death Models in Macroevolution. Annual Review of Ecology, Evolution, and Systematics 37(1):1-17.
 }
 \author{David W. Bapst}
@@ -109,5 +117,5 @@ ranges<-lapply(taxa,sampleRanges,r=r)
 ntaxa<-sapply(ranges,function(x) sum(!is.na(x[,1])))
 hist(ntaxa);mean(ntaxa)
 #works okay... some parameter combinations are difficult to get right number of taxa
+graphics.off()
 }
-\keyword{datagen}

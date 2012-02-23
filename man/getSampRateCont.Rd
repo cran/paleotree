@@ -74,4 +74,3 @@ SRres4<-getSampRateCont(rangesCont,n_tbins=3,grp1=randomgroup)
 print(c(SRres1$AICc,SRres2$AICc,SRres3$AICc,SRres4$AICc))
 #and we can see the most simple model has the lowest AICc (most informative model)
 }
-\keyword{datagen}
