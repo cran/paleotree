@@ -2,13 +2,13 @@
 \alias{timePaleoPhy}
 \alias{bin_timePaleoPhy}
 \title{Timescaling of Paleo-Phylogenies}
-\description{Takes an unscaled cladogram of fossil taxa and information on their ranges and outputs a timescaled tree using various methods. Also can resolve polytomies randomly and output samples or randomly-resolved trees.}
+\description{Timescales an unscaled cladogram of fossil taxa using information on their temporal ranges, using various methods. Also can resolve polytomies randomly and output samples of randomly-resolved trees.}
 \usage{
-timePaleoPhy(tree, timeData, type = "basic", vartime = NULL, ntrees = 1, randres = F, 
-	add.term = F, rand.obs = F, node.mins = NULL, plot = F)
+timePaleoPhy(tree, timeData, type = "basic", vartime = NULL, ntrees = 1, randres = FALSE, 
+    add.term = FALSE, rand.obs = FALSE, node.mins = NULL, plot = FALSE)
 
-bin_timePaleoPhy(tree, timeList, type = "basic", vartime = NULL, ntrees = 1, 
-	randres = F, sites = NULL,  add.term = F, rand.obs = F, node.mins = NULL, plot = F)
+bin_timePaleoPhy(tree, timeList, type = "basic", vartime = NULL, ntrees = 1,  nonstoch.bin=FALSE, 
+    randres = FALSE, sites = NULL,  add.term = FALSE, rand.obs = FALSE, node.mins = NULL, plot = FALSE)
 }
 \arguments{
   \item{tree}{An unscaled cladogram of fossil taxa}
@@ -33,6 +33,8 @@ bin_timePaleoPhy(tree, timeList, type = "basic", vartime = NULL, ntrees = 1,
 
   \item{timeList}{A list composed of two matrices giving interval times and taxon appearance datums, as would be output by binTimeData. The rownames of the second matrix should be the taxon IDs}
 
+  \item{nonstoch.bin}{If true, dates are not stochastically pulled from uniform distributions. See below for more details.}
+
   \item{sites}{Optional two column matrix, composed of site IDs for taxon FADs and LADs. The sites argument allows users to constrain the placement of dates in bin_timePaleoPhy by restricting multiple fossil taxa whose FADs or LADs are from the same very temporally restricted sites (such as fossil-rich Lagerstatten) to always have the same date, across many iterations of time-scaled trees from bin_timePaleoPhy. To do this, simply give a matrix where the "site" of each FAD and LAD for every taxon is listed, as corresponding to the second matrix in timeList. If no sites matrix is given (the default), then it is assumed all fossil come from different "sites" and there is no shared temporal structure among the events.}
 }
 \details{
@@ -41,104 +43,111 @@ This function is an attempt to unify and collect previously used and discussed m
 There are five method types that can be used by timePaleoPhy. Four of these use some value of absolute time, chosen a priori, to time-scale the tree. This is handled by the argument vartime, which is NULL by default and unused for type "basic".
 
 \describe{
-\item{"basic"}{This most simple of methods ignores vartime and scales nodes so they are as old as the first appearance of their oldest descendant. This method produces many zero-length branches.}
+\item{"basic"}{This most simple of methods ignores vartime and scales nodes so they are as old as the first appearance of their oldest descendant. This method produces many zero-length branches (Smith, 1994).}
 \item{"equal"}{The 'equal' method defined by G. Lloyd and used in Brusatte et al. (2008) and Lloyd et al. (2012). Originally usable in code supplied by G. Lloyd, it is recreated here. This method works by increasing the time of the root divergence by some amount (here set by vartime) and then adjusting zero-length branches so that time on early branches is re-apportioned out along those later branches equally.}
 \item{"aba"}{All branches additive. This method takes the "basic" tree and adds vartime to all branches.}
 \item{"zlba"}{Zero-length branches additive. This method adds vartime to all zero-length branches in the "basic" tree. Discussed by Hunt and Carrano, 2010.}
 \item{"mbl"}{Minimum branch length. Scales all branches so they are greater than or equal to vartime, and subtract time added to later branches from earlier branches in order to maintain the temporal structure of events.}
 }
 
-This function cannot time-scale branches relative to reconstructed character changes along branches, as used by Lloyd et al. (2012).
-
-timePaleoPhy can only be applied to datasets where taxon appearances are in continuous time. bin_timePaleoPhy is a wrapper of timePaleoPhy which produces timescaled trees for datasets which only have interval data available. For each output tree, taxon FADs and LADs are placed within their listed intervals under a uniform distribution. Thus, a large sample of time-scaled trees will approximate the uncertainty in the actual timing of the FADs and LADs.
+These functions cannot time-scale branches relative to reconstructed character changes along branches, as used by Lloyd et al. (2012).
 
 These functions will intuitively drop taxa from the tree with NA for range or are missing from timeData or timeList.
 
 As with many functions in the paleotree library, absolute time is always decreasing, i.e. the present day is zero.
+
+timePaleoPhy can only be applied to datasets where taxon appearances are in continuous time. bin_timePaleoPhy is a wrapper of timePaleoPhy which produces timescaled trees for datasets which only have interval data available. For each output tree, taxon FADs and LADs are placed within their listed intervals under a uniform distribution. Thus, a large sample of time-scaled trees will approximate the uncertainty in the actual timing of the FADs and LADs. 
+
+By setting the argument nonstoch.bin to TRUE, the dates are NOT stochastically pulled from uniform bins but instead FADs are assigned to the earliest time of whichever interval they were placed in and LADs are placed at the most recent time in their placed interval. This option may be useful for plotting. The sites argument becomes arbitrary if nonstoch.bin is TRUE.
 }
 \value{
 The output of these functions is a time-scaled tree or set of time-scaled trees, of either class phylo or multiphylo, depending on the argument ntrees. All trees are output with an element $root.time. This is the time of the root on the tree and is important for comparing patterns across trees.
 }
 \references{
-Bapst, in prep. Time-scaling Trees of Fossil Taxa. To be submitted to Paleobiology.
+Bapst, in prep. Time-scaling Trees of Fossil Taxa. To be submitted to \emph{Paleobiology}
 
-Brusatte, S. L., M. J. Benton, M. Ruta, and G. T. Lloyd. 2008. Superiority, Competition, and Opportunism in the Evolutionary Radiation of Dinosaurs. Science 321(5895):1485-1488.
+Brusatte, S. L., M. J. Benton, M. Ruta, and G. T. Lloyd. 2008 Superiority, Competition, and Opportunism in the Evolutionary Radiation of Dinosaurs. \emph{Science} \bold{321}(5895):1485-91488.
 
-Hunt, G., and M. T. Carrano. 2010. Models and methods for analyzing phenotypic evolution in lineages and clades. In J. Alroy, and G. Hunt, eds. Short Course on Quantitative Methods in Paleobiology. Paleontological Society.
+Hunt, G., and M. T. Carrano. 2010 Models and methods for analyzing phenotypic evolution in lineages and clades. In J. Alroy, and G. Hunt, eds. Short Course on Quantitative Methods in Paleobiology. Paleontological Society.
 
-Lloyd, G. T., S. C. Wang, and S. L. Brusatte. 2012. Identifying Heterogeneity in Rates of Morphological Evolutio: Discrete Character Change in the Evolution of Lungfish(Sarcopterygii, Dipnoi). Evolution 66(2):330-348.
+Lloyd, G. T., S. C. Wang, and S. L. Brusatte. 2012 Identifying Heterogeneity in Rates of Morphological Evolutio: Discrete Character Change in the Evolution of Lungfish(Sarcopterygii, Dipnoi). \emph{Evolution} \bold{66}(2):330--348.
+
+Smith, A. B. 1994 Systematics and the fossil record: documenting evolutionary patterns. Blackwell Scientific, Oxford.
 }
 \author{David W. Bapst, heavily inspired by code supplied by Graeme Lloyd and Gene Hunt.}
 
 \seealso{
-\code{\link{srcTimePaleoPhy}},\code{\link{binTimeData}},\code{\link{multi2di}}
+\code{\link{srcTimePaleoPhy}}, \code{\link{binTimeData}}, \code{\link{multi2di}}
 }
 \examples{
-##Simulate some fossil ranges with simFossilTaxa()
+#Simulate some fossil ranges with simFossilTaxa
 set.seed(444)
-taxa<-simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
-#simulate a fossil record with imperfect sampling with sampleRanges()
-rangesCont<-sampleRanges(taxa,r=0.5)
+taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
+#simulate a fossil record with imperfect sampling with sampleRanges
+rangesCont <- sampleRanges(taxa,r=0.5)
 #let's use taxa2cladogram to get the 'ideal' cladogram of the taxa
-cladogram<-taxa2cladogram(taxa,plot=TRUE)
+cladogram <- taxa2cladogram(taxa,plot=TRUE)
 #Now let's try timePaleoPhy using the continuous range data
-ttree<-timePaleoPhy(cladogram,rangesCont,type="basic",plot=TRUE)
+ttree <- timePaleoPhy(cladogram,rangesCont,type="basic",plot=TRUE)
 #plot diversity curve 
 phyloDiv(ttree)
 
 #that tree lacked the terminal parts of ranges (tips stops at the taxon FADs)
 #let's add those terminal ranges back on with add.term
-ttree<-timePaleoPhy(cladogram,rangesCont,type="basic",add.term=TRUE,plot=TRUE)
+ttree <- timePaleoPhy(cladogram,rangesCont,type="basic",add.term=TRUE,plot=TRUE)
 #plot diversity curve 
 phyloDiv(ttree)
 
-#that tree didn't look very resolved, does it? (The curse of sampled ancestry!)
+#that tree didn't look very resolved, does it? (See Wagner and Erwin 1995 to see why)
 #can randomly resolve trees using the argument randres
-#each resulting tree will have polytomies randomly resolved in different ways using multi2di()
-ttree<-timePaleoPhy(cladogram,rangesCont,type="basic",ntrees=1,randres=TRUE,add.term=TRUE,plot=TRUE)
+#each resulting tree will have polytomies randomly resolved in different ways using multi2di
+ttree <- timePaleoPhy(cladogram,rangesCont,type="basic",ntrees=1,randres=TRUE,add.term=TRUE,plot=TRUE)
 #notice well the warning it prints!
 #now let's plot the first tree (both trees will be identical because we used set.seed)
 phyloDiv(ttree)
 #we would need to set ntrees to a large number to get a fair sample of trees
 
-
-#if we set ntrees>1, timePaleoPhy() will make multiple time-trees
-ttrees<-timePaleoPhy(cladogram,rangesCont,type="basic",ntrees=9,randres=TRUE,add.term=TRUE,plot=TRUE)
+#if we set ntrees>1, timePaleoPhy will make multiple time-trees
+ttrees <- timePaleoPhy(cladogram,rangesCont,type="basic",ntrees=9,randres=TRUE,add.term=TRUE,plot=TRUE)
 #let's compare nine of them at once in a plot
 layout(matrix(1:9,3,3))
 for(i in 1:9){plot(ladderize(ttrees[[i]]),show.tip.label=FALSE,no.margin=TRUE)}
 #they are all a bit different!
+
 #can plot the median diversity curve with multiDiv
-graphics.off()
+layout(1)
 multiDiv(ttrees)
 
 #compare different methods of timePaleoPhy
-layout(matrix(1:6,3,2));par(mar=c(3,2,1,2))
+layout(matrix(1:6,3,2));parOrig <- par(mar=c(3,2,1,2))
 plot(ladderize(timePaleoPhy(cladogram,rangesCont,type="basic",vartime=NULL,add.term=TRUE)))
-	axisPhylo();text(x=50,y=23,"type=basic",adj=c(0,0.5),cex=1.2)
-plot(ladderize(timePaleoPhy(cladogram,rangesCont,type="equal",vartime=10,add.term=TRUE)));axisPhylo()
-	axisPhylo();text(x=55,y=23,"type=equal",adj=c(0,0.5),cex=1.2)
-plot(ladderize(timePaleoPhy(cladogram,rangesCont,type="aba",vartime=1,add.term=TRUE)));axisPhylo()
-	axisPhylo();text(x=55,y=23,"type=aba",adj=c(0,0.5),cex=1.2)
-plot(ladderize(timePaleoPhy(cladogram,rangesCont,type="zlba",vartime=1,add.term=TRUE)));axisPhylo()
-	axisPhylo();text(x=55,y=23,"type=zlba",adj=c(0,0.5),cex=1.2)
-plot(ladderize(timePaleoPhy(cladogram,rangesCont,type="mbl",vartime=1,add.term=TRUE)));axisPhylo()
-	axisPhylo();text(x=55,y=23,"type=mbl",adj=c(0,0.5),cex=1.2)
+    axisPhylo();text(x=50,y=23,"type=basic",adj=c(0,0.5),cex=1.2)
+plot(ladderize(timePaleoPhy(cladogram,rangesCont,type="equal",vartime=10,add.term=TRUE)))
+    axisPhylo();text(x=55,y=23,"type=equal",adj=c(0,0.5),cex=1.2)
+plot(ladderize(timePaleoPhy(cladogram,rangesCont,type="aba",vartime=1,add.term=TRUE)))
+    axisPhylo();text(x=55,y=23,"type=aba",adj=c(0,0.5),cex=1.2)
+plot(ladderize(timePaleoPhy(cladogram,rangesCont,type="zlba",vartime=1,add.term=TRUE)))
+    axisPhylo();text(x=55,y=23,"type=zlba",adj=c(0,0.5),cex=1.2)
+plot(ladderize(timePaleoPhy(cladogram,rangesCont,type="mbl",vartime=1,add.term=TRUE)))
+    axisPhylo();text(x=55,y=23,"type=mbl",adj=c(0,0.5),cex=1.2)
+layout(1);par(parOrig)
 
 #using node.mins
 #let's say we have (molecular??) evidence that node #5 is at least 1200 time-units ago
-nodeDates<-rep(NA,(Nnode(cladogram)-1))
-nodeDates[5]<-1200
-ttree<-timePaleoPhy(cladogram,rangesCont,type="basic",
+nodeDates <- rep(NA,(Nnode(cladogram)-1))
+nodeDates[5] <- 1200
+ttree1 <- timePaleoPhy(cladogram,rangesCont,type="basic",
 	randres=FALSE,node.mins=nodeDates,plot=TRUE)
-ttree<-timePaleoPhy(cladogram,rangesCont,type="basic",
+ttree2 <- timePaleoPhy(cladogram,rangesCont,type="basic",
 	randres=TRUE,node.mins=nodeDates,plot=TRUE)
 
 #Using bin_timePaleoPhy to timescale with discrete interval data
 #first let's use binTimeData() to bin in intervals of 1 time unit
-rangesDisc<-binTimeData(rangesCont,int.length=1)
-ttree<-bin_timePaleoPhy(cladogram,rangesDisc,type="basic",ntrees=1,randres=TRUE,add.term=TRUE,plot=FALSE)
+rangesDisc <- binTimeData(rangesCont,int.length=1)
+ttreeB1 <- bin_timePaleoPhy(cladogram,rangesDisc,type="basic",ntrees=1,randres=TRUE,add.term=TRUE,plot=FALSE)
 #notice the warning it prints!
-phyloDiv(ttree)
-graphics.off()
+phyloDiv(ttreeB1)
+#can also force the appearance timings not to be chosen stochastically
+ttreeB2 <- bin_timePaleoPhy(cladogram,rangesDisc,type="basic",ntrees=1,nonstoch.bin=TRUE,randres=TRUE,add.term=TRUE,plot=FALSE)
+phyloDiv(ttreeB2)
 }
