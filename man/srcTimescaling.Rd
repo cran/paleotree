@@ -6,11 +6,11 @@
 Timescales an unscaled cladogram of fossil taxa, using information on their ranges and an estimate of the instantaneous rate of sampling. The output is a sample of timescaled trees, as resulting from a stochastic algorithm that samples observed gaps in the fossil record with weights calculated from the sampling rate. This function also uses the sampling-rate calibrated time-scaling algorithm to resolve polytomies randomly and infer potential ancestor-descendant relationships, simultaneous with the time-scaling treatment.}
 \usage{
 srcTimePaleoPhy(tree, timeData, sampRate, ntrees = 1, anc.wt = 1, node.mins = NULL, 
-    rand.obs = FALSE, FAD.only = FALSE, root.max = 200, plot = FALSE)
+    rand.obs = FALSE, FAD.only = FALSE, root.max = 200, old.src=FALSE, plot = FALSE)
 
 bin_srcTimePaleoPhy(tree, timeList, sampRate, ntrees = 1, nonstoch.bin=FALSE,
     sites = NULL, anc.wt = 1, node.mins = NULL, rand.obs = FALSE, FAD.only = FALSE,
-    root.max = 200, plot = FALSE)
+    root.max = 200, old.src = FALSE, plot = FALSE)
 }
 \arguments{
   \item{tree}{An unscaled cladogram of fossil taxa}
@@ -27,9 +27,11 @@ bin_srcTimePaleoPhy(tree, timeList, sampRate, ntrees = 1, nonstoch.bin=FALSE,
 
   \item{node.mins}{Minimum ages of nodes on the tree. The minimum dates of nodes can be set using node.mins; this argument takes a vector of the same length as the number of nodes, with dates given in the same order as nodes are they are numbered in the tree$edge matrix (note that in tree$edge, the tips are given first Ntip numbers and these are ignored here). Not all nodes need be set; those without minimum dates can be given as NA in node.mins. These nodes will be frozen and will not be shifted by the SRC algorithm. If the dates refer to a polytomy, then the first divergence will be frozen with additional divergence able to occur after the minimum date.}
 
-  \item{FAD.only}{Should the tips represent observation times at the start of the taxon ranges? If rand.obs is TRUE, then it is assumed that users wish the tips to represent observations made with some temporal uncertainty, such that they might have come from any point within a taxon's range. This might be the case, for example, if a user is interested in applying phylogeny-based approaches to studying trait evolution, but have per-taxon measurements of traits that come from museum specimens with uncertain temporal placement. If TRUE, result is similar to when terminal ranges are no added on with timePaleoPhy. If FAD.only and rand.obs are both TRUE, the function will stop and a warning will be produced.}
+  \item{FAD.only}{Should the tips represent observation times at the start of the taxon ranges? If TRUE, result is similar to when terminal ranges are no added on with timePaleoPhy. If FAD.only and rand.obs are both TRUE, the function will stop and a warning will be produced.}
 
   \item{root.max}{Maximum time before the first FAD that the root can be pushed back to}
+
+  \item{old.src}{Use the older version of calculating gaps found in SRC timescaling functions in paleotree versions 1.0-1.4. The older version of the SRC method treats the time between branching points and the FAD of the later appearing daughter lineage as an exponentially-distributed random variable. The newer version, more in line with the reasoning behind the newer cal3 method, treats the summed amount of unobserved evolutionary history between some stem age, a branching event and the FADs of two daughter lineages as a gamma-distributed random variable, with a shape parameter of 2 and the sampling rate used as the rate parameters. This makes the newer version comparable to the algorithm used in cal3 timescaling, which only differs in the choice of the rate parameter.}
 
   \item{plot}{If true, plots the input, "basic" timescaled and output SRC-timescaled phylogenies}
 
@@ -59,16 +61,20 @@ By setting the argument nonstoch.bin to TRUE in bin_srcTimePaleoPhy, the dates a
 If timeData or the elements of timeList are actually data.frames (as output by read.csv or read.table), these will be coerced to a matrix.
 }
 \note{
-Most importantly, please note the stochastic element of the SRC method. It does not use traditional optimization methods, but instead pulls node times from a distribution. This means analyses MUST be done over many SRC-timescaled trees for analytical rigor! No one tree is correct.
+Most importantly, please note the stochastic element of the SRC method. It does not use traditional optimization methods, but instead draws divergence times from a distribution defined by the probability of intervals of unobserved evolutionary history. This means analyses MUST be done over many SRC-timescaled trees for analytical rigor! No one tree is correct.
 }
 \value{
 The output of these functions is a time-scaled tree or set of time-scaled trees, of either class phylo or multiphylo, depending on the argument ntrees. All trees are output with an element $root.time. This is the time of the root on the tree and is important for comparing patterns across trees.
+
+Trees created with bin_srcTimePaleoPhy will output with some additional elements, in particular $ranges.used, a matrix which records the continuous-time ranges generated for time-scaling each tree. (Essentially a pseudo-timeData matrix.)
 }
 \references{
 Bapst, in prep. Time-scaling Trees of Fossil Taxa. To be submitted to \emph{Paleobiology}
 }
 \author{David W. Bapst}
 \seealso{
+In particular, see the other rate-calibrated time-scaling method: code{\link{cal3TimePaleoPhy}}
+
 \code{\link{timePaleoPhy}}, \code{\link{binTimeData}}, \code{\link{getSampRateCont}}, \code{\link{multi2di}}
 }
 \examples{
