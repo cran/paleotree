@@ -5,7 +5,7 @@
 \usage{taxa2phylo(taxad, obs_time = NULL, plot = FALSE)}
 \arguments{
   \item{taxad}{A five-column matrix of taxonomic data, as output by simFossilTaxa}
-  \item{obs_time}{Per-taxon times of observation; if NULL, the LADs (column 4) in taxad2 are used}
+  \item{obs_time}{A vector of per-taxon times of observation which must be in the same order of taxa as in the object taxad; if NULL, the LADs (column 4) in taxad2 are used}
   \item{plot}{Plot the resulting phylogeny?}
 }
 \details{
@@ -20,7 +20,7 @@ Cryptic taxa are not dropped or merged as can be done with taxa2cladogram. The p
 As with many functions in the paleotree library, absolute time is always decreasing, i.e. the present day is zero.
 }
 \note{
-DO NOT use this function to time-scale a real tree for a real dataset. It assumes you know the divergence/speciation times of the branching nodes and relationships perfectly, which is almost impossible given the undersampled nature of the fossil record. Use timePaleoPhy or srcTimePaleoPhy instead.
+DO NOT use this function to time-scale a real tree for a real dataset. It assumes you know the divergence/speciation times of the branching nodes and relationships perfectly, which is almost impossible given the undersampled nature of the fossil record. Use timePaleoPhy or cal3TimePaleoPhy instead.
 
 DO use this function when doing simulations and you want to make a tree of the 'true' history, such as for simulating trait evolution along phylogenetic branches.
 

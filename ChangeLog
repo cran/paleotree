@@ -1,5 +1,21 @@
+Version 1.6 - 11-05-12
+-Changes to bin time-scaling functions so that rand.obs and FAD.only conditions were forwarded to their associated functions, rather than done  by the bin wrapper function (this caused problems with the calculation of the weight adjustment for the cal3 methods)
+-New function fixRootTime which is called by any other function which needs to fix $root.time elements after dropping taxa, etc.
+	-Uses solution for fixing root.times previous being used by dropZLB
+-Inconsistency found in how root.time elements were fixed in terminal-branch dropping functions; dropExtant was found to be buggy
+-New simulation functions for 'candle trees' which are clades were all observable taxa are monophyletic lineages which correspond to the terminal branches of a phylogeny
+-Changes to taxa2phylo so that an error is returned if observation times outside the original taxon ranges are passed to it
+-SRC method is now considered deprecated and is removed from the public release of paleotree, along with any references in the help files. The SRC method, as of 10/29/12, can be found in the paleotree github repo in the deprecated functions folder. THE AUTHOR OF THIS PACKAGE STRONGLY RECOMMENDS NOT TO USE THE SRC METHOD. Users interested in using rate calibrated timescaling should use cal3 instead.
+-cal3 is now modified so that step.size can be changed as an argument
+-cal3 is modified so that differences between time of observation and LAD do not cause differences in the extent to which nodes are dated, by adding the densities calculated for 'unconsidered' potential node ages to the maximum potential node agenot alter the placement of node ages, which can be modified with 
+-Bug fixed whereby cal3 was unable to properly use the rand.obs argument, giving out trees with time of obs at the LADs instead (perhaps the package author may have been drunk or just feeling reckless when he wrote the rand.obs arguments in the various timescaling functions?)
+-Bug fixed in simFossilTaxa where some sets of conditions would sometimes produce an error in some runs (thanks Tiego Quental for the bug report!)
+-Bug fixed in using rand.obs argument in timePaleoPhy where timeData was recycled over many runs (thanks Roger Benson for the bug report!)
+-Modified cal3 timescaling methods to have a randres option and to allow per-taxon anc.wt values
+-Modified plotMultiDiv to allow plotting multiple diversity curves, by default as a crazy rainbow
+
 version 1.5 - 10/05/12
--New functions, cal3TimeScaling and bin_cal3TimeScaling, similar to SRC methods but different probability equations used, req div rates
+-New functions, cal3TimePaleoPhy and bin_cal3TimePaleoPhy, similar to SRC methods but different probability equations used, req div rates
 -Modifications to SRC methods to work more like how cal3 calculates unobs evol history at each node
 -Added function freqRat for estimating the per-interval sampling probability via the frequency ratio method of Foote and Raup (1996)
 -Added function rootSplit, which finds most basal split among a set of taxa
