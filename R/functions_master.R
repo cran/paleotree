@@ -1,7 +1,7 @@
 #functions_master.R
 
 timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=FALSE,timeres=FALSE,add.term=FALSE,
-	rand.obs=FALSE,node.mins=NULL,plot=FALSE){
+	inc.term.adj=FALSE,rand.obs=FALSE,node.mins=NULL,plot=FALSE){
 	#fast time calibration for phylogenies of fossil taxa; basic methods
 		#this code inspired by similar code from G. Lloyd and G. Hunt
 	#INITIAL: 
@@ -43,6 +43,10 @@ timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=
 	if(ntrees==1 & rand.obs){message("Warning: Do not interpret a single tree with randomly-placed obs times")}
 	if(randres & timeres){stop(
 		"Error: Inconsistent arguments: You cannot randomly resolve polytomies and resolve with respect to time simultaneously!")}
+	if(!add.term & inc.term.adj){stop(
+		"Error: Inconsistent arguments: Terminal ranges cannot be used in adjustment of branch lengths if not added to tree!")}
+	if(type=="basic" & inc.term.adj){stop(
+		"Error: Inconsistent arguments: Terminal range adjustment of branch lengths does not affect basic time-scaling method!")}
 	#remove taxa that are NA or missing in timeData
 	tree<-drop.tip(tree,tree$tip.label[is.na(match(tree$tip.label,names(which(!is.na(timeData[,1])))))])
 	if(Ntip(tree)<2){stop("Error: Less than two valid taxa shared between the tree and temporal data")}
@@ -88,6 +92,13 @@ timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=
 		ttree<-tree
 		ttree$edge.length<-sapply(1:Nedge(ttree),function(x) 
 			ntime[ttree$edge[x,1]]-ntime[ttree$edge[x,2]])	#finds each edge length easy peasy, based on G. Lloyd's code
+		#okay, now time to do add terminal branch lengths if inc.term.adj
+		if(add.term & inc.term.adj){
+			obs_ranges<-timeData[,1]-timeData[,2]
+			term_id<-ttree$tip.label[ttree$edge[ttree$edge[,2]<=Ntip(ttree),2]]
+			term_add<-sapply(term_id,function(x) obs_ranges[x])
+			ttree$edge.length[ttree$edge[,2]<=Ntip(ttree)]<-ttree$edge.length[ttree$edge[,2]<=Ntip(ttree)]+term_add
+			}
 		#ttree_basic<-ttree
 		##if type=basic, I don't have to do anything but set root.time
 		if(type=="aba"){	#if (type="aba") then adds vartime to all branches (All Branch Additive) 
@@ -145,14 +156,20 @@ timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=
 					ntime[ttree$edge[x,1]]-ntime[ttree$edge[x,2]])	#update branch lengths using ntime
 				}}
 			}
-		#now add root.time: should be time of earliest FAD + distance of root from earliest tip
-		ttree$root.time<-max(timeData[ttree$tip.label,1])+min(dist.nodes(ttree)[1:Ntip(ttree),Ntip(ttree)+1])	
 		#if add.term!=FALSE, then taxon observed ranges are added to the tree, with the LADs becoming the location of the tips
-		if(add.term){
+		if(add.term & !inc.term.adj){
 			obs_ranges<-timeData[,1]-timeData[,2]
 			term_id<-ttree$tip.label[ttree$edge[ttree$edge[,2]<=Ntip(ttree),2]]
 			term_add<-sapply(term_id,function(x) obs_ranges[x])
 			ttree$edge.length[ttree$edge[,2]<=Ntip(ttree)]<-ttree$edge.length[ttree$edge[,2]<=Ntip(ttree)]+term_add
+			}
+		#now add root.time: 
+		if(add.term){
+			#should be time of earliest LAD + distance of root from earliest tip
+			ttree$root.time<-max(timeData[ttree$tip.label,2])+min(dist.nodes(ttree)[1:Ntip(ttree),Ntip(ttree)+1])	
+		}else{
+			#should be time of earliest FAD + distance of root from earliest tip
+			ttree$root.time<-max(timeData[ttree$tip.label,1])+min(dist.nodes(ttree)[1:Ntip(ttree),Ntip(ttree)+1])	
 			}
 		if(plot){
 			parOrig<-par(mar=c(2.5,1,1,0.5));layout(1:2)
@@ -160,6 +177,7 @@ timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=
 			plot(ladderize(ttree),show.tip.label=TRUE);axisPhylo()
 			layout(1);par(parOrig)
 			}
+		names(ttree$edge.length)<-NULL
 		ttrees[[ntr]]<-ttree
 		}
 	if(ntrees==1){ttrees<-ttrees[[1]]}
@@ -167,7 +185,7 @@ timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=
 	}
 
 bin_timePaleoPhy<-function(tree,timeList,type="basic",vartime=NULL,ntrees=1,nonstoch.bin=FALSE,randres=FALSE,timeres=FALSE,
-	sites=NULL,point.occur=FALSE,add.term=FALSE,rand.obs=FALSE,node.mins=NULL,plot=FALSE){
+	sites=NULL,point.occur=FALSE,add.term=FALSE,inc.term.adj=FALSE,rand.obs=FALSE,node.mins=NULL,plot=FALSE){
 	#wrapper for applying non-SRC time-scaling to timeData where FADs and LADs are given as bins 
 		#see timePaleoPhy function for more details
 	#input is a list with (1) interval times matrix and (2) species FOs and LOs
@@ -240,8 +258,10 @@ bin_timePaleoPhy<-function(tree,timeList,type="basic",vartime=NULL,ntrees=1,nons
 			if(timeres){tree1<-timeLadderTree(tree,timeData)}	
 			}
 		tree2<-suppressMessages(timePaleoPhy(tree1,timeData,type=type,vartime=vartime,ntrees=1,
-			randres=FALSE,add.term=add.term,rand.obs=rand.obs,node.mins=node.mins,plot=plot))
+			randres=FALSE,add.term=add.term,inc.term.adj=inc.term.adj,rand.obs=rand.obs,
+			node.mins=node.mins,plot=plot))
 		tree2$ranges.used<-timeData
+		names(tree2$edge.length)<-NULL
 		ttrees[[ntrb]]<-tree2
 		}
 	if(ntrees==1){ttrees<-ttrees[[1]]}
@@ -316,7 +336,7 @@ cal3TimePaleoPhy<-function(tree,timeData,brRate,extRate,sampRate,ntrees=1,anc.wt
 	Ps<-sapply(tree$tip.label,function(x) getPs(brRate[x],extRate[x],sampRate[x]))
 	names(Ps)<-tree$tip.label
 	if(length(node.mins)!=Nnode(tree) & !is.null(node.mins)){stop("node.mins length != Nnode!")}
-	ttree1<-timePaleoPhy(tree,timeData,type="basic",node.mins=node.mins,add.term=FALSE)
+	ttree1<-timePaleoPhy(tree,timeData,type="basic",node.mins=node.mins,add.term=FALSE,inc.term.adj=FALSE)
 	#identify which nodes are min-locked; make sure to update when resolving polytomies
 	if(length(node.mins)>0){locked_nodes<-which(!is.na(node.mins))++Ntip(tree)}else{locked_nodes<-NA}
 	ttree1<-collapse.singles(ttree1)
@@ -613,6 +633,7 @@ cal3TimePaleoPhy<-function(tree,timeData,brRate,extRate,sampRate,ntrees=1,anc.wt
 			plot(ladderize(ktree),show.tip.label=TRUE);axisPhylo();
 			layout(1);par(parOrig)		
 			}
+		names(ktree$edge.length)<-NULL
 		ttrees[[ntr]]<-ktree
 		}
 	if(ntrees==1){ttrees<-ttrees[[1]]}
@@ -681,6 +702,7 @@ bin_cal3TimePaleoPhy<-function(tree,timeList,brRate,extRate,sampRate,ntrees=1,no
 			ntrees=1,anc.wt=anc.wt,node.mins=node.mins,adj.obs.wt=adj.obs.wt,root.max=root.max,step.size=step.size,
 			FAD.only=FAD.only,rand.obs=rand.obs,randres=randres,plot=plot))
 		tree2$ranges.used<-timeData
+		names(tree2$edge.length)<-NULL
 		ttrees[[ntrb]]<-tree2
 		}
 	if(ntrees==1){ttrees<-ttrees[[1]]}
@@ -2176,7 +2198,8 @@ phyloDiv<-function(tree,int.length=1,int.times=NULL,plot=TRUE,plotLogRich=FALSE,
 	}
 
 multiDiv<-function(data,int.length=1,plot=TRUE,split.int=TRUE,drop.ZLB=TRUE,drop.cryptic=FALSE,
-	extant.adjust=0.01,plotLogRich=FALSE,timelims=NULL,plotMultCurves=FALSE,multRainbow=TRUE,divPalette=NULL){
+	extant.adjust=0.01,plotLogRich=FALSE,timelims=NULL,int.times=NULL,
+	plotMultCurves=FALSE,multRainbow=TRUE,divPalette=NULL){
 	#lines up a bunch of taxic or phylo objects and calculates diversity curves simulataneously
 		#across all their objects; intuits the type of object without being told
 		#it also calculates a "average" median curve and 95% quantile intervals
@@ -2192,63 +2215,65 @@ multiDiv<-function(data,int.length=1,plot=TRUE,split.int=TRUE,drop.ZLB=TRUE,drop
 	#int.length=1;plot=TRUE;split.int=TRUE;drop.ZLB=TRUE;drop.cryptic=FALSE;plotLogRich=FALSE;timeLims=NULL
 	#plotMultCurves=FALSE;multRainbow=TRUE;divPalette=NULL
 	require(ape)
-	tblen<-int.length
 	dclass<-sapply(data,class)	#data classes
 	dclass1<-numeric(length(dclass));dclass1[dclass=="matrix"]<-1;
 		dclass1[dclass=="list"]<-2;dclass1[dclass=="phylo"]<-3
 	if(any(dclass1==0)){stop("Error: Data of Unknown Type")}
-	#get max and min times for each type
-	if(any(dclass1==1)){
-		lims1<-sapply(data[dclass1==1],function(x) 
-			if(ncol(x)==6){
-				c(min(x[,3:4],na.rm=T),max(x[,3:4],na.rm=T))	
-			}else{
-				c(min(x,na.rm=TRUE),max(x,na.rm=TRUE))}
-			)
-	}else{lims1<-NA}
-	if(any(dclass1==2)){
-		for(i in which(dclass1==2)){
-			data[[i]][[1]][data[[i]][[1]][,1]==0,1]<-extant.adjust
-			}
-		lims2<-sapply(data[dclass1==2],function(x) 
-			c(min(x[[1]][max(x[[2]]),]),max(x[[1]][min(x[[2]]),])))
-	}else{lims2<-NA}
-	if(any(dclass1==3)){
-		lims3<-numeric()
-		for(i in which(dclass1==3)){
-			ttree<-data[[i]]
-			if(is.null(ttree$root.time)){
-				ntime<-dist.nodes(ttree)[,Ntip(ttree)+1]
-				ntime<-max(ntime)-ntime
-			}else{
-				ntime<-dist.nodes(ttree)[,Ntip(ttree)+1]
-				ntime<-ttree$root.time-ntime
+	if(is.null(int.times)){
+		tblen<-int.length
+		#get max and min times for each type
+		if(any(dclass1==1)){
+			lims1<-sapply(data[dclass1==1],function(x) 
+				if(ncol(x)==6){
+					c(min(x[,3:4],na.rm=T),max(x[,3:4],na.rm=T))	
+				}else{
+					c(min(x,na.rm=TRUE),max(x,na.rm=TRUE))}
+				)
+		}else{lims1<-NA}
+		if(any(dclass1==2)){	
+			for(i in which(dclass1==2)){
+				data[[i]][[1]][data[[i]][[1]][,1]==0,1]<-extant.adjust
 				}
-			lims3<-c(lims3,c(min(ntime),max(ntime)))
-			}
-	}else{lims3<-NA}
-	end<-min(c(lims1,lims2,lims3),na.rm=TRUE)
-	start<-max(c(lims1,lims2,lims3),na.rm=TRUE)
-	midtimes<-seq(start+2*tblen,end-2*tblen,by=-tblen)
-	midtimes<-midtimes[midtimes>0]
-	int.start<-midtimes+(tblen/2);int.end<-midtimes-(tblen/2)
-	int.times<-cbind(int.start,int.end)
-	if(split.int & any(dclass1==2)){
-		#for every single discrete time dataset, bins must be split at their boundaries
-		splinters<-sapply(data[dclasss=2],function(x) x[[1]][,1])
-		mustSplit<-apply(int.times,1,function(x) any(sapply(splinters,function(y) x[1]>y & x[2]<y)))
-		if(any(mustSplit)){
-			for(i in which(mustSplit)){
-					splitter<-splinters[sapply(splinters[,1],function(y) int.times[i,1]>y & int.times[i,2]<y),1]
-					#if(length(splitter)>1){stop("Error: Splitter returning more than one value?!")}
-					splitter<-c(int.times[i,1],splitter,int.times[i,2])
-					int.times<-rbind(int.times,cbind(splitter[1:(length(splitter)-1)],splitter[2:length(splitter)]))
+			lims2<-sapply(data[dclass1==2],function(x) 
+				c(min(x[[1]][max(x[[2]]),]),max(x[[1]][min(x[[2]]),])))
+		}else{lims2<-NA}
+		if(any(dclass1==3)){
+			lims3<-numeric()
+			for(i in which(dclass1==3)){
+				ttree<-data[[i]]
+				if(is.null(ttree$root.time)){
+					ntime<-dist.nodes(ttree)[,Ntip(ttree)+1]
+					ntime<-max(ntime)-ntime
+				}else{
+					ntime<-dist.nodes(ttree)[,Ntip(ttree)+1]
+					ntime<-ttree$root.time-ntime
+					}
+				lims3<-c(lims3,c(min(ntime),max(ntime)))
 				}
-			int.times<-int.times[-which(mustSplit),]
-			int.times<-int.times[order(-int.times[,1]),]
+		}else{lims3<-NA}
+		end<-min(c(lims1,lims2,lims3),na.rm=TRUE)
+		start<-max(c(lims1,lims2,lims3),na.rm=TRUE)
+		midtimes<-seq(start+2*tblen,end-2*tblen,by=-tblen)
+		midtimes<-midtimes[midtimes>0]
+		int.start<-midtimes+(tblen/2);int.end<-midtimes-(tblen/2)
+		int.times<-cbind(int.start,int.end)
+		if(split.int & any(dclass1==2)){
+			#for every single discrete time dataset, bins must be split at their boundaries
+			splinters<-sapply(data[dclasss=2],function(x) x[[1]][,1])
+			mustSplit<-apply(int.times,1,function(x) any(sapply(splinters,function(y) x[1]>y & x[2]<y)))
+			if(any(mustSplit)){
+				for(i in which(mustSplit)){
+						splitter<-splinters[sapply(splinters[,1],function(y) int.times[i,1]>y & int.times[i,2]<y),1]
+						#if(length(splitter)>1){stop("Error: Splitter returning more than one value?!")}
+						splitter<-c(int.times[i,1],splitter,int.times[i,2])
+						int.times<-rbind(int.times,cbind(splitter[1:(length(splitter)-1)],splitter[2:length(splitter)]))
+					}
+				int.times<-int.times[-which(mustSplit),]
+				int.times<-int.times[order(-int.times[,1]),]
+				}
+			midtimes<-(int.start+int.end)/2		
 			}
-		midtimes<-(int.start+int.end)/2		
-		}
+		}			
 	div<-matrix(,nrow(int.times),1)
 	for(i in 1:length(data)){
 		if((dclass1[i]==1)){
@@ -2256,7 +2281,7 @@ multiDiv<-function(data,int.length=1,plot=TRUE,split.int=TRUE,drop.ZLB=TRUE,drop
 			div<-cbind(div,divs1)
 			}
 		if((dclass1[i]==2)){
-			divs2<-taxicDivDisc(timeList=data[[i]],int.times=int.times,split.int=F,plot=FALSE)[,3]
+			divs2<-taxicDivDisc(timeList=data[[i]],int.times=int.times,split.int=FALSE,plot=FALSE)[,3]
 			div<-cbind(div,divs2)
 			}
 		if((dclass1[i]==3)){
@@ -2684,13 +2709,14 @@ simTermTaxaAdvanced<-function(p=0.1,q=0.1,mintaxa=1,maxtaxa=1000,mintime=1,maxti
 	ntaxa<-Ntip(tree)
 	#taxonNames<-tree$tip.label
 	termEdge<-sapply(tree$edge[,2],function(x) any(x==(1:ntaxa)))
+	termNodes<-tree$edge[termEdge,2]
 	#termAnc<-tree$edge[termEdge,1]
 	taxonDurations<-tree$edge.length[termEdge]
 	nodeDist<-dist.nodes(tree)
-	taxonLADs<-tree$root.time-nodeDist[ntaxa+1,1:ntaxa]
+	taxonLADs<-tree$root.time-nodeDist[ntaxa+1,termNodes]
 	taxonFADs<-taxonLADs+taxonDurations
 	taxonRanges<-cbind(taxonFADs,taxonLADs)
-	rownames(taxonRanges)<-tree$tip.label[tree$edge[termEdge,2]]
+	rownames(taxonRanges)<-tree$tip.label[termNodes]
 	res<-list(taxonRanges=taxonRanges,tree=tree)
 	return(res)
 	}
@@ -2744,7 +2770,7 @@ fixRootTime<-function(treeOrig,treeNew){
 		]
 	new_dist<-dist.nodes(treeNew)[1,Ntip(treeNew)+1]
 	treeNew$root.time<-treeOrig$root.time-(orig_dist-new_dist)
-	if(max(dist.nodes(treeNew)[,Ntip(treeNew)+1])>treeNew$root.time){
+	if(round(max(dist.nodes(treeNew)[, Ntip(treeNew) + 1]) - treeNew$root.time)>0){
 		stop("Error: fixRootTime isn't fixing correctly, root.time less than max tip-to-root length!")}
 	return(treeNew)
 	}

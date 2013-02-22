@@ -1,9 +1,9 @@
-4c00720cd898489dfff5c6b40fd50515 *ChangeLog
-ccdea1a6edbf8af3e1f9800a44909068 *DESCRIPTION
+7eaf306abfd5469834ff48a1284437c6 *ChangeLog
+66639559f7d8dd7081e61f450f870301 *DESCRIPTION
 894b8bfc1d9700f7c2af605ad20312e9 *NAMESPACE
-dda2dd9ea7fca14b75d37d883640fb59 *R/functions_master.R
+e6aec20ae661aa94d9e1590558bab428 *R/functions_master.R
 c4e4ef39537762c865406511fef7e58f *inst/CITATION
-b48e8605998742feef85eca3aa1da0ef *man/DiversityCurves.Rd
+2cb69c6f9cff076d7e42533844cd1fef *man/DiversityCurves.Rd
 538516402fc4a262391bfaafac461ca8 *man/SamplingConv.Rd
 df5c3b8775f7360c1da1d289f5458db8 *man/binTimeData.Rd
 d3e03b7852dd39761f3a7a715172a08e *man/cal3Timescaling.Rd
@@ -16,8 +16,8 @@ cb3cf6b6b08385e82673bf484ecd5b16 *man/expandTaxonTree.Rd
 792e2ddf5eeff4c98a9932719aeeb9b6 *man/getSampProbDisc.Rd
 63b3c1ace7c38a13983fc08c9aca0b3e *man/getSampRateCont.Rd
 75266d732fee1049801783a51b2e6441 *man/modifyTerminalBranches.Rd
-81e78143450a8278fb4dc459b5de7266 *man/multiDiv.Rd
-cadefbad25eaee405673fc72a0b87942 *man/paleotree-package.Rd
+9afacc1e41adf3d455c429795928665d *man/multiDiv.Rd
+2e8af582f8da2372d743745bc1144490 *man/paleotree-package.Rd
 61de8e0456551959fc0cac41947696a6 *man/plotTraitgram.Rd
 82469b47993f0041836e834b089bb3a2 *man/reverseList.Rd
 91c0ca508d49b2c504adeecbeab85683 *man/rootSplit.Rd
@@ -29,6 +29,6 @@ a3cc31d282e46a561eb9348184f1772b *man/simPaleoTrees.Rd
 be5447c822d23672876d9cde1d28a3d5 *man/taxa2phylo.Rd
 153e24f1c5654eacfdcdfb798485ac68 *man/termTaxa.Rd
 c15e6099495729084ca20a2286b67270 *man/timeLadderTree.Rd
-ca90fc984cd199561de48ff15bdb7078 *man/timePaleoPhy.Rd
+91a3e52d9408b68e7e2232c9cf711a6a *man/timePaleoPhy.Rd
 0704d148ff36232230be773d442a9c02 *man/timeSliceTree.Rd
 c4d9b986cfdf9e20bf3189b969e875cf *man/unitLengthTree.Rd
