@@ -1,7 +1,7 @@
-7eaf306abfd5469834ff48a1284437c6 *ChangeLog
-66639559f7d8dd7081e61f450f870301 *DESCRIPTION
-894b8bfc1d9700f7c2af605ad20312e9 *NAMESPACE
-e6aec20ae661aa94d9e1590558bab428 *R/functions_master.R
+8b69be4c0b5bbf209624a9b94299672b *ChangeLog
+005c19ff70576fb3a701ce660746f3db *DESCRIPTION
+1a20e87e209b403ccc5d392f6e0f0a45 *NAMESPACE
+0bc1a939b8fa7c7314f5dbdd629279a2 *R/functions_master.R
 c4e4ef39537762c865406511fef7e58f *inst/CITATION
 2cb69c6f9cff076d7e42533844cd1fef *man/DiversityCurves.Rd
 538516402fc4a262391bfaafac461ca8 *man/SamplingConv.Rd
@@ -17,8 +17,8 @@ cb3cf6b6b08385e82673bf484ecd5b16 *man/expandTaxonTree.Rd
 63b3c1ace7c38a13983fc08c9aca0b3e *man/getSampRateCont.Rd
 75266d732fee1049801783a51b2e6441 *man/modifyTerminalBranches.Rd
 9afacc1e41adf3d455c429795928665d *man/multiDiv.Rd
-2e8af582f8da2372d743745bc1144490 *man/paleotree-package.Rd
-61de8e0456551959fc0cac41947696a6 *man/plotTraitgram.Rd
+e7d07f9c82f9e601978c3e7d30508801 *man/paleotree-package.Rd
+15eb5dad6eda0fc0b608930afdeef972 *man/plotTraitgram.Rd
 82469b47993f0041836e834b089bb3a2 *man/reverseList.Rd
 91c0ca508d49b2c504adeecbeab85683 *man/rootSplit.Rd
 9832564aa2a18f28550ce6e9056a4beb *man/sampleRanges.Rd

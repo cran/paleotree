@@ -1,11 +1,11 @@
 Package: paleotree
 Type: Package
-Version: 1.8
+Version: 1.8.1
 Title: Paleontological and Phylogenetic Analyses of Evolution
-Date: 02-22-13
+Date: 04-03-13
 Author: David Bapst
 Depends: R (>= 2.15.0), ape
-Imports: phangorn, geiger
+Imports: phangorn
 ByteCompile: TRUE
 Maintainer: David Bapst <dwbapst@gmail.com>
 Description: Analyzes, time-scales and simulates phylogenies of
@@ -14,7 +14,7 @@ Description: Analyzes, time-scales and simulates phylogenies of
         from stratigraphic ranges.
 License: GPL (>= 2)
 URL: http://home.uchicago.edu/~dwbapst/
-Packaged: 2013-02-22 21:51:24 UTC; dwbapst
+Packaged: 2013-04-04 06:24:08 UTC; dwbapst
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2013-02-23 08:10:38
+Date/Publication: 2013-04-04 09:08:23
