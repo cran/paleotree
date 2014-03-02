@@ -9,7 +9,7 @@
 #' Unfortunately, it is occasional difficult to attribute some time-scaling methods to
 #' specific references in the literature.
 #' 
-#' There are five method types that can be used by timePaleoPhy. Four of these
+#' There are five method types that can be used by \code{timePaleoPhy}. Four of these
 #' use some value of absolute time, chosen a priori, to time-scale the tree.
 #' This is handled by the argument vartime, which is NULL by default and unused
 #' for type "basic".
@@ -24,9 +24,13 @@
 #'  \item{"equal"}{The 'equal' method defined by G. Lloyd and used in Brusatte
 #' et al. (2008) and Lloyd et al. (2012). Originally usable in code supplied by
 #' G. Lloyd, it is recreated here. This method works by increasing the time of
-#' the root divergence by some amount (here set by vartime) and then adjusting
+#' the root divergence by some amount and then adjusting
 #' zero-length branches so that time on early branches is re-apportioned out
-#' along those later branches equally.}
+#' along those later branches equally. The root age can be adjusted backwards
+#' in time by either increasing by an arbitrary amount (via the \code{vartime}
+#' argument) or by setting the root age directly (via the \code{node.mins}
+#' argument); conversely, the function will also allow a user to opt to not
+#' alter the root age at all.}
 
 #' \item{"aba"}{All branches additive. This method takes the "basic" tree and
 #' adds vartime to all branches.}
@@ -50,29 +54,45 @@
 #' As with many functions in the paleotree library, absolute time is always
 #' decreasing, i.e. the present day is zero.
 #' 
-#' timePaleoPhy is designed for direct application to datasets where taxon first 
+#' \code{timePaleoPhy} is mainly designed for direct application to datasets where taxon first 
 #' and last appearances are precisely known in continuous time, with no stratigraphic
 #' uncertainty. This is an uncommon form of data to have from the fossil record, 
 #' although not an impossible form (micropaleontologists often have very precise 
-#' range charts, for example). This means that most users SHOULD NOT use timePaleoPhy directly, 
-#' unless they have written their own code to deal with stratigraphic uncertainty. For
-#' some groups, the more typical 'first' and 'last' dates represent the minimum
+#' range charts, for example). 
+#'
+#' Instead, most data has some form of stratigraphic uncertainty. \code{timePaleoPhy} is not
+#' designed to handle such uncertainty by default. For example, some groups,
+#' the more typical 'first' and 'last' dates represent the minimum
 #' and maximum absolute ages for the fossil collections that a taxon is known
 #' is known from. Presumably, the first and last appearances of that taxon in
 #' the fossil record is at unknown dates within these bounds. These should not
-#' be mistaken as the FADs and LADs desired by timePaleoPhy, as timePaleoPhy 
+#' be mistaken as the FADs and LADs desired by \code{timePaleoPhy}, as \code{timePaleoPhy} 
 #' will use the earliest dates provided to calibrate node ages, which is either
 #' an overly conservative approach to time-scaling or fairly nonsensical.
 #'
-#' Alternatively to using timePaleoPhy, bin_timePaleoPhy is a wrapper of 
-#' timePaleoPhy which produces timescaled trees for datasets which only have 
+#' As of version 2.0, \code{timePaleoPhy} provides an argument to handle uncertainty in dating.
+#' This argument, dateTreatment handles whether dates are treated as first and last
+#' appearance dates or minimum and maximum bounds on a single point
+#' date. These point dates, if the minimum and maximum bounds option is selected,
+#' are chose under a uniform distribution. Many time-scaled trees should be created to approximate
+#' the uncertainty in the dates. Additionally, there is a third option:
+#' users may also make it so that the 'times of observation'
+#' of trees are uncertain, such that the tips of the tree (with terminal ranges added) should
+#' be randomly selected from a uniform distribution. Essentially, this third option treats the
+#' dates as first and last appearances, but treats the first appearance dates as known and
+#' fixed, but the 'last appearance' dates as unknown. In previous versions of paleotree,
+#' this third option was enacted with the argument rand.obs, which has been removed for
+#' clarity.
+#'
+#' As an alternative to using \code{timePaleoPhy}, \code{bin_timePaleoPhy} is a wrapper of 
+#' \code{timePaleoPhy} which produces timescaled trees for datasets which only have 
 #' interval data available. For each output tree, taxon first and last appearance 
 #' dates are placed within their listed intervals under a uniform distribution. 
 #' Thus, a large sample of time-scaled trees will approximate the uncertainty in 
 #' the actual timing of the FADs and LADs. 
 #'
-#' The input timeList object can have overlapping (i.e. non-sequential) intervals,
-#' and intervals of uneven size. Taxa alive in the modern should be listed as last 
+#' The input \code{timeList} object for \code{bin_timePaleoPhy} can have overlapping
+#' (i.e. non-sequential) intervals, and intervals of uneven size. Taxa alive in the modern should be listed as last 
 #' occurring in a time interval that begins at time 0 and ends at time 0. If taxa 
 #' occur only in single collections (i.e. their first and last appearance in the 
 #' fossil record is synchronous, the argument point.occur will force all taxa
@@ -81,7 +101,7 @@
 #' in time, with some positive duration. The sites matrix can be used to force
 #' only a portion of taxa to have simultaneous first and last appearances.
 #' 
-#' By setting the argument nonstoch.bin to TRUE for bin_timePaleoPhy, the dates are NOT
+#' By setting the argument nonstoch.bin to TRUE for \code{bin_timePaleoPhy}, the dates are NOT
 #' stochastically pulled from uniform bins but instead FADs are assigned to the
 #' earliest time of whichever interval they were placed in and LADs are placed
 #' at the most recent time in their placed interval. This option may be useful
@@ -114,7 +134,8 @@
 #' Ignored if type = "basic"
 
 #' @param ntrees Number of time-scaled trees to output. If ntrees is greater
-#' than one and both randres and rand.obs are false, the function will fail and
+#' than one and both randres is false and dateTreatment is either
+#' 'minMax' or 'randObs', the function will fail and
 #' a warning is issued, as these arguments would simply produce multiple
 #' identical time-scaled trees.
 
@@ -153,28 +174,60 @@
 #' add.term=FALSE, as this argument is inconsistent with those argument
 #' options.
 
-#' @param rand.obs Should the tips represent observation times uniform
-#' distributed within taxon ranges? This only impacts the location of tip-dates, 
-#' i.e. the 'times of observation' for taxa, and does not impact the dates used to 
-#' determine node ages. Thus, this is an alternative to using only the LADs or only the FADs
-#' as the per-taxon times of observation. For these functions,rand.obs is TRUE can only impact
-#' the result when add.term is FALSE (otherwise the time of observation can only be the FADs) 
-#' and so the function fails and a warning is issued. If rand.obs is TRUE, then it is assumed
-#' that users wish the tips to represent observations made with some temporal
-#' uncertainty, such that they might have come from any point within a taxon's
-#' known range.  This might be the case, for example, if a user is interested in
-#' applying phylogeny-based approaches to studying trait evolution, but have
-#' per-taxon measurements of traits that come from museum specimens with
-#' uncertain temporal placement. When rand.obs is TRUE, the tips are placed randomly
-#' within taxon ranges, as if uniformly distributed, and thus multiple trees should be 
-#' created and analyzed.
+#' @param dateTreatment This argument controls the interpretation of timeData. The default setting
+#' 'firstLast' treats the dates in timeData as a column of precise first and last appearances,
+#' such that first appearances will be used to date nodes and last appearances will only be
+#' called on if \code{add.term=TRUE}. A second option, added by great demand, is 'minMax' which
+#' treats these dates as minimum and maximum bounds on single point dates. Under this option,
+#' all taxa in the analysis will be treated as being point dates, such that the first appearance
+#' is also the last. These dates will be pulled under a uniform distribution. If 'minMax' is used,
+#' add.term becomes meaningless, and the use of it will return an error message. A third option
+#' is 'randObs'. This assumes that the dates in the matrix are first and last appearance times,
+#' but that the desired time of observation is unknown. Thus, this is much like 'firstLast' except
+#' the effective time of observation (the taxon's LAD under 'firstLast') is treated an uncertain date, and is randomly
+#' sampled between the first and last appearance times. The FAD still is treated as a fixed number, used
+#' for dating the nodes. In previous versions of paleotree, this
+#' was called in \code{timePaleoPhy} using the argument rand.obs, which has been removed
+#' for clarity. This temporal uncertainty in times of observation might be useful if
+#' a user is interested in applying phylogeny-based approaches to studying trait evolution, but have
+#' per-taxon measurements of traits that come from museum specimens with uncertain temporal placement.
+#' With both arguments 'minMax' and 'randObs', the sampling of dates from random distributions should
+#' compel users to produce many time-scaled trees for any given analytical purpose.
+#' Note that 'minMax' returns an error in 'bin' time-scaling functions; please use
+#' 'points.occur' instead.
 
-#' @param node.mins Minimum ages of nodes on the tree. The minimum dates of
-#' nodes can be set using node.mins; this argument takes a vector of the same
-#' length as the number of nodes, with dates given in the same order as nodes
-#' are they are numbered in the tree$edge matrix (note that in tree$edge, the
-#' tips are given first Ntip numbers and these are ignored here). Not all nodes
-#' need be set; those without minimum dates can be given as NA in node.mins.
+# @param rand.obs Should the tips represent observation times uniform
+# distributed within taxon ranges? This only impacts the location of tip-dates, 
+# i.e. the 'times of observation' for taxa, and does not impact the dates used to 
+# determine node ages. Thus, this is an alternative to using only the LADs or only the FADs
+# as the per-taxon times of observation. For these functions,rand.obs is TRUE can only impact
+# the result when add.term is FALSE (otherwise the time of observation can only be the FADs) 
+# and so the function fails and a warning is issued. If rand.obs is TRUE, then it is assumed
+# that users wish the tips to represent observations made with some temporal
+# uncertainty, such that they might have come from any point within a taxon's
+# known range.  This might be the case, for example, if a user is interested in
+# applying phylogeny-based approaches to studying trait evolution, but have
+# per-taxon measurements of traits that come from museum specimens with
+# uncertain temporal placement. When rand.obs is TRUE, the tips are placed randomly
+# within taxon ranges, as if uniformly distributed, and thus multiple trees should be 
+# created and analyzed.
+
+#' @param node.mins The minimum dates of internal nodes (clades) on a phylogeny can be set
+#' using node.mins. This argument takes a vector of the same length as the number of nodes,
+#' with dates given in the same order as nodes are ordered in the \code{tree$edge} matrix.
+#' Note that in \code{tree$edge}, terminal tips are given the first set of numbers
+#' (\code{1:Ntip(tree)}), so the first element of \code{node.mins} is the first internal node
+#' (the node numbered \code{Ntip(tree)+1}, which is generally the root for most \code{phylo}
+#' objects read by \code{read.tree}). Not all nodes need be given minimum dates; those without
+#' minimum dates can be given as NA in \code{node.mins}, but the vector must be the same length
+#' as the number of internal nodes in \code{tree}. These are minimum date constraints, such that
+#' a node will be forced to be \emph{at least as old as this date}, but the final date may be even
+#' older depending on the taxon dates used, the time-scaling method applied, the \code{vartime}
+#' used and any other minimum node dates given (e.g. if a clade is given a very old minimum date,
+#' this will (of course) over-ride any minimum dates given for clades that that node is nested
+#' within). Although \code{vartime} does adjust the node age downwards when the equal method
+#' is used, if a user has a specific date they'd like to constrain the root to, they should use
+#' \code{node.mins} instead because the result is more predictable.
 
 #' @param noisyDrop If TRUE (the default), any taxa dropped from tree due to not
 #' having a matching entry in the time data will be listed in a system message.
@@ -314,12 +367,17 @@
 #' 
 #' #using node.mins
 #' #let's say we have (molecular??) evidence that node #5 is at least 1200 time-units ago
-#' nodeDates <- rep(NA,(Nnode(cladogram)-1))
+#' #to use node.mins, first need to drop any unshared taxa
+#' droppers <- cladogram$tip.label[is.na(
+#'       match(cladogram$tip.label,names(which(!is.na(rangesCont[,1])))))]
+#' cladoDrop <- drop.tip(cladogram, droppers)
+#' # now make vector same length as number of nodes
+#' nodeDates <- rep(NA, Nnode(cladoDrop))
 #' nodeDates[5] <- 1200
-#' ttree1 <- timePaleoPhy(cladogram,rangesCont,type="basic",
-#' 	randres=FALSE,node.mins=nodeDates,plot=TRUE)
-#' ttree2 <- timePaleoPhy(cladogram,rangesCont,type="basic",
-#' 	randres=TRUE,node.mins=nodeDates,plot=TRUE)
+#' ttree1 <- timePaleoPhy(cladoDrop,rangesCont,type="basic",
+#'   	randres=FALSE,node.mins=nodeDates,plot=TRUE)
+#' ttree2 <- timePaleoPhy(cladoDrop,rangesCont,type="basic",
+#'    	randres=TRUE,node.mins=nodeDates,plot=TRUE)
 #' 
 #' #Using bin_timePaleoPhy to timescale with discrete interval data
 #' #first let's use binTimeData() to bin in intervals of 1 time unit
@@ -353,7 +411,7 @@
 #'
 #' @export
 timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=FALSE,timeres=FALSE,add.term=FALSE,
-	inc.term.adj=FALSE,rand.obs=FALSE,node.mins=NULL,noisyDrop=TRUE,plot=FALSE){
+	inc.term.adj=FALSE,dateTreatment="firstLast",node.mins=NULL,noisyDrop=TRUE,plot=FALSE){
 	#fast time calibration for phylogenies of fossil taxa; basic methods
 		#this code inspired by similar code from G. Lloyd and G. Hunt
 	#INITIAL: 
@@ -389,18 +447,25 @@ timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=
 		}else{stop("Error: timeData not of matrix or data.frame format")}}
 	if(class(tree$tip.label)!="character"){stop("Error: tree tip labels are not a character vector")}
 	if(ntrees<1){stop("Error: ntrees<1")}
-	if(!add.term & rand.obs){stop(
-		"Error: Inconsistent arguments: randomized observation times are treated as LAST appearance times, so add.term must be true for rand.obs to have any effect on output!"
+	if(!any(dateTreatment==c("firstLast","minMax","randObs"))){
+		stop("dateTreatment must be one of 'firstLast', 'minMax' or 'randObs'!")}
+	if(!add.term & dateTreatment=="randObs"){stop(
+		"Inconsistent arguments: randomized observation times are treated as LAST appearance times, so add.term must be true for dateTreatment selection to have any effect on output!"
 		)}
-	if(ntrees>1 & !randres & !rand.obs){stop("Error: Time-scale more trees without randomly resolving or random obs?!")}
+	if(add.term & dateTreatment=="minMax"){stop(
+		"Inconsistent arguments: randomized dates (dateTreatment=minMax) are treated as point occurrences, so there are effectively no terminal ranges for add.term to add!"
+		)}
+	if(ntrees>1 & !randres & dateTreatment=="firstLast"){stop("Error: Time-scale more trees without randomly resolving or random dates?!")}
 	if(ntrees==1 & randres){message("Warning: Do not interpret a single randomly-resolved tree")}
-	if(ntrees==1 & rand.obs){message("Warning: Do not interpret a single tree with randomly-placed obs times")}
+	if(ntrees==1 & dateTreatment=="randObs"){message("Warning: Do not interpret a single tree with randomly-placed observation times")}
+	if(ntrees==1 & dateTreatment=="minMax"){message("Warning: Do not interpret a single tree with randomly-placed taxon dates")}
 	if(randres & timeres){stop(
-		"Error: Inconsistent arguments: You cannot randomly resolve polytomies and resolve with respect to time simultaneously!")}
+		"Inconsistent arguments: You cannot randomly resolve polytomies and resolve with respect to time simultaneously!")}
 	if(!add.term & inc.term.adj){stop(
 		"Error: Inconsistent arguments: Terminal ranges cannot be used in adjustment of branch lengths if not added to tree!")}
 	if(type=="basic" & inc.term.adj){stop(
 		"Error: Inconsistent arguments: Terminal range adjustment of branch lengths does not affect basic time-scaling method!")}
+	originalInputTree<-tree
 	#remove taxa that are NA or missing in timeData
 	droppers<-tree$tip.label[is.na(match(tree$tip.label,names(which(!is.na(timeData[,1])))))]
 	if(length(droppers)>0){
@@ -419,19 +484,25 @@ timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=
 	for(ntr in 1:ntrees){
 		#resolve nodes, if tree is not binary
 		tree<-savetree
-		if(!is.binary.tree(savetree)){
+		if(!is.binary.tree(savetree)  | !is.rooted(savetree)){
 			if(randres){tree<-multi2di(savetree)}
 			if(timeres){tree<-timeLadderTree(savetree,timeData)}
 			}
-		if(rand.obs){timeData[,2]<-apply(saveTD,1,function(x) runif(1,x[2],x[1]))}else{timeData<-saveTD}
+		if(dateTreatment=="minMax"){timeData[,1:2]<-apply(saveTD,1,function(x) runif(1,x[2],x[1]))}
+		if(dateTreatment=="randObs"){timeData[,2]<-apply(saveTD,1,function(x) runif(1,x[2],x[1]))}
 		ntime<-sapply(1:Nnode(tree),function(x) 
 			max(timeData[tree$tip.label[unlist(prop.part(tree)[x])],1]))	#first, get node times
 		ntime<-c(timeData[tree$tip.label,1],ntime)
-		if(length(node.mins)>0){	#if there are node.mins, alter ntime as necessary
-			#of course, node.mins is referring to nodes in unresolved savetree
+		if(!is.null(node.mins)){	#if there are node.mins, alter ntime as necessary
+			#needs to be same length as nodes in originalInputTree
+			if(Nnode(savetree)!=length(node.mins)){
+				stop("node.mins must be same length as number of nodes in the input tree!")}
+			#of course, node.mins is referring to nodes in unresolved originalInputTree
 			#need to figure out which nodes are which now if randres; remake node.mins
-			if(!is.binary.tree(savetree) & randres){
-				node_changes<-match(prop.part(savetree),prop.part(tree))
+			if(length(droppers)>0){
+				stop("node.mins not compatible with datasets where some taxa are dropped; drop before analysis instead")}
+			if((!is.binary.tree(originalInputTree) | !is.rooted(tree)) & randres){
+				node_changes<-match(prop.part(originalInputTree),prop.part(tree))
 				node.mins1<-rep(NA,Nnode(tree))
 				node.mins1[node_changes]<-node.mins
 			}else{
@@ -497,10 +568,20 @@ timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=
 				}
 			}
 		if(type=="equal"){	#G. Lloyd's "equal" method
+			#OLD
 			#get a depth-ordered vector that identifies zero-length branches
-			zbr<-cbind(1:Nedge(ttree),node.depth(ttree)[ttree$edge[,2]]) 	#Get branch list; 1st col = end-node, 2nd = depth
-			zbr<-zbr[ttree$edge.length==0,]						#Parses zbr to just zero-length branches
-			zbr<-zbr[order(zbr[,2]),1]							#order zbr by depth
+			#zbr<-cbind(1:Nedge(ttree),node.depth(ttree)[ttree$edge[,2]]) 	#Get branch list; 1st col = end-node, 2nd = depth
+			#zbr<-zbr[ttree$edge.length==0,]						#Parses zbr to just zero-length branches
+			#zbr<-zbr[order(zbr[,2]),1]							#order zbr by depth
+			#
+			#NEW 02-03-04 
+			#get a TIME-TO-ROOT-ordered vector that identifies zero-length branches, as Graeme's DatePhylo
+			zbr<-cbind(1:Nedge(ttree),dist.nodes(ttree)[Ntip(ttree)+1,ttree$edge[,2]]) 	#Get branch list; 1st col = end-node, 2nd = abs distance (time) from root
+			zbr<-zbr[ttree$edge.length==0,]								#Parses zbr to just zero-length branches
+			zbr<-zbr[order(-zbr[,2]),1]									#order zbr by time-to-root
+			#if the edge lengths leading away from the root are somehow ZERO issue a warning
+			if(is.null(vartime) & any(ttree$edge.length[ttree$edge[,1]==(Ntip(ttree)+1)]==0)){
+				stop("The equal method requires the edges leading away from the root to have non-zero length to begin with, perhaps increase vartime?")}
 			for(i in zbr){if (ttree$edge.length[i] == 0) {			#starting with most shallow zlb, is this branch a zlb?
 				#if zlb, make a vector of mom-zlbs, going down the tree
 				brs<-ttree$edge[i,2] 						#branches to rescale, starting with picked branch
@@ -526,10 +607,12 @@ timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=
 		#now add root.time: 
 		if(add.term){
 			#should be time of earliest LAD + distance of root from earliest tip
-			ttree$root.time<-max(timeData[ttree$tip.label,2])+min(dist.nodes(ttree)[1:Ntip(ttree),Ntip(ttree)+1])	
+			latestAge<-max(timeData[ttree$tip.label,2])
+			ttree$root.time<-latestAge+min(dist.nodes(ttree)[1:Ntip(ttree),Ntip(ttree)+1])	
 		}else{
 			#should be time of earliest FAD + distance of root from earliest tip
-			ttree$root.time<-max(timeData[ttree$tip.label,1])+min(dist.nodes(ttree)[1:Ntip(ttree),Ntip(ttree)+1])	
+			latestAge<-max(timeData[ttree$tip.label,1])
+			ttree$root.time<-latestAge+min(dist.nodes(ttree)[1:Ntip(ttree),Ntip(ttree)+1])	
 			}
 		if(plot){
 			parOrig<-par(mar=c(2.5,1,1,0.5));layout(1:2)
@@ -547,7 +630,7 @@ timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=
 #' @rdname timePaleoPhy
 #' @export
 bin_timePaleoPhy<-function(tree,timeList,type="basic",vartime=NULL,ntrees=1,nonstoch.bin=FALSE,randres=FALSE,timeres=FALSE,
-	sites=NULL,point.occur=FALSE,add.term=FALSE,inc.term.adj=FALSE,rand.obs=FALSE,node.mins=NULL,noisyDrop=TRUE,plot=FALSE){
+	sites=NULL,point.occur=FALSE,add.term=FALSE,inc.term.adj=FALSE,dateTreatment="firstLast",node.mins=NULL,noisyDrop=TRUE,plot=FALSE){
 	#wrapper for applying non-SRC time-scaling to timeData where FADs and LADs are given as bins 
 		#see timePaleoPhy function for more details
 	#input is a list with (1) interval times matrix and (2) species FOs and LOs
@@ -556,7 +639,7 @@ bin_timePaleoPhy<-function(tree,timeList,type="basic",vartime=NULL,ntrees=1,nons
 			#this will fix these to always have the same date relative to each other across many trees
 			#this will assume that species listed for a site all are listed as being from the same interval...
 				#this function also assumes that the sites matrix is ordered exactly as the timeList data is
-	#if rand.obs=TRUE, the the function assumes that the LADs in timeList aren't where you actually want the tips
+	#if rand.obs=TRUE, the the function assumes that the LADs in timeList aren't where you actually want the tips (OLD)
 		#instead, tips will be randomly placed anywhere in that taxon's range with uniform probability
 		#thus, tip locations will differ slightly for each tree in the sample
 		#this is useful when you have a specimen or measurement but you don't know its placement in the species' range
@@ -572,6 +655,9 @@ bin_timePaleoPhy<-function(tree,timeList,type="basic",vartime=NULL,ntrees=1,nons
 	if(ntrees==1 & !nonstoch.bin){
 		message("Warning: Do not interpret a single tree; dates are stochastically pulled from uniform distributions")}
 	if(ntrees<1){stop("Error: ntrees<1")}
+	if(dateTreatment=="minMax"){stop("Instead of dateTreatment='minMax', please use argument points.occur instead in bin functions")}
+	if(!any(dateTreatment==c("firstLast","randObs"))){
+		stop("dateTreatment must be one of 'firstLast' or 'randObs'!")}
 	#clean out all taxa which are NA or missing for timeData
 	if(ntrees==1 & randres){message("Warning: Do not interpret a single randomly-resolved tree")}
 	if(randres & timeres){stop(
@@ -584,6 +670,12 @@ bin_timePaleoPhy<-function(tree,timeList,type="basic",vartime=NULL,ntrees=1,nons
 		tree<-drop.tip(tree,droppers)
 		if(Ntip(tree)<2){stop("Error: Less than two valid taxa shared between the tree and temporal data!")}
 		timeList[[2]][which(!sapply(rownames(timeList[[2]]),function(x) any(x==tree$tip.label))),1]<-NA
+		}
+	if(!is.null(node.mins)){
+		if(length(droppers)>0){	#then... the tree has changed unpredictably, node.mins unusable
+			stop("node.mins not compatible with datasets where some taxa are drop; drop before analysis instead")}
+		if(Nnode(tree)!=length(node.mins)){
+			stop("node.mins must be same length as number of nodes in the input tree!")}
 		}
 	timeList[[2]]<-timeList[[2]][!is.na(timeList[[2]][,1]),]
 	if(any(is.na(timeList[[2]]))){stop("Weird NAs in Data??")}
@@ -625,12 +717,12 @@ bin_timePaleoPhy<-function(tree,timeList,type="basic",vartime=NULL,ntrees=1,nons
 		rownames(timeData)<-rownames(timeList[[2]])
 		#if(rand.obs){timeData[,2]<-apply(timeData,1,function(x) runif(1,x[2],x[1]))}
 		tree1<-tree
-		if(!is.binary.tree(tree)){
+		if(!is.binary.tree(tree) | !is.rooted(tree)){
 			if(randres){tree1<-multi2di(tree)}
 			if(timeres){tree1<-timeLadderTree(tree,timeData)}	
 			}
 		tree2<-suppressMessages(timePaleoPhy(tree1,timeData,type=type,vartime=vartime,ntrees=1,
-			randres=FALSE,add.term=add.term,inc.term.adj=inc.term.adj,rand.obs=rand.obs,
+			randres=FALSE,add.term=add.term,inc.term.adj=inc.term.adj,dateTreatment=dateTreatment,
 			node.mins=node.mins,plot=plot))
 		tree2$ranges.used<-timeData
 		names(tree2$edge.length)<-NULL
