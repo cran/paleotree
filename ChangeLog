@@ -1,8 +1,20 @@
+Version - 2.1 - 08-15-14
+-Changes to bin_timePaleoPhy and bin_cal3TimePaleoPhy so taxa not included in the tree are dropped before random dates are drawn from those intervals, which increases computational efficiency.
+-New function perfectCharTree, for obtaining matrices of simulated parsimony informative characters on a topology
+-New function seqTimeList, which randomly searches a given timeList object with overlapping intervals for solutions which have fully sequential intervals
+-Added error message to timePaleoPhy to report an error if 'type' argument is not one of the listed options
+-Fixed error in sampleRanges when handed data with a single instantaneous taxon
+-Added option to return all sampling events in $ranges for simPaleoTrees
+-Modified bin_timePaleoPhy and bin_cal3TimePaleoPhy so that the $ranges.used arguments name the columns "FAD" and "LAD" respectively for ease of use with geoscalePhylo in package strap
+-Small modifications to how plotting worked in freqRat, changed calculations to work on proportions and not absolute frequencies, made it so that a warning is issued if a freqRat over 1 is calculated.
+-Clarifications to help file and warning statements regarding use of 'zlba' and 'aba' time-scaling methods (thanks Graeme Lloyd!)
+-Added calcExtinction argument to freqRat to give capability to get extinction rate from slope of log frequencies
+
 Version - 2.0 - 02-03-14
 -Changed parInit to use uniform distribution to randomly draw initial parameter values between bounds, rather than take mid value between bounds
 -Changed how time-scaling functions dealt with node.mins argument; can no longer use node.mins with a dataset that has unshared taxa that are to be dropped
 -Altered example for use of node.mins in help files for time-scaling functions; thanks John Clarke of Oxford for the heads up! Also other modifications were made to the help descriptions, clarifying that node.mins can be used to constrain the minimum age for the root node.
--Also on a different issue brought to my attention by John Clarke, added an error message to paleotree is 'equal' is attempted by the edges leading to the root are zero-length (because 'equal' cannot run under this situation!)
+-Also on a different issue brought to my attention by John Clarke, added an error message to paleotree when 'equal' is attempted by the edges leading to the root are zero-length (because 'equal' cannot run under this situation!)
 -Added new function collapseNodes that collapses specific user-defined nodes, either forward or backward
 -Made all lines checking for dichotomous trees check both with is.binary.tree() *and* is.rooted()
 -Added new function dateNodes which returns the dates of the internal and tip nodes of a phylogeny on an absolute time-scale, with respect to the $root.time element if one exists

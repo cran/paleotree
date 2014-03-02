@@ -33,11 +33,15 @@
 #' alter the root age at all.}
 
 #' \item{"aba"}{All branches additive. This method takes the "basic" tree and
-#' adds vartime to all branches.}
+#' adds vartime to all branches. Note that this time-scaling method can warp the
+#' tree structure, leading to tips to originate out of order with the appearance
+#' data used.}
 
 #' \item{"zlba"}{Zero-length branches additive. This method adds vartime to all
 #' zero-length branches in the "basic" tree. Discussed (possibly?) by Hunt and Carrano,
-#' 2010.} 
+#' 2010.Note that this time-scaling method can warp the
+#' tree structure, leading to tips to originate out of order with the appearance
+#' data used.}
 
 #' \item{"mbl"}{Minimum branch length. Scales all branches so they are
 #' greater than or equal to vartime, and subtract time added to later branches
@@ -49,7 +53,8 @@
 #' 
 #' These functions will intuitively drop taxa from the tree with NA for range
 #' or are missing from timeData or timeList. Taxa dropped from the tree will be
-#' will be listed in a 
+#' will be listed in a message output to the user. The same is done for taxa in
+#' the timeList object not listed in the tree..
 #' 
 #' As with many functions in the paleotree library, absolute time is always
 #' decreasing, i.e. the present day is zero.
@@ -261,7 +266,9 @@
 #' time-scaled trees, of either class phylo or multiphylo, depending on the
 #' argument ntrees. All trees are output with an element $root.time. This is
 #' the time of the root on the tree and is important for comparing patterns
-#' across trees.
+#' across trees. Note that the $root.time element is defined relative to the
+#' earliest first appearance date, and thus later tips may seem to occur in
+#' the distant future under the 'aba' and 'zbla' time-scaling methods.
 #' 
 #' Trees created with bin_timePaleoPhy will output with some additional
 #' elements, in particular $ranges.used, a matrix which records the
@@ -449,6 +456,8 @@ timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=
 	if(ntrees<1){stop("Error: ntrees<1")}
 	if(!any(dateTreatment==c("firstLast","minMax","randObs"))){
 		stop("dateTreatment must be one of 'firstLast', 'minMax' or 'randObs'!")}
+	if(!any(type==c("basic","mbl","equal","aba","zlba"))){
+		stop("type must be one of the types listed in the help file for timePaleoPhy")}
 	if(!add.term & dateTreatment=="randObs"){stop(
 		"Inconsistent arguments: randomized observation times are treated as LAST appearance times, so add.term must be true for dateTreatment selection to have any effect on output!"
 		)}
@@ -629,8 +638,10 @@ timePaleoPhy<-function(tree,timeData,type="basic",vartime=NULL,ntrees=1,randres=
 
 #' @rdname timePaleoPhy
 #' @export
-bin_timePaleoPhy<-function(tree,timeList,type="basic",vartime=NULL,ntrees=1,nonstoch.bin=FALSE,randres=FALSE,timeres=FALSE,
-	sites=NULL,point.occur=FALSE,add.term=FALSE,inc.term.adj=FALSE,dateTreatment="firstLast",node.mins=NULL,noisyDrop=TRUE,plot=FALSE){
+bin_timePaleoPhy<-function(tree,timeList,type="basic",vartime=NULL,ntrees=1,
+	nonstoch.bin=FALSE,randres=FALSE,timeres=FALSE,
+	sites=NULL,point.occur=FALSE,add.term=FALSE,inc.term.adj=FALSE,
+	dateTreatment="firstLast",node.mins=NULL,noisyDrop=TRUE,plot=FALSE){
 	#wrapper for applying non-SRC time-scaling to timeData where FADs and LADs are given as bins 
 		#see timePaleoPhy function for more details
 	#input is a list with (1) interval times matrix and (2) species FOs and LOs
@@ -666,7 +677,8 @@ bin_timePaleoPhy<-function(tree,timeList,type="basic",vartime=NULL,ntrees=1,nons
 	droppers<-tree$tip.label[is.na(match(tree$tip.label,names(which(!is.na(timeList[[2]][,1])))))]
 	if(length(droppers)>0){
 		if(length(droppers)==Ntip(tree)){stop("Error: Absolutely NO valid taxa shared between the tree and temporal data!")}
-		if(noisyDrop){message(paste("Warning: Following taxa dropped from tree:",paste0(droppers,collapse=", ")))}
+		if(noisyDrop){
+			message(paste("Warning: Following taxa dropped from tree:",paste0(droppers,collapse=", ")))}
 		tree<-drop.tip(tree,droppers)
 		if(Ntip(tree)<2){stop("Error: Less than two valid taxa shared between the tree and temporal data!")}
 		timeList[[2]][which(!sapply(rownames(timeList[[2]]),function(x) any(x==tree$tip.label))),1]<-NA
@@ -677,6 +689,17 @@ bin_timePaleoPhy<-function(tree,timeList,type="basic",vartime=NULL,ntrees=1,nons
 		if(Nnode(tree)!=length(node.mins)){
 			stop("node.mins must be same length as number of nodes in the input tree!")}
 		}
+	#best to drop taxa from timeList that aren't represented on the tree
+	notTree<-rownames(timeList[[2]])[is.na(match(rownames(timeList[[2]]),tree$tip.label))]
+	if(length(notTree)>0){
+		if(is.null(sites)){
+			if(noisyDrop){
+				message(paste("Warning: Following taxa dropped from timeList:",paste0(notTree,collapse=", ")))}
+			timeList[[2]]<-timeList[[2]][!is.na(match(rownames(timeList[[2]]),tree$tip.label)),]
+		}else{
+			stop("Some taxa in timeList not included on tree: not automatic taxon drop if 'sites' are given. Please remove from both sites and timeList and try again.")
+			}
+		}	
 	timeList[[2]]<-timeList[[2]][!is.na(timeList[[2]][,1]),]
 	if(any(is.na(timeList[[2]]))){stop("Weird NAs in Data??")}
 	if(any(apply(timeList[[1]],1,diff)>0)){stop("Error: timeList[[1]] not in intervals in time relative to modern")}
@@ -724,6 +747,7 @@ bin_timePaleoPhy<-function(tree,timeList,type="basic",vartime=NULL,ntrees=1,nons
 		tree2<-suppressMessages(timePaleoPhy(tree1,timeData,type=type,vartime=vartime,ntrees=1,
 			randres=FALSE,add.term=add.term,inc.term.adj=inc.term.adj,dateTreatment=dateTreatment,
 			node.mins=node.mins,plot=plot))
+		colnames(timeData)<-c("FAD","LAD")
 		tree2$ranges.used<-timeData
 		names(tree2$edge.length)<-NULL
 		ttrees[[ntrb]]<-tree2

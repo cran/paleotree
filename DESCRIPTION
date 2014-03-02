@@ -1,6 +1,6 @@
 Package: paleotree
 Type: Package
-Version: 2.0
+Version: 2.1
 Title: Paleontological and Phylogenetic Analyses of Evolution
 Date: 02-03-14
 Author: David W. Bapst
@@ -13,7 +13,7 @@ Description: Analyzes, time-scales and simulates phylogenies of extinct/fossil
     models to estimate sampling rates from stratigraphic ranges.
 License: GPL (>= 2)
 URL: http://webpages.sdsmt.edu/~dbapst/
-Packaged: 2014-02-04 04:47:23 UTC; adminosaur
+Packaged: 2014-08-16 06:59:30 UTC; adminosaur
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2014-02-04 10:35:26
+Date/Publication: 2014-08-16 09:55:49
