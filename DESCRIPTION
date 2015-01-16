@@ -1,8 +1,8 @@
 Package: paleotree
 Type: Package
-Version: 2.2
+Version: 2.3
 Title: Paleontological and Phylogenetic Analyses of Evolution
-Date: 09-18-14
+Date: 01-16-15
 Author: David W. Bapst
 Depends: R (>= 3.0.0), ape
 Imports: phangorn
@@ -12,8 +12,9 @@ Description: Analyzes, time-scales and simulates phylogenies of extinct/fossil
     lineages, along with calculation of diversity curves. Also fits likelihood
     models to estimate sampling rates from stratigraphic ranges.
 License: GPL (>= 2)
-URL: http://webpages.sdsmt.edu/~dbapst/
-Packaged: 2014-09-18 06:46:18 UTC; adminosaur
+URL: https://github.com/dwbapst/paleotree ,
+        http://webpages.sdsmt.edu/~dbapst/
 NeedsCompilation: no
+Packaged: 2015-01-16 16:17:06 UTC; adminosaur
 Repository: CRAN
-Date/Publication: 2014-09-18 09:56:12
+Date/Publication: 2015-01-16 18:12:10
