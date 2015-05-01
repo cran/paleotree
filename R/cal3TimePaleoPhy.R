@@ -143,7 +143,8 @@
 #' 
 #' A tutorial for applying the time-scaling functions in paleotree,
 #' particularly the cal3 method, along with an example using real (graptolite)
-#' data, can be found here:
+#' data, can be found at the following link:
+#'
 #' http://nemagraptus.blogspot.com/2013/06/a-tutorial-to-cal3-time-scaling-using.html
 #' 
 #' @rdname cal3TimePaleoPhy
@@ -257,12 +258,20 @@
 
 #' @return The output of these functions is a time-scaled tree or set of
 #' time-scaled trees, of either class phylo or multiphylo, depending on the
-#' argument ntrees. All trees are output with an element $root.time. This is
+#' argument ntrees. All trees are output with an element \code{$root.time}. This is
 #' the time of the root on the tree and is important for comparing patterns
 #' across trees.
 #'
-#' Trees created with bin_cal3TimePaleoPhy will output with some additional
-#' elements, in particular $ranges.used, a matrix which records the
+#' Additional elements are \code{sampledLogLike} and \code{$sumLogLike} which respectively
+#' record a vector containing
+#' the 'log-densities' of the various node-ages selected for each tree by the 'zipper'
+#' algorithm, and the sum of those log-densities. Although they are very similar to
+#' log-likelihood values, they may not be true likelihoods, as node ages are conditional on the other
+#' ages selected by other nodes. However, these values may give an indication about the relative
+#' optimality of a set of trees output by the cal3 functions.
+#'
+#' Trees created with \code{bin_cal3TimePaleoPhy} will output with some additional
+#' elements, in particular \code{$ranges.used}, a matrix which records the
 #' continuous-time ranges generated for time-scaling each tree. (Essentially a
 #' pseudo-timeData matrix.)
 
@@ -336,7 +345,7 @@
 #' ttree <- cal3TimePaleoPhy(cladogram,rangesCont,brRate=divRate,extRate=divRate,
 #'     sampRate=sRate,ntrees=1,anc.wt=0,plot=TRUE)
 #' 
-#' \dontrun{
+#' \donttest{
 #' #let's look at how three trees generated with very different time of obs. look
 #' ttreeFAD <- cal3TimePaleoPhy(cladogram,rangesCont,brRate=divRate,extRate=divRate,
 #'     FAD.only=TRUE,dateTreatment="firstLast",sampRate=sRate,ntrees=1,plot=TRUE)
@@ -345,22 +354,27 @@
 #' #by default the time of observations are the LADs
 #' ttreeLAD <- cal3TimePaleoPhy(cladogram,rangesCont,brRate=divRate,extRate=divRate,
 #'     FAD.only=FALSE,dateTreatment="randObs",sampRate=sRate,ntrees=1,plot=TRUE)
-#' layout(1:3);parOrig<-par(mar=c(0,0,0,0))
+#' layout(1:3)
+#' parOrig <- par(no.readonly=TRUE)
+#' par(mar=c(0,0,0,0))
 #' plot(ladderize(ttreeFAD));text(5,5,"time.obs=FAD",cex=1.5,pos=4)
 #' plot(ladderize(ttreeRand));text(5,5,"time.obs=Random",cex=1.5,pos=4)
 #' plot(ladderize(ttreeLAD));text(5,5,"time.obs=LAD",cex=1.5,pos=4)
+#' layout(1); par(parOrig)
 #' }
 #' 
 #' #to get a fair sample of trees, let's increase ntrees
 #' ttrees <- cal3TimePaleoPhy(cladogram,rangesCont,brRate=divRate,extRate=divRate,
 #'     sampRate=sRate,ntrees=9,plot=FALSE)
 #' #let's compare nine of them at once in a plot
-#' layout(matrix(1:9,3,3));parOrig<-par(mar=c(0,0,0,0))
+#' layout(matrix(1:9,3,3))
+#' parOrig <- par(no.readonly=TRUE)
+#' par(mar=c(0,0,0,0))
 #' for(i in 1:9){plot(ladderize(ttrees[[i]]),show.tip.label=FALSE)}
+#' layout(1); par(parOrig)
 #' #they are all a bit different!
 #' 
 #' #can plot the median diversity curve with multiDiv
-#' layout(1); par(parOrig)
 #' multiDiv(ttrees)
 #' 
 #' #using node.mins
@@ -403,7 +417,7 @@
 #'     sampRate=sRate1,ntrees=1,nonstoch.bin=TRUE,plot=TRUE)
 #' phyloDiv(ttree1)
 #' 
-#' \dontrun{
+#' \donttest{
 #' #example with multiple values of anc.wt
 #' ancWt <- sample(0:1,nrow(rangesDisc[[2]]),replace=TRUE)
 #' names(ancWt)<-rownames(rangesDisc[[2]])
@@ -498,6 +512,7 @@ cal3TimePaleoPhy<-function(tree,timeData,brRate,extRate,sampRate,ntrees=1,anc.wt
 	if(length(node.mins)>0){locked_nodes<-which(!is.na(node.mins))++Ntip(tree)}else{locked_nodes<-NA}
 	ttree1<-collapse.singles(ttree1)
 	ttrees<-rmtree(ntrees,3)
+	sampledLogLike<-numeric()
 	for(ntr in 1:ntrees){
 		#10/30/12: get FAD, new LAD (time of observation), and then calculate difference between t.obs and LAD
 		if(dateTreatment=="randObs" | FAD.only){
@@ -630,6 +645,8 @@ cal3TimePaleoPhy<-function(tree,timeData,brRate,extRate,sampRate,ntrees=1,anc.wt
 					if(sum(zip_prob)==0){zip_prob<-rep(1,length(zip_prob))}
 					zip_prob<-zip_prob/sum(zip_prob)
 					ch_zip<-sample(1:nrow(zips),1,prob=zip_prob)	#sample zips
+					#record sampled zip_prob
+					sampledLogLike<-c(sampledLogLike,log(zip_prob[ch_zip]))
 					ch_anc<-zips[ch_zip,2]
 					ch_tzip<-zips[ch_zip,3]
 					#if anagenesis, add to anags; if budding, add to budds
@@ -751,6 +768,8 @@ cal3TimePaleoPhy<-function(tree,timeData,brRate,extRate,sampRate,ntrees=1,anc.wt
 				if(sum(linDensity)==0){linDensity[length(linDensity)]<-1}
 				linDensity1<-linDensity/sum(linDensity)
 				ch_zip<-sample(poss_zip,1,prob=linDensity1)	#pick zipper location
+				#record sampled zip_prob
+				sampledLogLike<-c(sampledLogLike,log(linDensity1[ch_zip]))
 				#calculate new branch lengths, adding terminal ranges to tips
 				new_dlen1<-ifelse(ch_zip>dlen1,NA,dlen1-ch_zip)			#If not budding or anagenesis
 				new_dlen2<-dlen2-ch_zip		
@@ -776,6 +795,9 @@ cal3TimePaleoPhy<-function(tree,timeData,brRate,extRate,sampRate,ntrees=1,anc.wt
 		ktree$anag.tips<-anags	#record the number of anagenetic ancestors
 		ktree$budd.tips<-budds	#record the number of budding ancestors	
 		ktree$nAdjZip<-nAdjZip
+		#record sampled log-likelihoods
+		ktree$sampledLogLike<-sampledLogLike
+		ktree$sumLogLike<-sum(sampledLogLike)
 		#now add root.time: because NO TIPS ARE DROPPED (due to anagenesis) can calculate this now
 			#must be calculated on LADs because the terminal ranges are added to the TREE!!!
 			#should be time of earliest LAD + distance of root from earliest tip
@@ -789,10 +811,14 @@ cal3TimePaleoPhy<-function(tree,timeData,brRate,extRate,sampRate,ntrees=1,anc.wt
 		if(length(unique(timeData1[,2]))<Ntip(tree)){test2<-TRUE}	#test 2 does not work if any LADS are same
 		if(all(c(test1,test2))){ktree$test<-"passed"}else{warning("Warning: Terminal tips improperly aligned, cause unknown. Use ouput with care.")}
 		if(plot){
-			parOrig<-par(mar=c(2.5,2.5,1,2.5));layout(matrix(1:3,3,));plot(ladderize(tree),show.tip.label=TRUE,use.edge.length=FALSE)
+			parOrig <- par(no.readonly=TRUE)
+			par(mar=c(2.5,2.5,1,2.5))
+			layout(matrix(1:3,3,))
+			plot(ladderize(tree),show.tip.label=TRUE,use.edge.length=FALSE)
 			plot(ladderize(ttree1),show.tip.label=TRUE);axisPhylo()			
-			plot(ladderize(ktree),show.tip.label=TRUE);axisPhylo();
-			layout(1);par(parOrig)		
+			plot(ladderize(ktree),show.tip.label=TRUE);axisPhylo()
+			layout(1)
+			par(parOrig)		
 			}
 		names(ktree$edge.length)<-NULL
 		ttrees[[ntr]]<-ktree
@@ -813,7 +839,7 @@ bin_cal3TimePaleoPhy<-function(tree,timeList,brRate,extRate,sampRate,ntrees=1,no
 		}else{stop("Error: timeList[[1]] not of matrix or data.frame format")}}
 	if(class(timeList[[2]])!="matrix"){if(class(timeList[[2]])=="data.frame"){timeList[[2]]<-as.matrix(timeList[[2]])
 		}else{stop("Error: timeList[[2]] not of matrix or data.frame format")}}
-	if(dateTreatment=="minMax"){stop("Instead of dateTreatment='minMax', please use argument points.occur instead in bin functions")}
+	if(dateTreatment=="minMax"){stop("Instead of dateTreatment='minMax', please use argument point.occur instead in bin_ functions or use sites argument")}
 	if(!any(dateTreatment==c("firstLast","randObs"))){
 		stop("dateTreatment must be one of 'firstLast' or 'randObs'!")}
 	if(ntrees<1){stop("Error: ntrees<1")}
@@ -823,7 +849,7 @@ bin_cal3TimePaleoPhy<-function(tree,timeList,brRate,extRate,sampRate,ntrees=1,no
 	if(dateTreatment=="randObs" & FAD.only){stop("Error: FAD.only=TRUE and dateTreatment='randObs' are conflicting arguments")}
 	if(dateTreatment=="minMax" & FAD.only){
 		stop("Error: FAD.only=TRUE and dateTreatment='minMax' are conflicting, as there are no FADs, as dates are simply point occurrences")}
-	if(!is.null(sites) & point.occur){stop("Error: Inconsistent arguments, point.occur=TRUE will replace input 'sites' matrix")}
+	if(!is.null(sites) & point.occur){stop("Error: Inconsistent arguments, point.occur=TRUE would replace input 'sites' matrix\n Why not just make site assignments for first and last appearance the same in your input site matrix?")}
 	#clean out all taxa which are NA or missing for timeData
 	droppers<-tree$tip.label[is.na(match(tree$tip.label,names(which(!is.na(timeList[[2]][,1])))))]
 	if(length(droppers)>0){
@@ -850,7 +876,7 @@ bin_cal3TimePaleoPhy<-function(tree,timeList,brRate,extRate,sampRate,ntrees=1,no
 				message(paste("Warning: Following taxa dropped from timeList:",paste0(notTree,collapse=", ")))}
 			timeList[[2]]<-timeList[[2]][!is.na(match(rownames(timeList[[2]]),tree$tip.label)),]
 		}else{
-			stop("Some taxa in timeList not included on tree: not automatic taxon drop if 'sites' are given. Please remove from both sites and timeList and try again.")
+			stop("Some taxa in timeList not included on tree: no automatic taxon drop if 'sites' are given. Please remove from both sites and timeList and try again.")
 			}
 		}	
 	timeList[[2]]<-timeList[[2]][!is.na(timeList[[2]][,1]),]

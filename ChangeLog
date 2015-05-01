@@ -1,3 +1,23 @@
+Version - 2.4 - 05-01-15
+-Modified timePaleoPhy help file to clarify 'these are not realistic time-scaling functions' statement and correcting an 'either' to 'neither' in the description of argument 'ntrees'
+-Modified bin_timePaleoPhy and bin_cal3TimePaleoPhy to clarify that dateTreatment=minMax should be replaced be *either* the point.occur argument *or* a sites matrix
+-Changed license from GPL ver 2 or higher to Creative Common zero, as I finally realized that CC0 is supported by CRAN (apparently I missed this change years ago)
+-Added 'clade' option to collapseNodes to collapse *all* descendant edges of a selected node
+-Added function testEdgeMat which is a simple checker of the $edge matrix of phylo objects for inconsistencies
+-Added function taxonSortPBDBocc which sorts unique taxa out of PBDB occurrence datasets
+-Added function occData2timeList which converts taxon-sorted occurrence data lists to the two-matrix timeList object useable by many other paleotree functions
+-Added example data downloads from the Paleobiology Database of occurrence data and taxonomic data, available under 'graptPBDB'
+-Added function makePBDBtaxonTree which takes taxon data from the PBDB and constructs a very informal taxon tree from either (a) parent-child taxon relationships pairs, by default, or (b) the Linnean taxonomic hierarchy
+-Added function plotOccData which will plot occurrence data, such as that output by taxonSortPBDBocc from PBDB downloads
+-Changed a number of \dontrun to \donttest so they will run during modified non-CRAN R CHECK tests with --run-donttest
+-Now allowed to have a simpler Travis CI structure, apparently with --run-donttest
+-Added retioChar, character data for 3 characters for the 22 Retiolitinae species, to the retiolitinae example dataset
+-Added functions minCharChange and ancPropStateMat which are wrappers for doing parsimony ancestral reconstruction via phangorn's ancestral.pars
+-Added a badge to README that counts number of paleotree downloads from RStudio server
+-Added $sampledLogLike and $sumLogLike elements as additional output attached to time-scaled trees from cal3 functions, to allow users to quantify the relative optimality of each tree in a sample under the cal3 probability density function.
+-Added function resolveTreeChar, which will use parsimony ancestral reconstruction algorithms to try to resolve polytomies in a phylogeny, so as to minimize the number of independent transitions for some given discrete trait (ordered or unordered). This function ultimately relies on phangorn's ancestral.pars, via ancPropStateMat
+-Added function parentChild2TaxonTree which converts a two-column matrix parent-child relationships to a taxon-tree of 'phylo' format
+
 Version - 2.3 - 01-16-15
 -New function dropPaleoTip which is a simple wrapper for drop.tip in ape but uses fixRootTime to adjust the $root.time element in the resulting tree, after tips are dropped (Thanks to a conversation with Graeme Lloyd)
 -Modified how fixRootTime worked so that (by default) it drew the root age based on shared taxon membership of treeNew between the clades in treeOrig, see the description of argument nodeAgeTransfer for complete details. The original method, based on modifying the root-time based on changes in tree-depth (which is less robust to changes in taxon membership) can be executed by setting the argument nodeAgeTransfer to FALSE.

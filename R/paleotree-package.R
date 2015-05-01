@@ -5,7 +5,7 @@
 #' estimate sampling rates from stratigraphic ranges.
 #' 
 #' \tabular{ll}{ Package: \tab paleotree\cr Type: \tab Package\cr
-#' License: \tab GPL (>= 2)\cr } This package
+#' License: \tab CC0\cr } This package
 #' contains functions for analyzing sampling rates given ranges of fossil taxa,
 #' in both continuous and discrete time, functions for time-scaling phylogenies
 #' of fossil taxa and functions for simulating the fossil record in both taxic
@@ -40,6 +40,9 @@
 #'
 #' @examples
 #' 
+#' # get the package version of paleotree
+#' packageVersion("paleotree")
+#'
 #' ##Simulate some fossil ranges with simFossilTaxa
 #' set.seed(444);
 #' taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
@@ -77,7 +80,7 @@
 
 # NAMESPACE IMPORTING
 
-#' @importFrom phangorn Descendants Ancestors
+#' @importFrom phangorn Descendants Ancestors phyDat ancestral.pars
 #' @import ape
 
 
