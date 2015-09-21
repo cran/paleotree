@@ -1,3 +1,36 @@
+Version - 2.5 - 09-20-15
+-Added argument APIversion to makePBDBtaxonTree which allows a user to control which version of the API is called when argument solveMissing=queryPBDB. Current default is "1.1", this will need to be updated when PBDB API 1.2 becomes public
+-Added some safety checks to degradeTree
+-Added function equation2function which converts a character string containing the right-hand side of a single-line equation (like from class formula) to an R function with arguments corresponding the parameters in the input equation.
+-Added handling for ambiguous and polymorphic characters to minCharChange, AncPropStateMat and resolveTreeChar by adding support for these options as they already existed in phangorn
+-Altered function parentChild2TaxonTree to handle datasets where root-ancestor was indicated with an NA value
+-Additional checking in testEdgeMat to catch when the root node is misnumbered,  also additional checking taken with modification from Emmanuel Paradis's checkValidPhylo
+-Additional routines in cleanNewPhylo to convert $edge and $Nnode to integer storage, and in case collapse.singles fails to collapse all nodes
+-Modified taxa2phylo, expandTaxonTree, resolveTreeChar, taxa2cladogram to use cleanNewPhylo
+-Sweeping grandiose changes of how trees are created, cleaned, checked, etc with loads of tiny hidden functions. An unlikable yet necessary thing to implement.
+-Function taxa2phylo apparently requires that taxa be ordered by FAD, with the root ancestor being listed first (probably reflecting bad coding practices of Dave circa 2011...)
+	-Function taxa2phylo will now silently coerce a dataset (and input obs_time) so that taxa are ordered by FAD, before continuing
+	-Fixed small bug introduced by this, which mis-numbered ancestral taxa when passing to further parts of taxa2phylo (ugh)
+-Added tolerance argument to dateNodes to stop spurious warnings related to floating precision about native node dates that were barely distinguishable from zero
+-Added new example dataset of macroperforate foram relationships and ages taken from Aze et al. 2011 for use in testing taxa2phylo and other related functions
+-Added a tolerance argument to cal3timePaleoPhy to stop spurious warnings related to floating precision about terminal tip ages that were barely distinguishable from zero
+-Discovered broken while() loop in getUltimateAnc and testParentChild, added code to avoid infinite-running while loops
+-Added example dataset of character matrix and cladogram from Song and Zhang (2014) study of dicranograptid relationships
+-Removed variables from functions that were assigned but never used via package codetools
+-Following recent change in CRAN policy, now explicitly importing various functions from default non-base package into paleotree namespace, including importing package stats as a whole. These imports now listed in DESCRIPTION.
+-Added function bindPaleoTip which wraps phytool's bind.tip for use with non-ultrametric paleontological phylogenies with $root.time elements, allows input of the new tips age and updates $root.time
+-Added 'kanto' a fictional example dataset, consisting of a taxon abundances-by-sites table for community ecology
+-Added community ecology functions 'pairwiseSpearmanRho' and 'HurlbertPIE' since they don't seem to be in any other package
+-Modified how timePaleoPhy looks for node dates to assign, after taxa are dropped (originally matched clades based on tip IDs, not tip labels)
+-Added argument to multiDiv that allows for control of line type
+-Modified taxa2phylo so root.time is added before plotting
+-Removed erroneous, incorrect references to Hartmann et al. 2011 from simFossilTaxa; this effect is now properly accounted for by simFossilRecord
+-Added function createMrBayesConstraints to convert a topology to a list of topological constraint commands for MrBayes
+-Changed many cases where classes of objects are checked to use inherits(), not is() or class()=="", both of which are less preferred methods
+-Added function simFossilRecord, a large number of unexported functions and several minor exported helper functions listed under simFossilRecordMethods
+	-simFossilRecord is a complex, elaborate piece of software for fast, precise simulation of fossil records under a birth-death-sampling process, with a wide range of models of morphological differentiation allowed, and a wide range of forms for rates to be defined as with respect to several key parameters
+	-Current intention is to remove simFossilTaxa and related functions in next version *and* port simFossilRecord to its own package, simultaneously with the release of he *next* CRAN version of paleotree (2.6), as well as remove some other older, redundant functions. This will require considerable modification of examples in paleotree.
+
 Version - 2.4 - 05-01-15
 -Modified timePaleoPhy help file to clarify 'these are not realistic time-scaling functions' statement and correcting an 'either' to 'neither' in the description of argument 'ntrees'
 -Modified bin_timePaleoPhy and bin_cal3TimePaleoPhy to clarify that dateTreatment=minMax should be replaced be *either* the point.occur argument *or* a sites matrix
@@ -8,15 +41,19 @@ Version - 2.4 - 05-01-15
 -Added function occData2timeList which converts taxon-sorted occurrence data lists to the two-matrix timeList object useable by many other paleotree functions
 -Added example data downloads from the Paleobiology Database of occurrence data and taxonomic data, available under 'graptPBDB'
 -Added function makePBDBtaxonTree which takes taxon data from the PBDB and constructs a very informal taxon tree from either (a) parent-child taxon relationships pairs, by default, or (b) the Linnean taxonomic hierarchy
+-Added functions timeList2fourDate and fourDate2timeList which convert between the 'four-date' and 'timeList' formats for first and last appearance dates given as bounded ages (i.e. start and end times of intervals)
 -Added function plotOccData which will plot occurrence data, such as that output by taxonSortPBDBocc from PBDB downloads
 -Changed a number of \dontrun to \donttest so they will run during modified non-CRAN R CHECK tests with --run-donttest
--Now allowed to have a simpler Travis CI structure, apparently with --run-donttest
+-Now allowed to have a simpler Travis CI structure, apparently with --run-donttest 
+	-REVERTED due to new r-travis not failing broken builds; Will make this change on a later date)
 -Added retioChar, character data for 3 characters for the 22 Retiolitinae species, to the retiolitinae example dataset
 -Added functions minCharChange and ancPropStateMat which are wrappers for doing parsimony ancestral reconstruction via phangorn's ancestral.pars
 -Added a badge to README that counts number of paleotree downloads from RStudio server
 -Added $sampledLogLike and $sumLogLike elements as additional output attached to time-scaled trees from cal3 functions, to allow users to quantify the relative optimality of each tree in a sample under the cal3 probability density function.
 -Added function resolveTreeChar, which will use parsimony ancestral reconstruction algorithms to try to resolve polytomies in a phylogeny, so as to minimize the number of independent transitions for some given discrete trait (ordered or unordered). This function ultimately relies on phangorn's ancestral.pars, via ancPropStateMat
 -Added function parentChild2TaxonTree which converts a two-column matrix parent-child relationships to a taxon-tree of 'phylo' format
+-Added function taxonTable2TaxonTree which converts a table of taxonomic hierarchy membership to a taxon-tree of 'phylo' format
+
 
 Version - 2.3 - 01-16-15
 -New function dropPaleoTip which is a simple wrapper for drop.tip in ape but uses fixRootTime to adjust the $root.time element in the resulting tree, after tips are dropped (Thanks to a conversation with Graeme Lloyd)

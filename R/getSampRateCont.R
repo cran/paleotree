@@ -225,7 +225,7 @@ getSampRateCont<-function(timeData,n_tbins=1,grp1=NA,grp2=NA,threshold=0.1,est_o
 				tbin<-c(max(FO),max(FO)-cumsum(t_bl))[1:n_tbins]
 				mqrt<-matrix(par[(n_tb+1):(length(par))],,2,byrow=TRUE)
 				tcat<-sapply(FO,function(x) sum(tbin>=x))
-				tcount<-sapply(sort(unique(tcat)),function(x) sum(tcat==x))
+				#tcount<-sapply(sort(unique(tcat)),function(x) sum(tcat==x))
 				#if(all(tcount>100)){t(sapply(tcat,function(x) mqrt[x,]))
 				#}else{matrix(0.99,length(FO),2,byrow=TRUE)}
 				t(sapply(tcat,function(x) mqrt[x,]))
@@ -256,21 +256,26 @@ getSampRateCont<-function(timeData,n_tbins=1,grp1=NA,grp2=NA,threshold=0.1,est_o
 		}			
 	}
 	#########################
-	if(class(timeData)!="matrix"){if(class(timeData)=="data.frame"){timeData<-as.matrix(timeData)
-		}else{stop("Error: timeData not of matrix or data.frame format")}}
+	if(!inherits(timeData,"matrix")){
+		if(inherits(timeData,"data.frame")){
+			timeData<-as.matrix(timeData)
+		}else{
+			stop("timeData not of matrix or data.frame format")
+			}
+		}
 	#get rid of any NAs
 	if(length(grp1)>1){
-		if(length(grp1)!=nrow(timeData)){stop("Error: grp1 is not same length as timeData")}
+		if(length(grp1)!=nrow(timeData)){stop("grp1 is not same length as timeData")}
 		grp1<-grp1[!is.na(timeData[,1]) & !(timeData[,2]==0)]
 		}
 	if(length(grp2)>1){
-		if(length(grp2)!=nrow(timeData)){stop("Error: grp2 is not same length as timeData")}		
+		if(length(grp2)!=nrow(timeData)){stop("grp2 is not same length as timeData")}		
 		grp2<-grp2[!is.na(timeData[,1]) & !(timeData[,2]==0)]
 		}
 	timeData<-timeData[!is.na(timeData[,1]) & !(timeData[,2]==0),]	#drop living taxa
 	if(any(is.na(timeData))){stop("Weird NAs in Data??")}
-	if(any(timeData[,1]<timeData[,2])){stop("Error: timeData is not in time relative to modern (decreasing to present)")}
-	if(any(timeData[,2]<0)){stop("Error: Some dates in timeData <0 ?")}
+	if(any(timeData[,1]<timeData[,2])){stop("timeData is not in time relative to modern (decreasing to present)")}
+	if(any(timeData[,2]<0)){stop("Some dates in timeData <0 ?")}
 	FO<-timeData[,1];LO<-timeData[,2]
 	dur<-(-LO)-(-FO)
 	#THRESHOLD DETERMINES RANGES TOO SMALL TO BE CONSIDERED NOT ONE-TIMERS

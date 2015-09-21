@@ -56,7 +56,8 @@
 #' 
 #' set.seed(444)
 #' tree <- rtree(100)
-#' tree1 <- degradeTree(tree,0.5) 
+#' tree1 <- degradeTree(tree,prop_collapse=0.5) 
+#' tree3 <- degradeTree(tree,nCollapse=50) 
 #' 
 #' #let's compare the input and output
 #' layout(matrix(1:2,,2))
@@ -85,11 +86,21 @@
 #' @name degradeTree
 #' @rdname degradeTree
 #' @export degradeTree
-degradeTree<-function(tree,prop_collapse,nCollapse=NULL,node.depth=NA,leave.zlb=FALSE){
+degradeTree<-function(tree,prop_collapse=NULL,nCollapse=NULL,node.depth=NA,leave.zlb=FALSE){
 	#collapses a given proportion of internal edges, creating polytomies
 		#node.depth conditions on depth of edge in tree
 			# 1 removes more shallow nodes, 0 removes deeper nodes
-	if(!is(tree, "phylo")){stop("Error: tree is not of class phylo")}
+	if(!inherits(tree, "phylo")){stop("tree is not of class phylo")}
+	if(is.null(nCollapse) & is.null(prop_collapse)){
+		stop("One of either 'prop_collapse' or 'nCollapse' must be provided")}
+	if(!is.null(nCollapse)){
+		if(nCollapse<1){stop("nCollapse must be greater than 1")}
+		}
+	if(!is.null(prop_collapse)){
+		if(prop_collapse>1){stop("prop_collapse must be less than 1")}
+		}
+	if(!is.null(nCollapse) & !is.null(prop_collapse)){
+		stop("Providing both 'prop_collapse' and 'nCollapse' are conflicting choices")}			
 	edge<-(1:length(tree$edge))[which(tree$edge[,2]>Ntip(tree))]	#internal edges
 	if(is.null(nCollapse)){nCollapse<-round(prop_collapse*length(edge))}
 	if(is.na(node.depth)){
@@ -117,9 +128,11 @@ degradeTree<-function(tree,prop_collapse,nCollapse=NULL,node.depth=NA,leave.zlb=
 #' @rdname degradeTree
 #' @export 
 collapseNodes<-function(tree,nodeID,collapseType,leave.zlb=FALSE){
-	if(!is(tree, "phylo")){stop("Error: tree is not of class phylo")}
+	if(!inherits(tree, "phylo")){
+		stop("tree is not of class phylo")
+		}
 	if(!all(nodeID>0) | !all(nodeID<(Ntip(tree)+Nnode(tree)+1))){
-		stop("Error: some nodeID values outside the range of tip and node IDs")}
+		stop("some nodeID values outside the range of tip and node IDs")}
 	if(!all(nodeID>Ntip(tree))){
 		message("Warning: Some nodeID values indicate terminal tips; collapsing these generally doesn't do anything")}
 	if(length(collapseType)!=1){stop("collapseType must be a single selected option (length=1)")}

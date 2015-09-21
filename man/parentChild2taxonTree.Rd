@@ -75,7 +75,31 @@ pokexample_bad<-rbind(cbind("Squirtadae",c("Squirtle","Blastoise","Wartortle")),
 #this should return an error, as Gengar doesn't share common root
 pokeTree<-parentChild2taxonTree(pokexample_bad)
 
+
+# another example, where a taxon is listed as both parent and child
+pokexample_bad2<-rbind(cbind("Squirtadae",c("Squirtle","Blastoise","Wartortle")),
+	c("Shelloidea",c("Lapras","Squirtadae","Shelloidea")),
+	c("Pokezooa","Shelloidea"),c("Pokezooa","Parasect"),
+	c("Rodentapokemorpha","Linoone"),c("Rodentapokemorpha","Sandshrew"),
+	c("Rodentapokemorpha","Pikachu"),c("Hirsutamona","Ursaring"),
+	c("Hirsutamona","Rodentapokemorpha"),c("Pokezooa","Hirsutamona"),
+	c("Umbrarcheota","Gengar"))
+
+#this should return an error, as Shelloidea is its own parent
+pokeTree<-parentChild2taxonTree(pokexample_bad2)
+
 }
+
+
+
+# note that we should even be able to do this with ancestor-descendent pairs from
+	 # simulated datasets from simFossilTaxa, like so:
+set.seed(444)
+taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
+# need to reorder the columns so parents (ancestors) first, then children
+parentChild2taxonTree(taxa[,2:1])
+# now note that it issues a warning that the input wasn't type character
+   # and it will be coerced to be such
 }
 \author{
 David W. Bapst

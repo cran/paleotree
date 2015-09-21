@@ -25,9 +25,10 @@
 #' specific non-zero value of minExtant and maxExtant, may take a long time to
 #' find any acceptable simulation runs.
 #' 
-#' Hartmann et al. (2011) recently discovered a potential statistical artifact
-#' when branching simulations are conditioned on some maximum number of taxa.
-#' Thus, this function continues the simulation once mintaxa or minExtant is
+# Hartmann et al. (2011) recently discovered a potential statistical artifact
+# when branching simulations are conditioned on some maximum number of taxa.
+#
+#' This function continues the simulation once mintaxa or minExtant is
 #' hit, until the next taxon (limit +1) originates. Once the simulation
 #' terminates, it is judged whether it is acceptable for all conditions given
 #' and if so, the run is accepted as a dataset for output.
@@ -188,11 +189,12 @@
 #' \code{\link{simPaleoTrees}}, \code{\link{taxa2phylo}},
 #' \code{\link{taxa2cladogram}}
 
-#' @references Foote, M. 1996 On the Probability of Ancestors in the Fossil
+#' @references 
+#' Foote, M. 1996 On the Probability of Ancestors in the Fossil
 #' Record. \emph{Paleobiology} \bold{22}(2):141--151.
-#' 
-#' Hartmann, K., D. Wong, and T. Stadler. 2010 Sampling Trees from Evolutionary
-#' Models. \emph{Systematic Biology} \bold{59}(4):465--476.
+# 
+# Hartmann, K., D. Wong, and T. Stadler. 2010 Sampling Trees from Evolutionary
+# Models. \emph{Systematic Biology} \bold{59}(4):465--476.
 #' 
 #' Kendall, D. G. 1948 On the Generalized "Birth-and-Death" Process. \emph{The
 #' Annals of Mathematical Statistics} \bold{19}(1):1--15.
@@ -327,21 +329,21 @@ simFossilTaxa<-function(p,q,anag.rate=0,prop.bifurc=0,prop.cryptic=0,nruns=1,min
 	#set.seed(444);p=0.1;q=0.1;anag.rate=0.1;prop.bifurc=0;prop.cryptic=1;nruns=1;mintaxa=10;maxtaxa=20;mintime=1;maxtime=10;minExtant=0;maxExtant=NULL;plot=TRUE;print.runs=TRUE;min.cond=TRUE;count.cryptic=FALSE
 	#idiot proofing
 	if(any(c(p,q,anag.rate,prop.bifurc,prop.cryptic)<0)){stop(
-		"Error: bad parameters input, p, q, anag.rate, prop.bifurc or prop.cryptic are less than 0")}
-	if(prop.bifurc>0 & prop.cryptic==1){stop("Error: Prop.bifurc greater than 0 even though cryptic cladogenesis = 1??")}
-	if(nruns<1){stop("Error: nruns<1")}
-	if(maxtaxa<0){stop("Error: maxtaxa<0")}
-	if(mintaxa<1){stop("Error: mintaxa<1")}
-	if(mintime<1){stop("Error: mintime<1")}
-	if(maxtime<mintime){stop("Error: maxtime<mintime")}
-	if(mintaxa>maxtaxa){stop("Error: mintaxa > maxtaxa")}
+		"bad parameters input, p, q, anag.rate, prop.bifurc or prop.cryptic are less than 0")}
+	if(prop.bifurc>0 & prop.cryptic==1){stop("Prop.bifurc greater than 0 even though cryptic cladogenesis = 1??")}
+	if(nruns<1){stop("nruns<1")}
+	if(maxtaxa<0){stop("maxtaxa<0")}
+	if(mintaxa<1){stop("mintaxa<1")}
+	if(mintime<1){stop("mintime<1")}
+	if(maxtime<mintime){stop("maxtime<mintime")}
+	if(mintaxa>maxtaxa){stop("mintaxa > maxtaxa")}
 	if(maxtaxa>10000 & maxtime>10000){warning("Warning: Unrealistic limits for maxtaxa or maxtime")}
-	if(minExtant<0){stop("Error: minExtant<0")}
+	if(minExtant<0){stop("minExtant<0")}
 	if(minExtant>mintaxa){mintaxa<-minExtant}
 	if(!is.null(maxExtant)){
-		if(maxExtant<0){stop("Error: maxExtant<0")}
+		if(maxExtant<0){stop("maxExtant<0")}
 		if(maxExtant>maxtaxa){maxtaxa<-maxExtant}
-		if(minExtant>maxExtant){stop("Error: maxExtant is set higher than minExtant")}
+		if(minExtant>maxExtant){stop("maxExtant is set higher than minExtant")}
 		}
 	if(!min.cond){message("No conditioning during simulation; run until max limits or total extinction")}
 	#end idiot proofing
@@ -421,14 +423,14 @@ simFossilTaxa<-function(p,q,anag.rate=0,prop.bifurc=0,prop.cryptic=0,nruns=1,min
 				#are any "live" taxa below maxtime1? if so, continue
 				continue<-ifelse(any(is.na(taxad[,4])),any(taxad[is.na(taxad[,4]),3]<=maxtime1),FALSE)
 				if(!continue & !min.cond){eval<-TRUE}
-				taxad_save<-taxad
+				#taxad_save<-taxad
 				#print(c(nrow(taxad),sum(is.na(taxad[,4]))))
 				}
 			if(!continue & eval){
 				#if continue is false (maxtime1 is hit!), evaluate!
 				#don't just use one maxtime1, use a bunch 02-07-12: let's you use more runs!
 				taxad<-matrix(taxad[taxad[,3]<maxtime1,],sum(taxad[,3]<maxtime1),)
-				if(any(is.na(taxad[,4]))){stop("Error: Live creatures escaping simulation! Get out now while you still have time!")}
+				if(any(is.na(taxad[,4]))){stop("Live creatures escaping simulation! Get out now while you still have time!")}
 				posstimes<-sort(unique(c(taxad[,3:4],maxtime1)))
 				maxtimes<-posstimes[posstimes>=mintime & posstimes<=maxtime1]				#make vector of maxtimes
 				if(length(maxtimes)==0){

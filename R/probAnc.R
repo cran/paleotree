@@ -26,8 +26,8 @@
 #' can be no higher than 0.5. See Foote (1996) for a graphic depiction of this
 #' non-intuitive ceiling. For reasons (probably?) having to do with finite
 #' approximations of infinite summations, values close to perfect sampling
-#' may have values slightly higher than this ceiling (which is also apparent
-#' visually in the figures in Foote, 1996).
+#' may have values slightly higher than this ceiling, which is also apparent
+#' visually in the figures in Foote (1996).
 
 #' @inheritParams SamplingConv
 
@@ -80,7 +80,7 @@ probAnc<-function(p,q,R,mode="budding",analysis="directDesc",Mmax=85,nrep=10000)
 	if(mode=="anagenesis"){message("p will be treated as the rate of anagenesis/pseudospeciation")}
 	if(!any(analysis==c("directDesc","indirectDesc"))){
 		stop("Analysis type not designated, must be 'directDesc' or 'indirectDesc'")}
-	if(nrep<0){stop("Error: Nrep is less than zero?")}
+	if(nrep<0){stop("Nrep is less than zero?")}
 	if(analysis=="directDesc"){
 		#get completeness
 		Pp<-qsProb2Comp(R=R,p=p,q=q,mode=mode)
@@ -89,7 +89,7 @@ probAnc<-function(p,q,R,mode="budding",analysis="directDesc",Mmax=85,nrep=10000)
 			Pd<-function(p,q,Ti){exp(-q*(Ti-1))-exp(-q*Ti)}
 			PN<-function(p,q,Ti,Ni){(exp(-p*Ti)*((p*Ti)^Ni))/factorial(Ni)}
 			#should approximate 2*(p/q)*Pp when R and p are both <<1
-			approx<-2*(p/q)*Pp
+			#approx<-2*(p/q)*Pp
 			maxN<-100
 			}
 		if(mode=="bifurcating"){
@@ -100,7 +100,7 @@ probAnc<-function(p,q,R,mode="budding",analysis="directDesc",Mmax=85,nrep=10000)
 				if(Ni!=2 & Ni!=0){res<-0}
 				return(res)
 				}
-			approx<-2*(p/(p+q))*Pp
+			#approx<-2*(p/(p+q))*Pp
 			maxN<-2
 			}
 		if(mode=="anagenesis"){
@@ -111,7 +111,7 @@ probAnc<-function(p,q,R,mode="budding",analysis="directDesc",Mmax=85,nrep=10000)
 				if(Ni!=1 & Ni!=0){res<-0}
 				return(res)
 				}
-			approx<-2*(p/(p+q))*Pp
+			#approx<-2*(p/(p+q))*Pp
 			maxN<-1
 			}
 		#now get PA, the probability of a direct descendant of a taxon being sampled
@@ -129,7 +129,7 @@ probAnc<-function(p,q,R,mode="budding",analysis="directDesc",Mmax=85,nrep=10000)
 	if(analysis=="indirectDesc"){
 		if(mode=="budding" | mode=="bifurcating"){
 			if(p>q){stop(
-				"Error: Indirect Descendant formulae are unsolved if p>q, see Foote 1996")}
+				"Indirect Descendant formulae are unsolved if p>q, see Foote 1996")}
 			Qm<-function(p,q,M){
 				x<-(4*p*q)/((p+q)^2)
 				res<-((p+q)/(2*p))*(factorial(2*M)/((2^(2*M))*factorial(M)^2))*((x^M)/((2*M)-1))

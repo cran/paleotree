@@ -6,10 +6,13 @@
 \title{Estimating the Minimum Number of Character Transitions Using Maximum Parsimony}
 \usage{
 minCharChange(trait, tree, randomMax = 10000, maxParsimony = TRUE,
-  orderedChar = FALSE, type = "MPR", cost = NULL, printMinResult = TRUE)
+  orderedChar = FALSE, type = "MPR", cost = NULL, printMinResult = TRUE,
+  ambiguity = c(NA, "?"), dropAmbiguity = FALSE, polySymbol = "&",
+  contrast = NULL)
 
 ancPropStateMat(trait, tree, orderedChar = FALSE, type = "MPR",
-  cost = NULL)
+  cost = NULL, ambiguity = c(NA, "?"), dropAmbiguity = FALSE,
+  polySymbol = "&", contrast = NULL, returnContrast = FALSE)
 }
 \arguments{
 \item{trait}{A vector of trait values for a discrete character, preferably named with taxon names
@@ -53,9 +56,50 @@ is issued.}
 \item{printMinResult}{If TRUE (the default), a summary of the results is printed to the terminal. The
 information in this summary may be more detailed if the results of the analysis are simpler (i.e.
 fewer unique solutions).}
+
+\item{ambiguity}{A vector of values which indicate ambiguous (i.e. missing or unknown) character state codings
+in supplied \code{trait} data. Taxa coded ambiguously as treated as being equally likely to be any state coding.
+By default, \code{NA} values and "?" symbols are treated as ambiguous character codings, in agreement with behavior
+of functions in packages \code{phangorn} and \code{Claddis}.
+This argument is designed to mirror an hidden argument with an identical name in function \code{phyDat} in package {phangorn}.}
+
+\item{dropAmbiguity}{A logical. If \code{TRUE} (which is not the default), all taxa with ambiguous codings as defined
+by argument \code{ambiguity} will be dropped prior to ancestral nodes being inferred. This may result in too few taxa.}
+
+\item{polySymbol}{A single symbol which separates alternative states for polymorphic codings; the default symbol is
+\code{"&"}, following the output by \code{Claddis}'s \code{ReadMorphNexus} function, where polymorphic taxa are indicated
+by default with a string with state labels separated by an \code{"&"} symbol.
+For example, a taxon coded as polymorphic for states 1 or 2, would be indicated by the string "1&2".
+\code{polySymbol} is used to break up these strings and automatically construct a fitting \code{contrast} table
+for use with this data, including for ambiguous character state codings.}
+
+\item{contrast}{A matrix of type integer with cells of 0 and 1, where each row is labelled with a string value
+used for indicating character states in \code{trait}, and each column is labelled with the formal state label to
+be used for assign taxa to particular character states. A value of 1 indicates that the respective coding string for
+that row should be interpreted as reflecting the character state listed for that column. A coding could reflect
+multiple states (such as might occur when taxa are polymorphic for some morphological character), so the sums of
+rows and columns can sum to more than 1.
+If \code{contrast} is not \code{NULL} (the default), the arguments will nullify
+This argument is designed to mirror an hidden argument with an identical name in function \code{phyDat} in package {phangorn}.
+This structure is based on the \code{\link{contrasts}} tables used for statistical evaluation of factors.
+See the \code{phangorn} vignette "Special features of phangorn" for more details
+on its implementation within \code{phangorn} including an example.
+See examples below for the construction of an example contrast matrix for character data with polymorphisms,
+coded as character data output by \code{Claddis}'s \code{ReadMorphNexus} function, where polymorphic taxa are indicated
+with a string with state labels separated by an \code{"&"} symbol.}
+
+\item{returnContrast}{If TRUE, the contrast table used by \code{ancestral.pars} will be output instead for
+user evaluation that polymorphic symbols and ambiguous states are being parsed correctly.}
 }
 \value{
-A list is invisibly returned containing the following elements:
+By default, \code{ancPropStateMat} returns a matrix, with rows corresponding to the ID numbers of tips and nodes in
+\code{$edge}, and columns corresponding to character states, with the value representing the proportional
+weight of that node being that state under the algorithm used (known tip values are always 1).
+If argument \code{returnContrast} is \code{TRUE} then \code{ancPropStateMat} will instead return the final
+contrast table used by \code{phyDat} for interpreting character state strings.
+
+\code{minCharChange} invisibly returns a list containing the following elements, several of which are printed
+by default to the console, as controlled by argument \code{printMinResult}:
 
 \describe{
  \item{\code{message}}{Describes the performance of \code{minCharChange} at searching for a minimum solution.}
@@ -161,16 +205,15 @@ text(x=9,y=15,"type='ACCTRAN'",cex=1.5)
 #let's compare unordered versus ordered under MPR
 layout(1:2)
 quickAncPlotter(tree,ancMPR,cex=0.3)
-text(x=8,y=15,"ordered char",cex=1.5)
+text(x=8,y=15,"unordered char\\nMPR",cex=1.5)
 quickAncPlotter(tree,ancMPRord,cex=0.3)
-text(x=9,y=15,"ordered char'",cex=1.5)
+text(x=9,y=15,"ordered char\\nMPR",cex=1.5)
 layout(1)
 
 \dontrun{
 # what ancPropStateMat automates (with lots of checks):
 
 require(phangorn)
-
 char1<-matrix(char,,1)
 rownames(char1)<-names(char)
 #translate into something for phangorn to read
@@ -184,6 +227,73 @@ minCharChange(tree,trait=char,type="MPR")
 
 #and now with ACCTRAN
 minCharChange(tree,trait=char,type="ACCTRAN")
+
+#POLYMORPHISM IN CHARACTER DATA
+
+
+# example trait data with a polymorphic taxon
+     # separated with '&' symbol
+# similar to polymorphic data output by ReadMorphNexus from package Claddis
+charPoly<-as.character(c(1,2,NA,0,0,1,"1&2",2,0,NA,0,2,1,1,"1&2"))
+#simulate a tree with 16 taxa
+set.seed(444)
+tree<-rtree(15)
+tree$edge.length<-NULL
+tree<-ladderize(tree)
+names(charPoly)<-tree$tip.label
+charPoly
+
+# need a contrast matrix that takes this into account
+    #can build row by row, by hand
+
+#first, build contrast matrix for basic states
+contrast012<-rbind(c(1,0,0),c(0,1,0),c(0,0,1))
+colnames(contrast012)<-rownames(contrast012)<-0:2
+contrast012
+
+#add polymorphic state and NA ambiguity as new rows
+contrastPoly<-c(0,1,1)
+contrastNA<-c(1,1,1)
+contrastNew<-rbind(contrast012,'1&2'=contrastPoly,contrastNA)
+rownames(contrastNew)[5]<-NA
+
+#let's look at contrast
+contrastNew
+
+# now try this contrast table we've assembled
+    # default: unordered, MPR
+ancPoly<-ancPropStateMat(tree, trait=charPoly, contrast=contrastNew)
+
+# but...!
+# we can also do it automatically,
+    # by default, states with '&' are automatically treated
+    # as polymorphic character codings by ancPropStateMat
+ancPolyAuto<-ancPropStateMat(tree, trait=charPoly, polySymbol="&")
+
+# but does this match what the table we constructed?
+ancPropStateMat(tree, trait=charPoly,
+		polySymbol="&", returnContrast=TRUE)
+
+# compare to contrastNew above!
+# only difference should be the default ambiguous
+	# character '?' is added to the table
+
+#compare reconstructions
+layout(1:2)
+quickAncPlotter(tree,ancPoly,cex=0.5)
+text(x=3.5,y=1.2,"manually-constructed\\ncontrast",cex=1.3)
+quickAncPlotter(tree,ancPolyAuto,cex=0.5)
+text(x=3.5,y=1.2,"auto-constructed\\ncontrast",cex=1.3)
+layout(1)
+
+#look pretty similar!
+
+#i.e. the default polySymbol="&", but could be a different symbol
+     #such as "," or "\\"... it can only be *one* symbol, though
+
+# all of this machinery should function just fine in minCharChange
+		# again, by default polySymbol="&" (included anyway here for kicks)
+minCharChange(tree, trait=charPoly, polySymbol="&")
 }
 \author{
 David W. Bapst

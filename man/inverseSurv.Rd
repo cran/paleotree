@@ -69,7 +69,7 @@ can be safely set to 1.}
 \item{drop.extant}{Drops all extant taxa from a dataset, w}
 }
 \value{
-A function of class "paleotreeFunc", which takes vector equal to the number
+A function of class "paleotreeFunc", which takes a vector equal to the number
 of parameters and returns the *negative* log likelihood (for use with optim and
 similar optimizing functions, which attempt to minimize support values). See the
 functions listed at \code{\link{modelMethods}} for manipulating and examining
@@ -205,7 +205,9 @@ here in paleotree on a trial basis, so that it can be more easily loaded onto re
 thus forewarned of this essentially 'beta' status of this function.
 }
 \examples{
-#let's simulate some taxon ranges from an imperfectly sampled fossil record
+\donttest{
+
+# let's simulate some taxon ranges from an imperfectly sampled fossil record
 set.seed(444)
 taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,
       maxtime=1000, maxExtant=0)
@@ -226,7 +228,6 @@ results
 #plot the results
 constrFun(results$par, altMode=TRUE)
 
-\donttest{
 #unconstrained function with ALL of 225 parameters!!!
     # this will take forever to converge, so it isn't run
 optim(parInit(likFun),likFun,lower=parLower(likFun),upper=parUpper(likFun),

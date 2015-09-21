@@ -78,6 +78,8 @@
 
 #' @examples
 #' 
+#' \donttest{
+#' 
 #' # let's write a quick&dirty ancestral trait plotting function
 #' 
 #'  quickAncPlot<-function(tree,trait,cex,orderedChar=FALSE,type="MPR",cost=NULL){
@@ -160,12 +162,14 @@
 #' 
 #' layout(1)
 #' 
-#' 
+#' }
+#'
 
 #' @name resolveTreeChar
 #' @rdname resolveTreeChar
 #' @export
-resolveTreeChar<-function(tree, trait, orderedChar=FALSE, stateBias=NULL, iterative=TRUE, type="MPR", cost=NULL){
+resolveTreeChar<-function(tree, trait, orderedChar=FALSE, stateBias=NULL, iterative=TRUE, type="MPR", cost=NULL,
+			ambiguity= c(NA, "?"), dropAmbiguity=FALSE, polySymbol="&", contrast=NULL){
 		#	orderedChar=TRUE; type="MPR"; cost=NULL; stateBias="primitive"
 		#	orderedChar=FALSE; type="MPR"; cost=NULL; stateBias=NULL
 	#orderedChar=TRUE : put clades together relative to character being ordered, 0 is most primitive state
@@ -182,8 +186,12 @@ resolveTreeChar<-function(tree, trait, orderedChar=FALSE, stateBias=NULL, iterat
 			stop("stateBias cannot be used in analyses for unordered characters")
 			}}
 	#check iterative
-	if(!is.logical(iterative)){stop("iterative must be a logical class element")}
-	if(length(iterative)!=1){stop("iterative must be a single logical element")}
+	if(!is.logical(iterative)){
+		stop("iterative must be a logical class element")
+		}
+	if(length(iterative)!=1){
+		stop("iterative must be a single logical element")
+		}
 	#now run the resolution mechanism function, possibly in a loop
 	if(iterative){
 		tree2<-tree
@@ -377,9 +385,10 @@ resolveTreeCharMechanism<-function(tree, trait, orderedChar, stateBias, type, co
 			tree2<-tree1
 			tree2$edge<-rbind(tree2$edge[tree2$edge[,1]!=chosen,],edgeMat)
 			tree2$Nnode<-tree2$Nnode+length(unique(nodeChar))-1
-			tree2<-collapse.singles(reorder(tree2))
-			if(!testEdgeMat(tree2)){stop("Produced edge matrix has inconsistencies")}
-			tree3<-read.tree(text=write.tree(tree2))
+			#tree2<-collapse.singles(reorder(tree2))
+			#if(!testEdgeMat(tree2)){stop("Produced edge matrix has inconsistencies")}
+			#tree3<-read.tree(text=write.tree(tree2))
+			tree3<-cleanNewPhylo(tree2)
 			if(Ntip(tree1)!=Ntip(tree3)){
 				if(Ntip(tree1)!=Ntip(tree2)){
 					stop("Taxa loss/added somehow in fixing polytomies?")

@@ -57,7 +57,7 @@ begins and ends at 0 time. This interval is always automatically removed prior
 to the calculation intermediary data for fitting likelihood functions.}
 }
 \value{
-A function of class "paleotreeFunc", which takes vector equal to the number
+A function of class "paleotreeFunc", which takes a vector equal to the number
 of parameters and returns the *negative* log likelihood (for use with optim and
 similar optimizing functions, which attempt to minimize support values). See the
 functions listed at \code{\link{modelMethods}} for manipulating and examining
@@ -87,9 +87,8 @@ constrained using functions available in this package and/or analyzed
 with commonly used optimizing functions.
 }
 \details{
-These functions effectively replace two older functions in paleotree,
-\code{\link{getSampRateCont}} and \code{\link{getSampProbDisc}}, which
-are otherwise retained in paleotree for historical purposes. The
+These functions effectively replace two older functions in paleotree, now removed,
+\code{getSampRateCont} and \code{getSampProbDisc}. The
 functions here do not offer the floating time interval options of
 their older siblings, but do allow for greater flexibility in defining
 constrains on parameter values. Differences in time intervals, or any

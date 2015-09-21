@@ -7,9 +7,8 @@
 #' with commonly used optimizing functions.
 #'
 #' @details
-#' These functions effectively replace two older functions in paleotree,
-#' \code{\link{getSampRateCont}} and \code{\link{getSampProbDisc}}, which
-#' are otherwise retained in paleotree for historical purposes. The
+#' These functions effectively replace two older functions in paleotree, now removed,
+#' \code{getSampRateCont} and \code{getSampProbDisc}. The
 #' functions here do not offer the floating time interval options of
 #' their older siblings, but do allow for greater flexibility in defining
 #' constrains on parameter values. Differences in time intervals, or any
@@ -100,7 +99,7 @@
 #' occurring at the modern day (i.e. being functionally identical as occurring at 0 time).
 
 #' @return 
-#' A function of class "paleotreeFunc", which takes vector equal to the number
+#' A function of class "paleotreeFunc", which takes a vector equal to the number
 #' of parameters and returns the *negative* log likelihood (for use with optim and
 #' similar optimizing functions, which attempt to minimize support values). See the
 #' functions listed at \code{\link{modelMethods}} for manipulating and examining
@@ -194,8 +193,13 @@ make_durationFreqCont<-function(timeData,groups=NULL,drop.extant=TRUE,threshold=
 		#UNLIKE getSampProbDisc and getSampRateCont, there are no moving time-windows
 		#in fact, this was probably a bad idea to begin with
 	#drop.extant drops ALL taxa that survive to the modern (i.e. truncated ranges)
-	if(class(timeData)!="matrix"){if(class(timeData)=="data.frame"){timeData<-as.matrix(timeData)
-		}else{stop("Error: timeData not of matrix or data.frame format")}}
+	if(!inherits(timeData,"matrix")){
+		if(inherits(timeData,"data.frame")){
+			timeData<-as.matrix(timeData)
+		}else{
+			stop("timeData not of matrix or data.frame format")
+			}
+		}
 	#drop unsampled taxa (i.e. NAs)
 	naDroppers<-is.na(timeData[,1]) | is.na(timeData[,2])
 	if(any(naDroppers)){
@@ -224,8 +228,8 @@ make_durationFreqCont<-function(timeData,groups=NULL,drop.extant=TRUE,threshold=
 		}
 	if(any(is.na(timeData))){stop("Weird NAs in Data??")}
 	if(any(timeData[,1]<timeData[,2])){
-		stop("Error: timeData is not in time relative to modern (decreasing to present)")}
-	if(any(timeData[,2]<0)){stop("Error: Some dates in timeData <0 ?")}
+		stop("timeData is not in time relative to modern (decreasing to present)")}
+	if(any(timeData[,2]<0)){stop("Some dates in timeData <0 ?")}
 	#get the dataset
 	dur<-(timeData[,1]-timeData[,2])
 	#THRESHOLD DETERMINES RANGES TOO SMALL TO BE CONSIDERED NOT ONE-TIMERS
@@ -325,10 +329,10 @@ make_durationFreqDisc<-function(timeList,groups=NULL,drop.extant=TRUE){				# ,in
 		}
 	if(any(is.na(timeData))){stop("Weird NAs in Data??")}
 	if(any(apply(timeData,1,diff)<0)){
-		stop("Error: timeData / timeList[[2]] not in intervals numbered from first to last (1 to infinity)")}
-	if(any(timeData[,2]<0)){stop("Error: Some dates in timeList <0 ?")}
+		stop("timeData / timeList[[2]] not in intervals numbered from first to last (1 to infinity)")}
+	if(any(timeData[,2]<0)){stop("Some dates in timeList <0 ?")}
 	if(sum(timeData%%1)>0){
-		stop("Error: Some of these interval numbers aren't given as whole numbers! What?")}
+		stop("Some of these interval numbers aren't given as whole numbers! What?")}
 	#get the dataset
 	dur<-apply(timeData,1,diff)+1
 	#timeData1<-max(timeData)-timeData+1

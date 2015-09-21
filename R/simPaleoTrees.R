@@ -79,6 +79,7 @@
 
 #' @examples
 #' 
+
 #' set.seed(444)
 #' #simulate trees conditioned to have no living descendants
 #' trees <- simPaleoTrees(p=0.1,q=0.1,r=0.5,ntrees=10,all.extinct=TRUE,maxtime=100,
@@ -86,6 +87,7 @@
 #' #number of tips
 #' sapply(trees,Ntip)
 #' 
+#' \donttest{
 #' #simulate trees conditioned to have possible living taxa and perfect sampling at modern
 #' trees <- simPaleoTrees(p=0.1,q=0.1,r=0.5,ntrees=10,all.extinct=FALSE,maxtime=100,
 #'     modern.samp.prob=TRUE,print.runs=TRUE,plot=TRUE)
@@ -99,7 +101,10 @@
 #' sapply(trees,function(x) sum(sapply(x$ranges[!is.na(x$ranges)],length)))
 #' #remove any sampling events at t=0; shouldn't be any, so should be identical
 #' sapply(trees,function(x) sum(sapply(x$ranges[!is.na(x$ranges)],function(y) sum(y>0))))
+#' }
 #' 
+
+
 #' @export simPaleoTrees
 simPaleoTrees<-function(p,q,r,ntrees=1,all.extinct=FALSE,modern.samp.prob=1.0,mintime=1,maxtime=100,
 	mintaxa=2,maxtaxa=500,anag.rate=0,prop.bifurc=0,prop.cryptic=0,drop.zlb=TRUE,print.runs=FALSE,ranges.only=TRUE,
@@ -119,8 +124,8 @@ simPaleoTrees<-function(p,q,r,ntrees=1,all.extinct=FALSE,modern.samp.prob=1.0,mi
 		#zero-length branches are dropped
 	#simPaleoTrees(p=0.1,q=0.1,r=0.1,ntrees=10)
 	#require(ape)
-	if(mintaxa<2){stop("Error: Need at least two taxa per tree; increase mintaxa")}
-	if(ntrees<1){stop("Error: number of trees to simulate is <1")}
+	if(mintaxa<2){stop("Need at least two taxa per tree; increase mintaxa")}
+	if(ntrees<1){stop("number of trees to simulate is <1")}
 	res<-rmtree(ntrees,2)
 	ntries<-0
 	for(i in 1:ntrees){
@@ -141,7 +146,7 @@ simPaleoTrees<-function(p,q,r,ntrees=1,all.extinct=FALSE,modern.samp.prob=1.0,mi
 				tree<-taxa2phylo(taxa,obs_time=ranges1[,2],plot=plot)
 				if(drop.zlb){tree<-dropZLB(tree)}
 				if(all(!is.na(tree))){
-					numext<-sum(ranges1[,2]==0)
+					#numext<-sum(ranges1[,2]==0)
 					minta<-Ntip(tree)>mintaxa
 					minti<-(max(ranges1,na.rm=TRUE)-min(ranges1,na.rm=TRUE))>mintime
 					if(minta & minti){
