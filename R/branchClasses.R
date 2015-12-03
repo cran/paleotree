@@ -27,7 +27,9 @@
 #' @examples
 #' #simulated example
 #' set.seed(444)
-#' taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=20)
+#' record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
+#'	nTotalTaxa=c(30,40), nExtant=c(10,20))
+#' taxa<-fossilRecord2fossilTaxa(record)
 #' tree <- taxa2phylo(taxa)
 #' brlenRes <- branchClasses(tree)
 #'
@@ -50,7 +52,7 @@ branchClasses<-function(tree,whichExtant=NULL,tol=0.01){
 	#names will be time of origin for each branch
 	#require(ape)
 	if(!inherits(tree,"phylo")){stop("tree is not of class phylo")}
-	dists<-dist.nodes(tree)[Ntip(tree)+1,]
+	dists<-node.depth.edgelength(tree)
 	if(is.null(whichExtant)){
 		dists1<-dists[1:Ntip(tree)]
 		if(is.null(tree$root.time)){modern<-max(dists1)}else{modern<-tree$root.time}

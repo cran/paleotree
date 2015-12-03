@@ -37,7 +37,7 @@
 #' even relatively large sample sizes. A portion at the bottom of the examples
 #' in the help file examine this issue in greater detail with simulations. This
 #' package author recommends using the ML method developed in Foote (1997)
-#' instead, which is usable via the function \code{\link{getSampProbDisc}}.
+#' instead, which is usable via the function \code{\link{make_durationFreqDisc}}.
 #' 
 #' As extant taxa should not be included in a freqRat calculation, any taxa
 #' listed as being in a bin with start time 0 and end time 0 (and thus being
@@ -60,8 +60,7 @@
 
 #' @author David W. Bapst
 
-#' @seealso Model fitting methods in \code{\link{durationFreq}}, which replaced
-#' methods listed in \code{\link{getSampProbDisc}}, \code{\link{getSampRateCont}}. 
+#' @seealso Model fitting methods in \code{\link{make_durationFreqDisc}} and \code{\link{make_durationFreqCont}}. 
 #' Also see conversion methods in \code{\link{sProb2sRate}}, \code{\link{qsProb2Comp}}
 
 #' @references Foote, M. 1997 Estimating Taxonomic Durations and Preservation
@@ -71,9 +70,11 @@
 #' ranges of taxa. \emph{Paleobiology} \bold{22}(2):121--140.
 #' @examples
 #' 
-#' #Simulate some fossil ranges with simFossilTaxa
+#' #Simulate some fossil ranges with simFossilRecord
 #' set.seed(444)
-#' taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=100,maxtime=1000,maxExtant=0)
+#' record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
+#'	nTotalTaxa=c(30,40), nExtant=0)
+#' taxa<-fossilRecord2fossilTaxa(record)
 #' #simulate a fossil record with imperfect sampling with sampleRanges
 #' rangesCont <- sampleRanges(taxa,r=0.1)
 #' #Now let's use binTimeData to bin in intervals of 5 time units
@@ -98,13 +99,13 @@
 #'
 #' #est. ext rate = ~0.44 per interval
 #' #5 time-unit intervals, so ~0.44 / 5 = ~0.08 per time-unite
-#' #That's pretty close to the generating value of 0.01, used in simFossilTaxa
+#' #That's pretty close to the generating value of 0.01, used in sampleRanges
 #' 
 #' \dontrun{
 #' #################
 #' #The following example code (which is not run by default) examines how 
 #' 	#the freqRat estimates vary with sample size, interval length
-#' 	#and compare it to using getSampProbDisc
+#' 	#and compare it to using make_durationFreqDisc
 #' 
 #' #how good is the freqRat at 20 sampled taxa on avg?
 #' set.seed(444)
@@ -114,8 +115,9 @@
 #' ntaxa<-freqRats<-numeric()
 #' for(i in 1:length(r)){
 #' 	#assuming budding model
-#' 	taxa<-simFossilTaxa_SRCond(r=r[i],avgtaxa=20,p=0.1,q=0.1,maxExtant=0)
-#' 	ranges<-sampleRanges(taxa,r=r[i])
+#' 	record<-simFossilRecord(p=0.1, q=0.1, r=r[i], nruns=1,
+#' 		nSamp=c(15,25), nExtant=0, plot=TRUE)
+#' 	ranges<-fossilRecord2fossilRanges(record)
 #' 	timeList<-binTimeData(ranges,int.length=int.length)
 #' 	ntaxa[i]<-nrow(timeList[[2]])
 #' 	freqRats[i]<-freqRat(timeList)
@@ -133,8 +135,9 @@
 #' ntaxa<-freqRats<-numeric()
 #' for(i in 1:length(r)){
 #' 	#assuming budding model
-#' 	taxa<-simFossilTaxa_SRCond(r=r[i],avgtaxa=100,p=0.1,q=0.1,maxExtant=0)
-#' 	ranges<-sampleRanges(taxa,r=r[i])
+#' 	record<-simFossilRecord(p=0.1, q=0.1, r=r[i], nruns=1,
+#' 		nSamp=c(80,150), nExtant=0, plot=TRUE)
+#' 	ranges<-fossilRecord2fossilRanges(record)
 #' 	timeList<-binTimeData(ranges,int.length=int.length)
 #' 	ntaxa[i]<-nrow(timeList[[2]])
 #' 	freqRats[i]<-freqRat(timeList)
@@ -153,8 +156,9 @@
 #' ntaxa<-freqRats<-numeric()
 #' for(i in 1:length(r)){
 #' 	#assuming budding model
-#' 	taxa<-simFossilTaxa_SRCond(r=r[i],avgtaxa=100,p=0.1,q=0.1,maxExtant=0)
-#' 	ranges<-sampleRanges(taxa,r=r[i])
+#' 	record<-simFossilRecord(p=0.1, q=0.1, r=r[i], nruns=1,
+#' 		nSamp=c(80,150), nExtant=0, plot=TRUE)
+#' 	ranges<-fossilRecord2fossilRanges(record)
 #' 	timeList<-binTimeData(ranges,int.length=int.length)
 #' 	ntaxa[i]<-nrow(timeList[[2]])
 #' 	freqRats[i]<-freqRat(timeList)
@@ -170,8 +174,9 @@
 #' ntaxa<-freqRats<-numeric()
 #' for(i in 1:length(r)){
 #' 	#assuming budding model
-#' 	taxa<-simFossilTaxa_SRCond(r=r[i],avgtaxa=20,p=0.1,q=0.1,maxExtant=0)
-#' 	ranges<-sampleRanges(taxa,r=r[i])
+#' 	record<-simFossilRecord(p=0.1, q=0.1, r=r[i], nruns=1,
+#' 		nSamp=c(15,25), nExtant=0, plot=TRUE)
+#' 	ranges<-fossilRecord2fossilRanges(record)
 #' 	timeList<-binTimeData(ranges,int.length=int.length)
 #' 	ntaxa[i]<-nrow(timeList[[2]])
 #' 	freqRats[i]<-freqRat(timeList)
@@ -190,14 +195,19 @@
 #' ntaxa<-ML_sampProb<-numeric()
 #' for(i in 1:length(r)){
 #' 	#assuming budding model
-#' 	taxa<-simFossilTaxa_SRCond(r=r[i],avgtaxa=20,p=0.1,q=0.1,maxExtant=0)
-#' 	ranges<-sampleRanges(taxa,r=r[i])
+#' 	record<-simFossilRecord(p=0.1, q=0.1, r=r[i], nruns=1,
+#' 		nSamp=c(15,25), nExtant=0, plot=TRUE)
+#' 	ranges<-fossilRecord2fossilRanges(record)
 #' 	timeList<-binTimeData(ranges,int.length=int.length)
 #' 	ntaxa[i]<-nrow(timeList[[2]])
-#' 	ML_sampProb[i]<-getSampProbDisc(timeList)[[2]][2]
+#'  likFun<-make_durationFreqDisc(timeList)
+#'  ML_sampProb[i]<-optim(parInit(likFun),likFun,
+#' 		lower=parLower(likFun),upper=parUpper(likFun),
+#'      method="L-BFGS-B",control=list(maxit=1000000))[[1]][2]
 #' 	}
 #' plot(R,ML_sampProb);abline(0,1)
-#' #Not so great due to likelihood surface ridges, but it returns values between 0-1
+#' # Not so great due to likelihood surface ridges
+#'  # but it returns values between 0-1
 #' 
 #' #how good is the ML method at 100 taxa, 1 time-unit bins?
 #' set.seed(444)
@@ -207,11 +217,15 @@
 #' ntaxa<-ML_sampProb<-numeric()
 #' for(i in 1:length(r)){
 #' 	#assuming budding model
-#' 	taxa<-simFossilTaxa_SRCond(r=r[i],avgtaxa=100,p=0.1,q=0.1,maxExtant=0)
-#' 	ranges<-sampleRanges(taxa,r=r[i])
+#' 	record<-simFossilRecord(p=0.1, q=0.1, r=r[i], nruns=1,
+#' 		nSamp=c(80,150), nExtant=0, plot=TRUE)
+#' 	ranges<-fossilRecord2fossilRanges(record)
 #' 	timeList<-binTimeData(ranges,int.length=int.length)
 #' 	ntaxa[i]<-nrow(timeList[[2]])
-#' 	ML_sampProb[i]<-getSampProbDisc(timeList)[[2]][2]
+#'  likFun<-make_durationFreqDisc(timeList)
+#'  ML_sampProb[i]<-optim(parInit(likFun),likFun,
+#' 		lower=parLower(likFun),upper=parUpper(likFun),
+#'      method="L-BFGS-B",control=list(maxit=1000000))[[1]][2]
 #' 	}
 #' plot(R,ML_sampProb);abline(0,1)
 #' #Oh, fairly nice, although still a biased uptick as R gets larger
@@ -238,7 +252,13 @@ freqRat<-function(timeData,calcExtinction=FALSE,plot=FALSE){
 	f3<-sumDur[3]
 	freqRat<-(f2^2)/(f1*f3)
 	names(freqRat)<-"freqRat"
-	if(freqRat>1){message("Warning: Frequency distribution of input range data appears to violate model assumptions, producing an impossible freqRat greater than 1")}
+	if(is.nan(freqRat)){
+		message("Warning: Frequency distribution of input range data appears to violate model assumptions, producing a freqRat of zero over zero (NA)")
+	}else{
+		if(freqRat>1){
+			message("Warning: Frequency distribution of input range data appears to violate model assumptions, producing an impossible freqRat greater than 1")
+			}
+		}
 	#calculate extinction rate (rate of lineages going extinct per lineage, per interval)
 	if(calcExtinction){
 		logSD<-log(sumDur[-1])

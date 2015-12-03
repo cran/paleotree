@@ -49,11 +49,13 @@
 #' 
 #' The sampling rate used by cal3 methods is the instantaneous sampling rate,
 #' as estimated by various other function in the paleotree package. See
-#' getSampRateCont for more details. If you have the per-time unit sampling
+#' \code{\link{make_durationFreqCont}} for more details.
+#' If you have the per-time unit sampling
 #' probability ('R' as opposed to 'r') look at the sampling parameter
-#' conversion functions also included in this package. Most datasets will
-#' probably use getSampProbDisc and sProb2sRate prior to using this function,
-#' as shown in an example below.
+#' conversion functions also included in this package
+#' (e.g. \code{\link{sProb2sRate}}). Most datasets will probably use
+#' \code{\link{make_durationFreqDisc}} and \code{sProb2sRate}
+#' prior to using this function, as shown in an example below.
 #' 
 #' The branching and extinction rate are the 'per-capita' instantaneous
 #' origination/extinction rates for the taxic level of the tips of the tree
@@ -71,24 +73,24 @@
 #' what is done for the examples below.) A third option for calculating all
 #' three rates simultaneously would be to apply likelihood methods developed by
 #' Foote (2002) to forward and reverse survivorship curves. Note that only one
-#' of these three suggested methods is implemented in paleotree: estimating the
+#' of these three suggested methods is implemented in \code{paleotree}: estimating the
 #' sampling and extinction rates from the distribution of taxon durations via
-#' getSampRateCont and getSampProbDisc.
+#' \code{make_durationFreqCont} and \code{make_durationFreqDisc}.
 #' 
 #' By default, the cal3 functions will consider that ancestor-descendant
 #' relationships may exist among the given taxa, under a budding cladogenetic
 #' or anagenetic modes. Which tips are designated as which is given by two
 #' additional elements added to the output tree, $budd.tips (taxa designated as
 #' ancestors via budding cladogenesis) and $anag.tips (taxa designated as
-#' ancestors via anagenesis). This can be turned off by setting anc.wt=0. As
+#' ancestors via anagenesis). This can be turned off by setting \code{anc.wt = 0}. As
 #' this function may infer anagenetic relationships during time-scaling, this
 #' can create zero-length terminal branches in the output. Use
 #' \code{\link{dropZLB}} to get rid of these before doing analyses of lineage
 #' diversification.
 #' 
-#' Unlike timePaleoPhy, cal3 methods will always resolve polytomies. In
+#' Unlike \code{timePaleoPhy}, cal3 methods will always resolve polytomies. In
 #' general, this is done using the rate calibrated algorithm, although if
-#' argument randres=TRUE, polytomies will be randomly resolved with uniform
+#' argument \code{randres = TRUE}, polytomies will be randomly resolved with uniform
 #' probability, ala multi2di from ape. Also, cal3 will always add the terminal
 #' ranges of taxa. However, because of the ability to infer potential
 #' ancestor-descendant relationships, the length of terminal branches may be
@@ -100,28 +102,28 @@
 #' with their consensus trees, as opposed to using the set of most parsimonious
 #' trees. Comparing the results of these two approaches may be very revealing.
 #' 
-#' Like timePaleoPhy, cal3TimePaleoPhy is designed for direct application to datasets 
+#' Like \code{timePaleoPhy}, \code{cal3TimePaleoPhy} is designed for direct application to datasets 
 #' where taxon first and last appearances are precisely known in continuous time, with 
 #' no stratigraphic uncertainty. This is an uncommon form of data to have from the fossil record, 
 #' although not an impossible form (micropaleontologists often have very precise 
-#' range charts, for example). This means that most users SHOULD NOT use cal3TimePaleoPhy directly, 
+#' range charts, for example). This means that most users \emph{should not} use \code{cal3TimePaleoPhy} directly, 
 #' unless they have written their own code to deal with stratigraphic uncertainty. For
 #' some groups, the more typical 'first' and 'last' dates represent the minimum
 #' and maximum absolute ages for the fossil collections that a taxon is known
 #' is known from. Presumably, the first and last appearances of that taxon in
 #' the fossil record is at unknown dates within these bounds. These should not
-#' be mistaken as the FADs and LADs desired by cal3TimePaleoPhy, as cal3TimePaleoPhy 
+#' be mistaken as the FADs and LADs desired by \code{cal3TimePaleoPhy}, as \code{cal3TimePaleoPhy} 
 #' will use the earliest dates provided to calibrate node ages, which is either
 #' an overly conservative approach to time-scaling or fairly nonsensical.
 #'
-#' Alternatively to using cal3TimePaleoPhy, bin_cal3TimePaleoPhy is a wrapper of 
-#' cal3TimePaleoPhy which produces timescaled trees for datasets which only have 
+#' Alternatively to using \code{cal3TimePaleoPhy}, \code{bin_cal3TimePaleoPhy} is a wrapper of 
+#' \code{cal3TimePaleoPhy} which produces timescaled trees for datasets which only have 
 #' interval data available. For each output tree, taxon first and last appearance 
 #' dates are placed within their listed intervals under a uniform distribution. 
 #' Thus, a large sample of time-scaled trees will approximate the uncertainty in 
 #' the actual timing of the FADs and LADs. 
 #'
-#' The input timeList object can have overlapping (i.e. non-sequential) intervals,
+#' The input \code{timeList} object can have overlapping (i.e. non-sequential) intervals,
 #' and intervals of uneven size. Taxa alive in the modern should be listed as last 
 #' occurring in a time interval that begins at time 0 and ends at time 0. If taxa 
 #' occur only in single collections (i.e. their first and last appearance in the 
@@ -131,15 +133,15 @@
 #' in time, with some positive duration. The sites matrix can be used to force
 #' only a portion of taxa to have simultaneous first and last appearances.
 #'
-#' By setting the argument nonstoch.bin to TRUE in bin_cal3TimePaleoPhy, the
+#' By setting the argument \code{nonstoch.bin} to \code{TRUE} in \code{bin_cal3TimePaleoPhy}, the
 #' dates are NOT stochastically pulled from uniform bins but instead FADs are
 #' assigned to the earliest time of whichever interval they were placed in and
 #' LADs are placed at the most recent time in their placed interval. This
 #' option may be useful for plotting. The sites argument becomes arbitrary if
-#' nonstoch.bin is TRUE.
+#' nonstoch.bin is \code{TRUE}.
 #' 
-#' If timeData or the elements of timeList are actually data.frames (as output
-#' by read.csv or read.table), these will be coerced to a matrix.
+#' If \code{timeData} or the elements of \code{timeList} are actually data frames (as output
+#' by \code{read.csv} or \code{read.table}), these will be coerced to a matrix.
 #' 
 #' A tutorial for applying the time-scaling functions in paleotree,
 #' particularly the cal3 method, along with an example using real (graptolite)
@@ -302,7 +304,7 @@
 #' @author David W. Bapst
 
 #' @seealso \code{\link{timePaleoPhy}}, \code{\link{binTimeData}},
-#' \code{\link{getSampRateCont}}, \code{\link{multi2di}}
+#' \code{\link{make_durationFreqCont}}, \code{sProb2sRate}, \code{\link{multi2di}}
 
 #' @references 
 #' Bapst, D. W. 2013. A stochastic rate-calibrated method for time-scaling
@@ -328,21 +330,25 @@
 
 #' @examples
 #' 
-#' #Simulate some fossil ranges with simFossilTaxa
+#' #Simulate some fossil ranges with simFossilRecord
 #' set.seed(444)
-#' taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
+#' record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
+#'	nTotalTaxa=c(30,40), nExtant=0)
+#' taxa<-fossilRecord2fossilTaxa(record)
 #' #simulate a fossil record with imperfect sampling with sampleRanges
 #' rangesCont <- sampleRanges(taxa,r=0.5)
 #' #let's use taxa2cladogram to get the 'ideal' cladogram of the taxa
 #' cladogram <- taxa2cladogram(taxa,plot=TRUE)
 #' #this library allows one to use rate calibrated type time-scaling methods (Bapst, in prep.)
 #' #to use these, we need an estimate of the sampling rate (we set it to 0.5 above)
-#' SRres <- getSampRateCont(rangesCont)
-#' sRate <- SRres[[2]][2]
+#' likFun<-make_durationFreqCont(rangesCont)
+#' srRes<-optim(parInit(likFun),likFun,lower=parLower(likFun),upper=parUpper(likFun),
+#'       method="L-BFGS-B",control=list(maxit=1000000))
+#' sRate <- srRes[[1]][2]
 #' # we also need extinction rate and branching rate
 #'    # we can get extRate from getSampRateCont too
 #' #we'll assume extRate=brRate (ala Foote et al., 1999); may not always be a good assumption
-#' divRate<-SRres[[2]][1]
+#' divRate<-srRes[[1]][1]
 #' #now let's try cal3TimePaleoPhy, which timescales using a sampling rate to calibrate
 #' #This can also resolve polytomies based on sampling rates, with some stochastic decisions
 #' ttree <- cal3TimePaleoPhy(cladogram,rangesCont,brRate=divRate,extRate=divRate,
@@ -400,7 +406,9 @@
 #' 
 #' #example with time in discrete intervals
 #' set.seed(444)
-#' taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
+#' record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
+#'	nTotalTaxa=c(30,40), nExtant=0)
+#' taxa<-fossilRecord2fossilTaxa(record)
 #' #simulate a fossil record with imperfect sampling with sampleRanges()
 #' rangesCont <- sampleRanges(taxa,r=0.5)
 #' #let's use taxa2cladogram to get the 'ideal' cladogram of the taxa
@@ -408,14 +416,16 @@
 #' #Now let's use binTimeData to bin in intervals of 1 time unit
 #' rangesDisc <- binTimeData(rangesCont,int.length=1)
 #' #we can do something very similar for the discrete time data (can be a bit slow)
-#' SPres <- getSampProbDisc(rangesDisc)
-#' sProb <- SPres[[2]][2]
+#' likFun<-make_durationFreqDisc(rangesDisc)
+#' spRes<-optim(parInit(likFun),likFun,lower=parLower(likFun),upper=parUpper(likFun),
+#'       method="L-BFGS-B",control=list(maxit=1000000))
+#' sProb <- spRes[[1]][2]
 #' #but that's the sampling PROBABILITY per bin, not the instantaneous rate of change
 #' #we can use sProb2sRate() to get the rate. We'll need to also tell it the int.length
 #' sRate1 <- sProb2sRate(sProb,int.length=1)
 #' #we also need extinction rate and branching rate (see above)
 #'     #need to divide by int.length...
-#' divRate<-SPres[[2]][1]/1
+#' divRate<-spRes[[1]][1]/1
 #' #estimates that r=0.3... kind of low (simulated sampling rate is 0.5)
 #' #Note: for real data, you may need to use an average int.length (no constant length)
 #' ttree <- bin_cal3TimePaleoPhy(cladogram,rangesDisc,brRate=divRate,extRate=divRate,
@@ -455,7 +465,9 @@ cal3TimePaleoPhy<-function(tree, timeData, brRate, extRate, sampRate,
 	#FAD.only=FALSE; adj.obs.wt=TRUE; root.max=200; step.size=0.1;
 	#randres=FALSE; noisyDrop=TRUE; plot=FALSE
 	#
-	#taxa<-simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=50,maxtaxa=100,maxtime=1000,maxExtant=0)
+	# record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
+	#	nTotalTaxa=c(50,100), nExtant=0)
+	# taxa<-fossilRecord2fossilTaxa(record)
 	#cladogram<-taxa2cladogram(taxa);timeData<-sampleRanges(taxa,r=0.1)
 	#
 	###trying to see if adj.wts works
@@ -831,15 +843,15 @@ cal3TimePaleoPhy<-function(tree, timeData, brRate, extRate, sampRate,
 		#now add root.time: because NO TIPS ARE DROPPED (due to anagenesis) can calculate this now
 			#must be calculated on LADs because the terminal ranges are added to the TREE!!!
 			#should be time of earliest LAD + distance of root from earliest tip
-		ktree$root.time<-max(timeData1[ktree$tip.label,2])+min(dist.nodes(ktree)[1:Ntip(ktree),Ntip(ktree)+1])	
+		ktree$root.time<-max(timeData1[ktree$tip.label,2])+min(node.depth.edgelength(ktree)[1:Ntip(ktree)])	
 		names(ktree$edge.length)<-names(ktree$tip.label)<-names(ktree$budd.tips)<-names(ktree$anag.tips)<-NULL
 		#stuff for checking if things are correct
 		tipdiffs<-cbind(	diff(sort(-timeData1[,2])),
-					diff(sort(dist.nodes(ktree)[1:Ntip(ktree),Ntip(ktree)+1])),
-					diff(sort(-timeData1[,2]))-diff(sort(dist.nodes(ktree)[1:Ntip(ktree),Ntip(ktree)+1])))	
+					diff(sort(node.depth.edgelength(ktree)[1:Ntip(ktree)])),
+					diff(sort(-timeData1[,2]))-diff(sort(node.depth.edgelength(ktree)[1:Ntip(ktree)])))	
 		test1<-all(tipdiffs[,3]<tolerance)
 		test2<-identical(names(sort(-timeData1[,2])),
-				ktree$tip.label[order(dist.nodes(ktree)[1:Ntip(ktree),Ntip(ktree)+1])])
+				ktree$tip.label[order(node.depth.edgelength(ktree)[1:Ntip(ktree)])])
 		if(length(unique(timeData1[,2]))<Ntip(tree)){
 			test2<-TRUE}	#test 2 does not work if any LADS are same
 		if(all(c(test1,test2))){

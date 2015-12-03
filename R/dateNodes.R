@@ -43,7 +43,9 @@
 #' @examples
 #' #let's simulate some example data
 #' set.seed(444)
-#' taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
+#' record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
+#'	nTotalTaxa=c(30,40), nExtant=0)
+#' taxa<-fossilRecord2fossilTaxa(record)
 #' #get the true time-sclaed tree
 #' tree1 <- taxa2phylo(taxa)
 #'
@@ -59,14 +61,14 @@
 
 #' @export
 dateNodes<-function(tree,rootAge=tree$root.time,labelDates=FALSE,tolerance=0.001){
-	#based on date.nodes by Graeme Lloyd, but using dist.nodes
+	#based on date.nodes by Graeme Lloyd, but using node.depth.edgelength
 	#checks
 	if(!inherits(tree,"phylo")){
 		stop("tree must be of class 'phylo'")
 		}
 	#test that it has edge lengths
 	if(is.null(tree$edge.length)){stop("tree does not appear to have edge lengths?")}
-	nodeRelTimes<-dist.nodes(tree)[,Ntip(tree)+1]
+	nodeRelTimes<-node.depth.edgelength(tree)
 	if(is.null(rootAge)){
 		rootAge <- max(nodeRelTimes)
 		message("Root age not given; treating tree as if latest tip was at modern day (time=0)")}

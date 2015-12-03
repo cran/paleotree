@@ -10,7 +10,7 @@
 #' These functions exist to manipulate \code{fossilRecordSimulation} objects
 #' output from \code{simFossilRecord}, particularly so that they can be interfaced
 #' with functions in library \code{paleotree} in the same way that output from the
-#' legacy simulation function \code{simFossilTaxa} was used.
+#' deprecated 'legacy' simulation function \code{simFossilTaxa} was used.
 #'
 #' \code{timeSliceFossilRecord} takes a given \code{fossilRecordSimulation} object
 #' and 'slices' the data to remove any events that occur after the given
@@ -18,20 +18,20 @@
 #' are now listed as extant.
 #'
 #' \code{fossilRecord2fossilTaxa} converts a \code{fossilRecordSimulation} object
-#' to the flat table format of taxon data as was originally output by \code{simFossilTaxa}
-#' simulations, and can be taken as input by a number of \code{paleotree} functions such as
+#' to the flat table format of taxon data as was originally output by deprecated function 
+#' \code{simFossilTaxa}, and can be taken as input by a number of \code{paleotree} functions such as
 #' \code{sampleRanges},\code{taxa2phylo} and \code{taxa2cladogram}.
 #'
 #' \code{fossilRecord2fossilRanges} converts a \code{fossilRecordSimulation} object
 #' to the flat table format of observed taxon ranges, as is typically output by processing
-#' simulation output (particularly from \code{simFossilTaxa}) with \code{paleotree} function
+#' \code{simFossilRecord} simulation output with \code{paleotree} function
 #' \code{sampleRanges}.
 #'
 
 #' @param fossilRecord A list object output by \code{simFossilRecord}, often composed
 #' of multiple elements, each of which is data for 'one taxon', with the first
 #' element being a distinctive six-element vector composed of numbers, corresponding
-#' to the six numbers in a \code{simFossilTaxa} matrix.
+#' to the six fields in tables output by the deprecated function \code{simFossilTaxa}.
 
 #' @param sliceTime The date to slice the \code{simFossilRecord} output at, given
 #' in time-units before the modern, on the same scale as the input \code{fossilRecord}.
@@ -228,11 +228,12 @@ fossilRecord2fossilRanges<-function(fossilRecord, merge.cryptic=TRUE, ranges.onl
 		# merge.cryptic = TRUE or FALSE
 		# ranges.only or sampling times?
 	# CHECKS
+	# browser()
 	checkResult<-checkFossilRecord(fossilRecord)
 	#
 	sampData<-lapply(fossilRecord,function(x) x[[2]]) 
 	#get sampOcc : separate out the sampling events
-	sampOcc<-sapply(fossilRecord,function(x) x[[2]])
+	sampOcc<-lapply(fossilRecord,function(x) x[[2]])
 	names(sampOcc)<-names(fossilRecord)
 	#merge cryptic taxa
 	if(merge.cryptic){
@@ -249,7 +250,7 @@ fossilRecord2fossilRanges<-function(fossilRecord, merge.cryptic=TRUE, ranges.onl
 					stop("sampling data for taxa is not coercing correctly to a vector")}
 			}else{
 				#if its a cryptic taxon that didn't found the complex, erase its data
-				sampOcc<-NA
+				sampOcc[[i]]<-NA
 				}
 			}
 		}

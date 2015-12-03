@@ -70,8 +70,8 @@
 #' @aliases taxicDivCont taxicDivDisc phyloDiv
 
 #' @param timeData Two-column matrix giving the per-taxon first and last
-#' appearances in absolute time. The matrices output by simFossilTaxa can also
-#' be supplied to taxicDivCont.
+#' appearances in absolute time. The simulated data tables output by \code{fossilRecord2fossilTaxa}
+#' following simulation with \code{simFossilRecord} can also be supplied to \code{taxicDivCont}.
 
 #' @param timeList A list composed of two matrices, giving interval start and end 
 #' dates and taxon first and last occurrences within those intervals. See details.
@@ -90,7 +90,8 @@
 #' @param plotLogRich If TRUE, taxic diversity is plotted on log scale.
 
 #' @param drop.cryptic If TRUE, cryptic taxa are merged to form one taxon for
-#' estimating taxon curves. Only works for objects from simFossilTaxa.
+#' estimating taxon curves. Only works for objects from \code{simFossilRecord}
+#' via \code{fossilRecord2fossilTaxa}.
 
 #' @param drop.singletons If TRUE, taxa confined to a single interval will be
 #' dropped prior to the diversity curve calculation. This is sometimes done if
@@ -137,7 +138,9 @@
 #'
 #' #simulation examples
 #' set.seed(444)
-#' taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
+#' record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
+#'	nTotalTaxa=c(30,40), nExtant=0)
+#' taxa<-fossilRecord2fossilTaxa(record)
 #' #let's see what the 'true' diversity curve looks like in this case
 #' #plot the FADs and LADs with taxicDivCont()
 #' taxicDivCont(taxa)
@@ -167,7 +170,9 @@
 #'  #to simulate doing molecular-phylogeny studies 
 #'  #of diversification...in the past
 #' set.seed(444)
-#' taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
+#' record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
+#'	nTotalTaxa=c(30,40), nExtant=0)
+#' taxa<-fossilRecord2fossilTaxa(record)
 #' taxicDivCont(taxa)
 #' #that's the whole diversity curve
 #' #with timeSliceTree we could look at the lineage accumulation curve 
@@ -183,7 +188,9 @@
 #' 
 #' #an example of a 'spiky' diversity curve and why split.int is a good thing
 #' set.seed(444)
-#' taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
+#' record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
+#'	nTotalTaxa=c(30,40), nExtant=0)
+#' taxa<-fossilRecord2fossilTaxa(record)
 #' taxaDiv <- taxicDivCont(taxa)
 #' #simulate a fossil record with imperfect sampling with sampleRanges()
 #' rangesCont <- sampleRanges(taxa,r=0.5)
@@ -368,10 +375,10 @@ phyloDiv<-function(tree,int.length=0.1,int.times=NULL,plot=TRUE,plotLogRich=FALS
 	savetree<-ttree
 	if(!is.binary.tree(ttree) | !is.rooted(tree)){ttree<-multi2di(ttree)}
 	if(is.null(ttree$root.time)){
-		ntime<-dist.nodes(ttree)[,Ntip(ttree)+1]
+		ntime<-node.depth.edgelength(ttree)
 		ntime<-max(ntime)-ntime
 	}else{
-		ntime<-dist.nodes(ttree)[,Ntip(ttree)+1]
+		ntime<-node.depth.edgelength(ttree)
 		ntime<-ttree$root.time-ntime
 		ntime<-round(ntime,6)
 		if(min(ntime)<0){stop("tree$root.time is less than total depth of tree!")}

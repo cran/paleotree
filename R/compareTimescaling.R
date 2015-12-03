@@ -72,7 +72,9 @@
 #' @examples
 #' 
 #' set.seed(444)
-#' taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
+#' record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
+#'	nTotalTaxa=c(30,40), nExtant=0)
+#' taxa<-fossilRecord2fossilTaxa(record)
 #' #get the true tree
 #' tree1 <- taxa2phylo(taxa)
 #' #simulate a fossil record with imperfect sampling with sampleRanges()
@@ -136,12 +138,12 @@ compareNodeAges<-function(tree1,tree2,dropUnshared=FALSE){
 		matches1<-which(!is.na(match(tree1$tip.label,tree2$tip.label)))[1]
 		if(length(matches1)<1){stop(paste("No shared taxa between tree2 and tree1[[",i,"]]!"))}
 		tipmatch<-tree1$tip.label[matches1]
-		mtimeA<-dist.nodes(tree1)[matches1,Ntip(tree1)+1]
-		mtimeB<-dist.nodes(tree2)[match(tipmatch,tree2$tip.label),Ntip(tree2)+1]
+		mtimeA<-node.depth.edgelength(tree1)[matches1]
+		mtimeB<-node.depth.edgelength(tree2)[match(tipmatch,tree2$tip.label)]
 		tree1<-drop.tip(tree1,tree1$tip.label[is.na(match(tree1$tip.label,tree2$tip.label))])
 		tree2<-drop.tip(tree2,tree2$tip.label[is.na(match(tree2$tip.label,tree1$tip.label))])
-		ntime1<-dist.nodes(tree1)[,Ntip(tree1)+1]
-		ntime2<-dist.nodes(tree2)[,Ntip(tree2)+1]
+		ntime1<-node.depth.edgelength(tree1)
+		ntime2<-node.depth.edgelength(tree2)
 		mtime1<-ntime1[match(tipmatch,tree1$tip.label)]
 		mtime2<-ntime2[match(tipmatch,tree2$tip.label)]
 		if(!is.null(tree1$root.time)){

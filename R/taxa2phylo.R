@@ -31,7 +31,7 @@
 #' decreasing, i.e. the present day is zero.
 #' 
 #' @param taxad A five-column matrix of taxonomic data, as output by
-#' simFossilTaxa
+#' \code{fossilRecord2fossilTaxa} via simulations produced using \code{simFossilRecord}
 
 #' @param obs_time A vector of per-taxon times of observation which must be in
 #' the same order of taxa as in the object taxad; if NULL, the LADs (column 4)
@@ -43,8 +43,9 @@
 #' of class phylo. This function will output trees with the element $root.time,
 #' which is the time of the root divergence in absolute time.
 #' 
-#' The tip labels are the rownames from the simulation input; see simFossiltaxa
-#' documentation for details.
+#' The tip labels are the rownames from the simulation input; see documentation
+#' for \code{simFossilRecord} and \code{fossilRecord2fossilTaxa} documentation for details.
+
 #' @note DO NOT use this function to time-scale a real tree for a real dataset.
 #' It assumes you know the divergence/speciation times of the branching nodes
 #' and relationships perfectly, which is almost impossible given the
@@ -55,16 +56,22 @@
 #' the 'true' history, such as for simulating trait evolution along
 #' phylogenetic branches.
 #' 
-#' Unlike taxa2cladogram, this function does not merge cryptic taxa in output
-#' from simFossilTaxa and I do not offer an option to secondarily drop them.
+#' Unlike \code{taxa2cladogram}, this function does not merge cryptic taxa in output
+#' from \code{simFossilRecord} (via \code{fossilRecord2fossilTaxa})
+#' and I do not offer an option to secondarily drop them.
 #' The tip labels should provide the necessary information for users to drop
-#' such taxa, however. See simFossilTaxa.
+#' such taxa, however. See \link{simFossilRecord}.
+
 #' @author David W. Bapst
-#' @seealso \code{\link{simFossilTaxa}}, \code{\link{taxa2cladogram}}
+
+#' @seealso \code{\link{simFossilRecord}}, \code{\link{taxa2cladogram}}, \link{fossilRecord2fossilTaxa}
+
 #' @examples
 #' 
 #' set.seed(444)
-#' taxa<-simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
+#' record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
+#'  	nTotalTaxa=c(30,40), nExtant=0)
+#' taxa<-fossilRecord2fossilTaxa(record)
 #' #let's use taxa2cladogram to get the 'ideal' cladogram of the taxa
 #' tree<-taxa2phylo(taxa)
 #' phyloDiv(tree)
@@ -76,8 +83,10 @@
 #' #note that it drops taxa which were never sampled!
 #' 
 #' #testing with cryptic speciation
-#' taxaCrypt<-simFossilTaxa(p=0.1,q=0.1,prop.cryptic=0.5,nruns=1,mintaxa=10,maxtaxa=20,
-#'     maxtime=1000,maxExtant=0)
+#' set.seed(444)
+#' record<-simFossilRecord(p=0.1, q=0.1, prop.cryptic=0.5, nruns=1,
+#'  	nTotalTaxa=c(30,40), nExtant=0, count.cryptic=TRUE)
+#' taxaCrypt<-fossilRecord2fossilTaxa(record)
 #' treeCrypt<-taxa2phylo(taxaCrypt)
 #' layout(1)
 #' plot(treeCrypt)
@@ -296,7 +305,12 @@ taxa2phylo<-function(taxad,obs_time=NULL,plot=FALSE){
 	#now, root.time should be the time of the first obs PLUS the distance
 		# from the earliest tip to the root
 	first_obs_time<-max(taxad[,3:4])-min(obs,na.rm=TRUE)
-	tree$root.time<-first_obs_time+min(dist.nodes(tree)[1:Ntip(tree),Ntip(tree)+1])
+	tree$root.time<-first_obs_time+min(node.depth.edgelength(tree)[1:Ntip(tree)])
+	#make it so that root.time-max node dist from root must be below zero
+	rootOffset<-tree$root.time-max(node.depth.edgelength(tree))
+	if(rootOffset<0){
+		tree$root.time<-tree$root.time-rootOffset
+		}
 	#plot
 	if(plot){
 		plot(ladderize(tree),show.tip.label=FALSE)

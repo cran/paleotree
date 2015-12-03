@@ -53,7 +53,8 @@
 #' 
 #' Note that the modeling of sampling in this function is independent and
 #' secondary of the actual simulation of the ranges, which are (generally)
-#' produced by the models of simFossilTaxa. Thus, 'hat-shaped range
+#' produced by the models of simFossilRecord with argument \code{r}
+#' (sampling rate) not set. Thus, 'hat-shaped range
 #' distributions' are only contained within single morphotaxa; they do not
 #' cross multiple morphotaxa in the case of anagenesis. Cryptic taxa each have
 #' their own hat and do not share a single hat; by default the ranges of
@@ -109,8 +110,8 @@
 
 
 #' @param taxad A two-column matrix of per-taxon ranges. The five-column matrix
-#' output of simFossilTaxa can also be supplied, which will be common in
-#' simulation usages.
+#' output of \code{simFossilRecord}, post transformation with \code{fossilRecord2fossilTaxa}
+#' can also be supplied, which will be common in simulation usages.
 
 #' @param r Instantaneous average sampling rate per lineage time units; given
 #' as a vector of length one or length equal to the number of taxa
@@ -154,7 +155,7 @@
 #' corresponding to a different taxon in the input. Elements that are NA are
 #' unsampled taxa.
 #' @author David W. Bapst
-#' @seealso \code{\link{simFossilTaxa}}, \code{\link{binTimeData}}
+#' @seealso \code{\link{simFossilRecord}}, \code{\link{binTimeData}}
 #' @references Foote, M. 1997 Estimating Taxonomic Durations and Preservation
 #' Probability. \emph{Paleobiology} \bold{23}(3):278--300.
 #' 
@@ -164,7 +165,9 @@
 #' @examples
 #' 
 #' set.seed(444)
-#' taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=20,maxtaxa=30,maxtime=1000,maxExtant=0)
+#' record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
+#'	nTotalTaxa=c(30,40), nExtant=0)
+#' taxa<-fossilRecord2fossilTaxa(record)
 #' layout(1:2)
 #' #let's see what the 'true' diversity curve looks like in this case
 #' taxicDivCont(taxa)
@@ -193,14 +196,17 @@
 #' 
 #' #testing with cryptic speciation
 #' layout(1)
-#' taxaCrypt <- simFossilTaxa(p=0.1,q=0.1,prop.cryptic=0.5,nruns=1,mintaxa=20,maxtaxa=30,
-#'   maxtime=1000,maxExtant=0,plot=TRUE)
+#' recordCrypt<-simFossilRecord(p=0.1, q=0.1, prop.cryptic=0.5, nruns=1,
+#'	nTotalTaxa=c(20,30), nExtant=0)
+#' taxaCrypt<-fossilRecord2fossilTaxa(recordCrypt)
 #' rangesCrypt <- sampleRanges(taxaCrypt,r=0.5)
 #' taxicDivCont(rangesCrypt)
 #' 
 #' #an example of hat-shaped models (beta distributions) when there are live taxa
 #' set.seed(444)
-#' taxaLive<-simFossilTaxa(p=0.1,q=0.05,mintaxa=5,plot=FALSE)
+#' recordLive<-simFossilRecord(p=0.1, q=0.05, nruns=1,
+#'	nTotalTaxa=c(5,100),nExtant=c(10,100))
+#' taxaLive<-fossilRecord2fossilTaxa(recordLive)
 #' #with end-points of live taxa at random points in the hat
 #' rangesLive<-sampleRanges(taxaLive,r=0.1,alpha=4,beta=4,randLiveHat=TRUE,plot=TRUE)
 #' #with all taxa end-points at end-point of hat

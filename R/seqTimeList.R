@@ -52,16 +52,18 @@
 #' @author David W. Bapst
 
 #' @examples
-#' #Simulate some fossil ranges with simFossilTaxa
+#' #Simulate some fossil ranges with simFossilRecord
 #' set.seed(444)
-#' taxa <- simFossilTaxa(p=0.1,q=0.1,nruns=1,mintaxa=60,maxtaxa=80,maxtime=1000,maxExtant=0)
+#' record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
+#'	nTotalTaxa=c(60,80), nExtant=0)
+#' taxa<-fossilRecord2fossilTaxa(record)
 #' #simulate a fossil record with imperfect sampling with sampleRanges()
 #' rangesCont <- sampleRanges(taxa,r=0.1)
 #' 
 #' #Now let's use binTimeData to get ranges in discrete overlapping intervals
 #'     #via pre-set intervals input
-#' presetIntervals <- cbind(c(1000,995,990,980,970,960,950,940,930,905),
-#'     c(995,989,960,975,960,950,930,930,900,885))
+#' presetIntervals <- cbind(c(1000,995,990,980,970,975,960,950,940,930,900,890,888,879,875),
+#'   c(995,989,960,975,960,950,930,930,930,900,895,888,880,875,870))
 #' rangesDisc1 <- binTimeData(rangesCont,int.times=presetIntervals)
 #' 
 #' seqLists<-seqTimeList(rangesDisc1,nruns=10)
@@ -75,7 +77,7 @@
 #' 
 #' freqRat(seqLists$timeLists[[4]],plot=TRUE)
 #' 
-#' #too few taxa of two orthree interval durations for the ratio to work properly
+#' #too few taxa of two or three interval durations for the ratio to work properly
 #'     #perhaps ignore these estimates
 #' 
 #' #with weighted selection of intervals
