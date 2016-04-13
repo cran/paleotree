@@ -1,24 +1,24 @@
-#' Three Rate Calibrated Timescaling of Paleo-Phylogenies
+#' Three Rate Calibrated 'a posteriori' Time-Scaling of Paleo-Phylogenies
 #' 
-#' Timescales an unscaled cladogram of fossil taxa, using information on their
+#' Time-scales an unscaled cladogram of fossil taxa, using information on their
 #' ranges and estimates of the instantaneous rates of branching, extinction and
-#' sampling. The output is a sample of timescaled trees, as resulting from a
+#' sampling. The output is a sample of a posteriori time-scaled trees, as resulting from a
 #' stochastic algorithm which samples observed gaps in the fossil record with
 #' weights calculated based on the input rate estimates. This function also
 #' uses the three-rate calibrated time-scaling algorithm to stochastically
 #' resolve polytomies and infer potential ancestor-descendant relationships,
 #' simultaneous with the time-scaling treatment.
 #' 
-#' @details The three-rate calibrated ("cal3") algorithm time-scales trees by
+#' @details The three-rate calibrated ("cal3") algorithm time-scales trees a posteriori by
 #' stochastically picking node divergence times relative to a probability
 #' distribution of expected waiting times between speciation and first
 #' appearance in the fossil record. This algorithm is extended to apply to
 #' resolving polytomies and designating possible ancestor-descendant
 #' relationships. The full details of this method, its sister method the
-#' sampling-rate-calibrated timescaling method and the details of the algorithm
+#' sampling-rate-calibrated time-scaling method and the details of the algorithm
 #' will be given in Bapst (in prep for Paleobiology).
 #' 
-#' Briefly, cal3 timescaling is done by examining each node separately, moving
+#' Briefly, cal3 time-scaling is done by examining each node separately, moving
 #' from the root upwards. Ages of branching nodes are constrained below by the
 #' ages of the nodes below them (except the root; hence the need for the
 #' root.max argument) and constrained above by the first appearance dates
@@ -59,7 +59,7 @@
 #' 
 #' The branching and extinction rate are the 'per-capita' instantaneous
 #' origination/extinction rates for the taxic level of the tips of the tree
-#' being time-scaled. Any user of the cal3 timescaling method has multiple
+#' being time-scaled. Any user of the cal3 time-scaling method has multiple
 #' options for estimating these rates. One is to separately calculate the
 #' per-capita rates (following the equations in Foote, 2001) across multiple
 #' intervals and take the mean for each rate. A second, less preferred option,
@@ -117,7 +117,7 @@
 #' an overly conservative approach to time-scaling or fairly nonsensical.
 #'
 #' Alternatively to using \code{cal3TimePaleoPhy}, \code{bin_cal3TimePaleoPhy} is a wrapper of 
-#' \code{cal3TimePaleoPhy} which produces timescaled trees for datasets which only have 
+#' \code{cal3TimePaleoPhy} which produces time-scaled trees for datasets which only have 
 #' interval data available. For each output tree, taxon first and last appearance 
 #' dates are placed within their listed intervals under a uniform distribution. 
 #' Thus, a large sample of time-scaled trees will approximate the uncertainty in 
@@ -252,8 +252,9 @@
 #' rather than using the cal3 algorithm to weight the resolution of polytomies 
 #' relative to sampling in the fossil record?
 
-#' @param plot If true, plots the input, "basic" timescaled and output
-#' cal3-timescaled phylogenies
+#' @param plot If true, plots the input, "basic" time-scaled phylogeny (an
+#' intermediary step in the algorithm) and the output
+#' cal3 time-scaled phylogeny.
 
 #' @param tolerance Acceptable amount of shift in tip dates from dates listed
 #' in \code{timeData}. Shifts outside of the range of \code{tolerance} will
@@ -291,7 +292,7 @@
 #' rate-calibrated time-scaling methods. These do not use traditional
 #' optimization methods, but instead draw divergence times from a distribution
 #' defined by the probability of intervals of unobserved evolutionary history.
-#' This means analyses MUST be done over many cal3-timescaled trees for
+#' This means analyses MUST be done over many cal3 time-scaled trees for
 #' analytical rigor! No one tree is correct.
 #'
 #' Similarly, please account for stratigraphic uncertainty in your analysis.
@@ -349,7 +350,7 @@
 #'    # we can get extRate from getSampRateCont too
 #' #we'll assume extRate=brRate (ala Foote et al., 1999); may not always be a good assumption
 #' divRate<-srRes[[1]][1]
-#' #now let's try cal3TimePaleoPhy, which timescales using a sampling rate to calibrate
+#' #now let's try cal3TimePaleoPhy, which time-scales using a sampling rate to calibrate
 #' #This can also resolve polytomies based on sampling rates, with some stochastic decisions
 #' ttree <- cal3TimePaleoPhy(cladogram,rangesCont,brRate=divRate,extRate=divRate,
 #'     sampRate=sRate,ntrees=1,plot=TRUE)
@@ -386,7 +387,8 @@
 #' parOrig <- par(no.readonly=TRUE)
 #' par(mar=c(0,0,0,0))
 #' for(i in 1:9){plot(ladderize(ttrees[[i]]),show.tip.label=FALSE)}
-#' layout(1); par(parOrig)
+#' layout(1)
+#' par(parOrig)
 #' #they are all a bit different!
 #' 
 #' #can plot the median diversity curve with multiDiv
@@ -435,6 +437,14 @@
 #' ttree1 <- bin_cal3TimePaleoPhy(cladogram,rangesDisc,brRate=divRate,extRate=divRate,
 #'     sampRate=sRate1,ntrees=1,nonstoch.bin=TRUE,plot=TRUE)
 #' phyloDiv(ttree1)
+#'
+#' # testing node.mins in bin_cal3TimePaleoPhy
+#' ttree <- bin_cal3TimePaleoPhy(cladoDrop,rangesDisc,brRate=divRate,extRate=divRate,
+#'     sampRate=sRate1,ntrees=1,node.mins=nodeDates,plot=TRUE)
+#' # with randres=TRUE
+#' ttree <- bin_cal3TimePaleoPhy(cladoDrop,rangesDisc,brRate=divRate,extRate=divRate,
+#'     sampRate=sRate1,ntrees=1,randres=TRUE,node.mins=nodeDates,plot=TRUE)
+#' 
 #' 
 #' #example with multiple values of anc.wt
 #' ancWt <- sample(0:1,nrow(rangesDisc[[2]]),replace=TRUE)
@@ -541,9 +551,15 @@ cal3TimePaleoPhy<-function(tree, timeData, brRate, extRate, sampRate,
 	Ps<-sapply(tree$tip.label,function(x) pqr2Ps(brRate[x],extRate[x],sampRate[x]))
 	names(Ps)<-tree$tip.label
 	#timescale with timePaleoPhy to get "basic" timetree
-	ttree1<-timePaleoPhy(tree,timeData,type="basic",node.mins=node.mins,add.term=FALSE,inc.term.adj=FALSE)
+	ttree1<-timePaleoPhy(tree=tree,timeData=timeData,
+		type="basic",dateTreatment="firstLast",
+		node.mins=node.mins,add.term=FALSE,inc.term.adj=FALSE)
 	#identify which nodes are min-locked; make sure to update when resolving polytomies
-	if(length(node.mins)>0){locked_nodes<-which(!is.na(node.mins))++Ntip(tree)}else{locked_nodes<-NA}
+	if(length(node.mins)>0){
+		locked_nodesOrig<-which(!is.na(node.mins))+Ntip(tree)
+	}else{
+		locked_nodesOrig<-NA
+		}
 	ttree1<-collapse.singles(ttree1)
 	ttrees<-rmtree(ntrees,3)
 	sampledLogLike<-numeric()
@@ -564,8 +580,22 @@ cal3TimePaleoPhy<-function(tree, timeData, brRate, extRate, sampRate,
 				}
 			timeData1<-cbind(timeData,0)
 			}
-		ktree<-ttree1
-		if(randres){ktree<-multi2di(ktree)}
+		# now randomly resolve if randres
+		if(randres & (!is.binary.tree(ttree1) | !is.rooted(ttree1))){
+			ktree<-multi2di(ttree1)
+			# need to updated node locks if any node.mins given
+			if(!identical(locked_nodesOrig,NA)){
+				origDesc<-lapply(prop.part(ttree1),function(x) sort(ttree1$tip.label[x]))
+				treeDesc<-lapply(prop.part(ktree),function(x) sort(ktree$tip.label[x]))
+				node_changes<-match(origDesc,treeDesc)
+				locked_nodes<-node_changes[locked_nodesOrig]
+			}else{
+				locked_nodes<-locked_nodesOrig
+				}
+		}else{
+			ktree<-ttree1
+			locked_nodes<-locked_nodesOrig
+			}
 		nodes<-(1:Nnode(ktree))+Ntip(ktree)		#get a vector of all internal nodes	
 		nodes<-nodes[order(-node.depth(ktree)[-(1:Ntip(ktree))])]	#order by depth
 		anags<-character();budds<-character();nAdjZip<-0
@@ -878,9 +908,12 @@ cal3TimePaleoPhy<-function(tree, timeData, brRate, extRate, sampRate,
 
 #' @rdname cal3TimePaleoPhy
 #' @export
-bin_cal3TimePaleoPhy<-function(tree,timeList,brRate,extRate,sampRate,ntrees=1,nonstoch.bin=FALSE,
-		sites=NULL,point.occur=FALSE,anc.wt=1,node.mins=NULL,dateTreatment="firstLast",FAD.only=FALSE,
-		adj.obs.wt=TRUE,root.max=200,step.size=0.1,randres=FALSE,noisyDrop=TRUE,plot=FALSE){
+bin_cal3TimePaleoPhy<-function(tree,timeList,brRate,extRate,sampRate,
+	ntrees=1, anc.wt=1, node.mins=NULL, dateTreatment="firstLast",
+	FAD.only=FALSE,sites=NULL,point.occur=FALSE,nonstoch.bin=FALSE,
+	adj.obs.wt=TRUE,root.max=200,step.size=0.1,
+	randres=FALSE,noisyDrop=TRUE,
+	tolerance=0.0001, diagnosticMode=FALSE, plot=FALSE){
 	#see the bin_cal3 function for more notation...
 	#require(ape)
 	if(!inherits(tree, "phylo")){
@@ -991,9 +1024,13 @@ bin_cal3TimePaleoPhy<-function(tree,timeList,brRate,extRate,sampRate,ntrees=1,no
 		rownames(timeData)<-rownames(timeList[[2]])
 		#if(rand.obs){timeData[,2]<-apply(timeData,1,function(x) runif(1,x[2],x[1]))}
 		#if(FAD.only){timeData[,2]<-timeData[,1]}
-		tree2<-suppressMessages(cal3TimePaleoPhy(tree,timeData,brRate=brRate,extRate=extRate,sampRate=sampRate,
-			ntrees=1,anc.wt=anc.wt,node.mins=node.mins,adj.obs.wt=adj.obs.wt,root.max=root.max,step.size=step.size,
-			FAD.only=FAD.only,dateTreatment=dateTreatment,randres=randres,plot=plot))
+		tree2<-suppressMessages(
+			cal3TimePaleoPhy(tree,timeData,brRate=brRate,extRate=extRate,sampRate=sampRate,
+				ntrees=1,anc.wt=anc.wt,node.mins=node.mins,adj.obs.wt=adj.obs.wt,
+				root.max=root.max,step.size=step.size,
+				FAD.only=FAD.only,dateTreatment=dateTreatment,randres=randres,
+				tolerance=tolerance,diagnosticMode=diagnosticMode,plot=plot)
+			)
 		colnames(timeData)<-c("FAD","LAD")
 		tree2$ranges.used<-timeData
 		names(tree2$edge.length)<-NULL

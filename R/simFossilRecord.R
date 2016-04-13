@@ -112,7 +112,7 @@
 #' computation time to find acceptable simulation runs, or effectively never find any
 #' acceptable simulation runs.
 #' 
-#' \emph{On Timescale Used in Output}
+#' \emph{On Time-Scale Used in Output}
 #' 
 #' Dates given in the output are on an reversed absolute time-scale; i.e. time
 #' decreases going from the past to the future, as is typical in paleontological
@@ -146,7 +146,7 @@
 #' See documentation for argument \code{negRatesAsZero} about the treatment of rates that decrease below zero.
 #' Notation of branching, extinction and sampling rates as \code{p, q, r} 
 #' follows what is typical for the paleobiology literature (e.g. Foote, 1997), not the  Greek letters \code{lambda, mu, phi}
-#' found more typically in the biological literature (e.g. Stadler, 2009; Heath et al., 2014; Gavrykushina et al., 2014).
+#' found more typically in the biological literature (e.g. Stadler, 2009; Heath et al., 2014; Gavryushkina et al., 2014).
 
 #' @param totalTime,nTotalTaxa,nExtant,nSamp These arguments represent stopping and
 #' acceptance conditions for simulation runs. They are respectively \code{totalTime}, the
@@ -181,7 +181,7 @@
 #' considered at the end of these waiting times. Instead, any time a waiting time greater than \code{maxStepTime} is
 #' selected, then instead \emph{no} event occurs and a time-step equal to \code{maxStepTime} occurs instead, thus effectively
 #' discretizing the progression of time in the simulations run by \code{simFossilRecord}. Decreasing this value will increase
-#' accuracy (as the timescale is effectively more discretized) but increase computation time, as the computer will need
+#' accuracy (as the time-scale is effectively more discretized) but increase computation time, as the computer will need
 #' to stop and check rates to see if an event happened more often. Users should toggle this value relative to the time-dependent
 #' rate equations they input, relative to the rate of change in rates expected in time-dependent rates.
 
@@ -198,6 +198,9 @@
 
 #' @param print.runs If TRUE, prints the proportion of simulations accepted for
 #' output to the terminal.
+
+#' @param maxAttempts Number of simulation attempts allowed before the simulation process
+#' is halted with an error message. Default is \code{Inf}.
 
 #' @param plot If TRUE, plots the diversity curves of accepted simulations,
 #' including both the diversity curve of the true number of taxa and the
@@ -725,7 +728,7 @@ simFossilRecord<-function(
 	# model parameters
 	#
 	p, q, r=0, anag.rate=0, prop.bifurc=0, prop.cryptic=0,
-	modern.samp.prob=1, startTaxa=1, nruns=1,
+	modern.samp.prob=1, startTaxa=1, nruns=1, maxAttempts=Inf,
 
 	# run conditions can be given as vectors of length 1 or length 2 (= min,max)
 	#
@@ -772,8 +775,8 @@ simFossilRecord<-function(
 	#ARGUMENT CHECKING
 	#
 	# number of starting taxa and runs must be at least 1
-	if(nruns<1){
-		stop("nruns must be at least 1")}
+	if(nruns<1 | maxAttempts<1){
+		stop("nruns and maxAttempts must be at least 1")}
 	if(startTaxa<1){
 		stop("startTaxa must be at least 1")}
 	#nruns, starting taxa must be integer values
@@ -851,6 +854,11 @@ simFossilRecord<-function(
 		accept<-FALSE
 		while(!accept){
 			ntries<-ntries+1
+			#test that haven't exceeded maximum number of attempts
+			if(ntries>maxAttempts){
+				stop(paste0("Maximum number of attempts (",maxAttempts,
+					") has been exceeded with only ",i-1," run(s) successful."))
+				}
 			#
 			#initiate the taxa dataset
 			timePassed<-0

@@ -4,7 +4,7 @@
 \alias{bin_cal3TimePaleoPhy}
 \alias{cal3}
 \alias{cal3TimePaleoPhy}
-\title{Three Rate Calibrated Timescaling of Paleo-Phylogenies}
+\title{Three Rate Calibrated 'a posteriori' Time-Scaling of Paleo-Phylogenies}
 \usage{
 cal3TimePaleoPhy(tree, timeData, brRate, extRate, sampRate, ntrees = 1,
   anc.wt = 1, node.mins = NULL, dateTreatment = "firstLast",
@@ -13,13 +13,14 @@ cal3TimePaleoPhy(tree, timeData, brRate, extRate, sampRate, ntrees = 1,
   diagnosticMode = FALSE, plot = FALSE)
 
 bin_cal3TimePaleoPhy(tree, timeList, brRate, extRate, sampRate, ntrees = 1,
-  nonstoch.bin = FALSE, sites = NULL, point.occur = FALSE, anc.wt = 1,
-  node.mins = NULL, dateTreatment = "firstLast", FAD.only = FALSE,
-  adj.obs.wt = TRUE, root.max = 200, step.size = 0.1, randres = FALSE,
-  noisyDrop = TRUE, plot = FALSE)
+  anc.wt = 1, node.mins = NULL, dateTreatment = "firstLast",
+  FAD.only = FALSE, sites = NULL, point.occur = FALSE,
+  nonstoch.bin = FALSE, adj.obs.wt = TRUE, root.max = 200,
+  step.size = 0.1, randres = FALSE, noisyDrop = TRUE, tolerance = 1e-04,
+  diagnosticMode = FALSE, plot = FALSE)
 }
 \arguments{
-\item{tree}{An unscaled cladogram of fossil taxa, of class 'phylo'. Tip labels
+\item{tree}{An unscaled cladogram of fossil taxa, of class \code{phylo}. Tip labels
 must match the taxon labels in the respective temporal data.}
 
 \item{timeData}{Two-column matrix of first and last occurrences in absolute
@@ -116,7 +117,7 @@ node ages.}
 rather than using the cal3 algorithm to weight the resolution of polytomies 
 relative to sampling in the fossil record?}
 
-\item{noisyDrop}{If TRUE (the default), any taxa dropped from tree due to not
+\item{noisyDrop}{If \code{TRUE} (the default), any taxa dropped from tree due to not
 having a matching entry in the time data will be listed in a system message.}
 
 \item{tolerance}{Acceptable amount of shift in tip dates from dates listed
@@ -129,15 +130,13 @@ console and to graphic devices an enormous number of messages, plots and
 anciliary information that may be useful or entirely useless to figuring
 out what is going wrong.}
 
-\item{plot}{If true, plots the input, "basic" timescaled and output
-cal3-timescaled phylogenies}
+\item{plot}{If true, plots the input, "basic" time-scaled phylogeny (an
+intermediary step in the algorithm) and the output
+cal3 time-scaled phylogeny.}
 
 \item{timeList}{A list composed of two matrices giving interval times and
 taxon appearance dates. The rownames of the second matrix should be the taxon IDs,
-identical to the tip.labels for tree. See details.}
-
-\item{nonstoch.bin}{If true, dates are not stochastically pulled from
-uniform distributions. See below for more details.}
+identical to the \code{tip.labels} for tree. See details.}
 
 \item{sites}{Optional two column matrix, composed of site IDs for taxon FADs
 and LADs. The sites argument allows users to constrain the placement of
@@ -154,6 +153,9 @@ events.}
 which forces all FADs and LADs to equal each other. This should be used when
 all taxa are only known from single 'point occurrences', i.e. each is only
 recovered from a single bed/horizon, such as a Lagerstatten.}
+
+\item{nonstoch.bin}{If true, dates are not stochastically pulled from
+uniform distributions. See below for more details.}
 }
 \value{
 The output of these functions is a time-scaled tree or set of
@@ -176,9 +178,9 @@ continuous-time ranges generated for time-scaling each tree. (Essentially a
 pseudo-timeData matrix.)
 }
 \description{
-Timescales an unscaled cladogram of fossil taxa, using information on their
+Time-scales an unscaled cladogram of fossil taxa, using information on their
 ranges and estimates of the instantaneous rates of branching, extinction and
-sampling. The output is a sample of timescaled trees, as resulting from a
+sampling. The output is a sample of a posteriori time-scaled trees, as resulting from a
 stochastic algorithm which samples observed gaps in the fossil record with
 weights calculated based on the input rate estimates. This function also
 uses the three-rate calibrated time-scaling algorithm to stochastically
@@ -186,16 +188,16 @@ resolve polytomies and infer potential ancestor-descendant relationships,
 simultaneous with the time-scaling treatment.
 }
 \details{
-The three-rate calibrated ("cal3") algorithm time-scales trees by
+The three-rate calibrated ("cal3") algorithm time-scales trees a posteriori by
 stochastically picking node divergence times relative to a probability
 distribution of expected waiting times between speciation and first
 appearance in the fossil record. This algorithm is extended to apply to
 resolving polytomies and designating possible ancestor-descendant
 relationships. The full details of this method, its sister method the
-sampling-rate-calibrated timescaling method and the details of the algorithm
+sampling-rate-calibrated time-scaling method and the details of the algorithm
 will be given in Bapst (in prep for Paleobiology).
 
-Briefly, cal3 timescaling is done by examining each node separately, moving
+Briefly, cal3 time-scaling is done by examining each node separately, moving
 from the root upwards. Ages of branching nodes are constrained below by the
 ages of the nodes below them (except the root; hence the need for the
 root.max argument) and constrained above by the first appearance dates
@@ -236,7 +238,7 @@ prior to using this function, as shown in an example below.
 
 The branching and extinction rate are the 'per-capita' instantaneous
 origination/extinction rates for the taxic level of the tips of the tree
-being time-scaled. Any user of the cal3 timescaling method has multiple
+being time-scaled. Any user of the cal3 time-scaling method has multiple
 options for estimating these rates. One is to separately calculate the
 per-capita rates (following the equations in Foote, 2001) across multiple
 intervals and take the mean for each rate. A second, less preferred option,
@@ -294,7 +296,7 @@ will use the earliest dates provided to calibrate node ages, which is either
 an overly conservative approach to time-scaling or fairly nonsensical.
 
 Alternatively to using \code{cal3TimePaleoPhy}, \code{bin_cal3TimePaleoPhy} is a wrapper of 
-\code{cal3TimePaleoPhy} which produces timescaled trees for datasets which only have 
+\code{cal3TimePaleoPhy} which produces time-scaled trees for datasets which only have 
 interval data available. For each output tree, taxon first and last appearance 
 dates are placed within their listed intervals under a uniform distribution. 
 Thus, a large sample of time-scaled trees will approximate the uncertainty in 
@@ -331,7 +333,7 @@ Most importantly, please note the stochastic element of the three
 rate-calibrated time-scaling methods. These do not use traditional
 optimization methods, but instead draw divergence times from a distribution
 defined by the probability of intervals of unobserved evolutionary history.
-This means analyses MUST be done over many cal3-timescaled trees for
+This means analyses MUST be done over many cal3 time-scaled trees for
 analytical rigor! No one tree is correct.
 
 Similarly, please account for stratigraphic uncertainty in your analysis.
@@ -362,7 +364,7 @@ sRate <- srRes[[1]][2]
    # we can get extRate from getSampRateCont too
 #we'll assume extRate=brRate (ala Foote et al., 1999); may not always be a good assumption
 divRate<-srRes[[1]][1]
-#now let's try cal3TimePaleoPhy, which timescales using a sampling rate to calibrate
+#now let's try cal3TimePaleoPhy, which time-scales using a sampling rate to calibrate
 #This can also resolve polytomies based on sampling rates, with some stochastic decisions
 ttree <- cal3TimePaleoPhy(cladogram,rangesCont,brRate=divRate,extRate=divRate,
     sampRate=sRate,ntrees=1,plot=TRUE)
@@ -399,7 +401,8 @@ layout(matrix(1:9,3,3))
 parOrig <- par(no.readonly=TRUE)
 par(mar=c(0,0,0,0))
 for(i in 1:9){plot(ladderize(ttrees[[i]]),show.tip.label=FALSE)}
-layout(1); par(parOrig)
+layout(1)
+par(parOrig)
 #they are all a bit different!
 
 #can plot the median diversity curve with multiDiv
@@ -448,6 +451,14 @@ phyloDiv(ttree)
 ttree1 <- bin_cal3TimePaleoPhy(cladogram,rangesDisc,brRate=divRate,extRate=divRate,
     sampRate=sRate1,ntrees=1,nonstoch.bin=TRUE,plot=TRUE)
 phyloDiv(ttree1)
+
+# testing node.mins in bin_cal3TimePaleoPhy
+ttree <- bin_cal3TimePaleoPhy(cladoDrop,rangesDisc,brRate=divRate,extRate=divRate,
+    sampRate=sRate1,ntrees=1,node.mins=nodeDates,plot=TRUE)
+# with randres=TRUE
+ttree <- bin_cal3TimePaleoPhy(cladoDrop,rangesDisc,brRate=divRate,extRate=divRate,
+    sampRate=sRate1,ntrees=1,randres=TRUE,node.mins=nodeDates,plot=TRUE)
+
 
 #example with multiple values of anc.wt
 ancWt <- sample(0:1,nrow(rangesDisc[[2]]),replace=TRUE)

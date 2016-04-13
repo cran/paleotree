@@ -6,11 +6,11 @@
 \usage{
 simFossilRecord(p, q, r = 0, anag.rate = 0, prop.bifurc = 0,
   prop.cryptic = 0, modern.samp.prob = 1, startTaxa = 1, nruns = 1,
-  totalTime = c(0, 1000), nTotalTaxa = c(1, 1000), nExtant = c(0, 1000),
-  nSamp = c(0, 1000), tolerance = 10^-4, maxStepTime = 0.01,
-  shiftRoot4TimeSlice = "withExtantOnly", count.cryptic = FALSE,
-  negRatesAsZero = TRUE, print.runs = FALSE, sortNames = FALSE,
-  plot = FALSE)
+  maxAttempts = Inf, totalTime = c(0, 1000), nTotalTaxa = c(1, 1000),
+  nExtant = c(0, 1000), nSamp = c(0, 1000), tolerance = 10^-4,
+  maxStepTime = 0.01, shiftRoot4TimeSlice = "withExtantOnly",
+  count.cryptic = FALSE, negRatesAsZero = TRUE, print.runs = FALSE,
+  sortNames = FALSE, plot = FALSE)
 }
 \arguments{
 \item{p, q, r, anag.rate}{These parameters control the instantaneous ('per-capita') rates of branching, extinction,
@@ -30,7 +30,7 @@ pure-birth model.
 See documentation for argument \code{negRatesAsZero} about the treatment of rates that decrease below zero.
 Notation of branching, extinction and sampling rates as \code{p, q, r} 
 follows what is typical for the paleobiology literature (e.g. Foote, 1997), not the  Greek letters \code{lambda, mu, phi}
-found more typically in the biological literature (e.g. Stadler, 2009; Heath et al., 2014; Gavrykushina et al., 2014).}
+found more typically in the biological literature (e.g. Stadler, 2009; Heath et al., 2014; Gavryushkina et al., 2014).}
 
 \item{prop.cryptic, prop.bifurc}{These parameters control (respectively) the proportion of branching events that have
 morphological differentiation, versus those that are cryptic (\code{prop.cryptic}) and the proportion of morphological
@@ -49,6 +49,9 @@ listed as their time of origination.}
 \item{nruns}{Number of simulation datasets to accept, save and output. If \code{nruns = 1}, output will be a single
 object of class \code{fossilRecordSimulation}, and if \code{nruns} is greater than 1, a list will be output composed of
 \code{nruns} objects of class \code{fossilRecordSimulation}.}
+
+\item{maxAttempts}{Number of simulation attempts allowed before the simulation process
+is halted with an error message. Default is \code{Inf}.}
 
 \item{totalTime, nTotalTaxa, nExtant, nSamp}{These arguments represent stopping and
 acceptance conditions for simulation runs. They are respectively \code{totalTime}, the
@@ -73,7 +76,7 @@ produce a serious mismatch of resulting process to the defined model, because th
 considered at the end of these waiting times. Instead, any time a waiting time greater than \code{maxStepTime} is
 selected, then instead \emph{no} event occurs and a time-step equal to \code{maxStepTime} occurs instead, thus effectively
 discretizing the progression of time in the simulations run by \code{simFossilRecord}. Decreasing this value will increase
-accuracy (as the timescale is effectively more discretized) but increase computation time, as the computer will need
+accuracy (as the time-scale is effectively more discretized) but increase computation time, as the computer will need
 to stop and check rates to see if an event happened more often. Users should toggle this value relative to the time-dependent
 rate equations they input, relative to the rate of change in rates expected in time-dependent rates.}
 
@@ -265,7 +268,7 @@ are very unlikely or impossible given other model parameters may take considerab
 computation time to find acceptable simulation runs, or effectively never find any
 acceptable simulation runs.
 
-\emph{On Timescale Used in Output}
+\emph{On Time-Scale Used in Output}
 
 Dates given in the output are on an reversed absolute time-scale; i.e. time
 decreases going from the past to the future, as is typical in paleontological

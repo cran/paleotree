@@ -7,7 +7,7 @@
 #' \tabular{ll}{ Package: \tab paleotree\cr Type: \tab Package\cr
 #' License: \tab CC0\cr } This package
 #' contains functions for analyzing sampling rates given ranges of fossil taxa,
-#' in both continuous and discrete time, functions for time-scaling phylogenies
+#' in both continuous and discrete time, functions for a posteriori time-scaling phylogenies
 #' of fossil taxa and functions for simulating the fossil record in both taxic
 #' and phylogenetic varieties.
 #' 
@@ -42,6 +42,9 @@
 #' 
 #' # get the package version of paleotree
 #' packageVersion("paleotree")
+#'
+#' # get the citation for paleotree
+#' citation("paleotree")
 #'
 #' ##Simulate some fossil ranges with simFossilRecord
 #' set.seed(444);
