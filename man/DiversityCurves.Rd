@@ -2,9 +2,11 @@
 % Please edit documentation in R/DiversityCurves.R
 \name{DiversityCurves}
 \alias{DiversityCurves}
-\alias{phyloDiv}
 \alias{taxicDivCont}
 \alias{taxicDivDisc}
+\alias{phyloDiv}
+\alias{taxicDivDisc}
+\alias{phyloDiv}
 \title{Diversity Curves}
 \usage{
 taxicDivCont(timeData, int.length = 1, int.times = NULL, plot = TRUE,
@@ -35,8 +37,8 @@ If given, the argument split.int and int.length are ignored.}
 
 \item{timelims}{Limits for the x (time) axis for diversity curve plots. Only
 affects plotting. Given as either NULL (the default) or as a vector of
-length two as for 'xlim' in the basic R function plot. Time axes will be plotted
-\emph{exactly} to these values.}
+length two as for \code{xlim} in the basic R function \code{plot}. Time axes 
+will be plotted \emph{exactly} to these values.}
 
 \item{drop.cryptic}{If TRUE, cryptic taxa are merged to form one taxon for
 estimating taxon curves. Only works for objects from \code{simFossilRecord}
@@ -52,7 +54,7 @@ where more named taxa are known in certain intervals largely due to
 taxonomic expert effort and not real changes in historical biotic diversity.}
 
 \item{extant.adjust}{Amount of time to be added to extend start time for
-(0,0) bins for extant taxa, so that the that 'time interval' doesn't appear 
+(0,0) bins for extant taxa, so that the that 'time interval' does not appear 
 to have an infinitely small width.}
 
 \item{split.int}{For discrete time data, should calculated/input intervals
@@ -209,9 +211,6 @@ taxicDivDisc(rangesDisc,int.times=taxaDiv[,1:2],split.int=FALSE)
 #looks 'spiky'!
 
 }
-\author{
-David W. Bapst
-}
 \seealso{
 \code{\link{multiDiv}}, \code{\link{timeSliceTree}},
 \code{\link{binTimeData}}
@@ -222,4 +221,6 @@ There are several different functions for traditional LTT plots
 package phytools, the function \code{plotLtt} in the package laser and the
 function \code{LTT.average.root} in the package TreeSim.
 }
-
+\author{
+David W. Bapst
+}

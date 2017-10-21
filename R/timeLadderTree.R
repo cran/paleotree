@@ -27,8 +27,8 @@
 
 #' @param tree A phylo object
 
-#' @param timeData Two-column matrix of per-taxon first and last occurrances in
-#' absolute continous time
+#' @param timeData Two-column matrix of per-taxon first and last occurrences in
+#' absolute continuous time.
 
 #' @return Returns the modified tree as an object of class phylo, with no edge
 #' lengths.
@@ -38,7 +38,7 @@
 #' @seealso \code{\link{di2multi}}
 
 #' @examples
-#' 
+#' \donttest{
 #' set.seed(444)
 #' record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
 #'	nTotalTaxa=c(100,200))
@@ -58,7 +58,8 @@
 #' axisPhylo() 
 #'
 #' layout(1)
-#' 
+#' }
+
 #' @export timeLadderTree
 timeLadderTree<-function(tree,timeData){
 	#resolves all polytomies in a tree as ladders to match FADs in timeData

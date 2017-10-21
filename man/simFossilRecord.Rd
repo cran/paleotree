@@ -43,7 +43,7 @@ the available models of morphological differentiation in the \emph{Description} 
 slice). Must be a number between 0 and 1. If 1, all taxa that survive to the modern
 day (to the \code{sliceTime}) are sampled, if 0, none are.}
 
-\item{startTaxa}{Number of initital taxa to begin a simulation with. All will have the simulation start date
+\item{startTaxa}{Number of initial taxa to begin a simulation with. All will have the simulation start date
 listed as their time of origination.}
 
 \item{nruns}{Number of simulation datasets to accept, save and output. If \code{nruns = 1}, output will be a single
@@ -194,10 +194,11 @@ bifurcation and cryptic cladogenetic events all share in common that a single ge
 lineage splits into two descendant lineages, but differ in the morphological differentiation
 of these child lineages relative to their parent. Under budding cladogenesis, only one of the
 child lineages becomes morphologically distinguishable from the parent, and thus the ancestral
-morphotaxon persists through the branching event as the un-differtiated child lineage. Under
+morphotaxon persists through the branching event as the child lineage that does \emph{not}
+differentiate. Under
 bifurcating cladogenesis, both child lineages become immediately distinct from the ancestor,
 and thus two new morphotaxa appear while the ancestor terminates in an event known as
-'pseudoextinction'. Crytic cladogenesis has no morphological differentiation: both child lineages
+'pseudoextinction'. Cryptic cladogenesis has no morphological differentiation: both child lineages
 are presumed to be indistinct from the ancestor and from each other, which means a hypothetical
 differentiation independent of any branching, such that a morphotaxon instanteously transitions
 to a new morphotaxon identity, resulting in the pseudoextinction of the ancestral morphotaxon
@@ -205,7 +206,7 @@ and the immediate 'pseudospeciation' of the child morphotaxon. The two morphotax
 in time at all, as modeled here (contra to the models described by Ezard et al., 2012). For ease
 of following these cryptic lineages, cryptic cladogenetic events are treated in terms of data
 structure similarly to budding cladogenetic events, with one child lineage treated as a
-persistance of the ancestral lineage, and the other as a new morphologically indistinguishable lineage.
+persistence of the ancestral lineage, and the other as a new morphologically indistinguishable lineage.
 This model of cryptic cladogenesis is ultimately based on the hierarchical birth-death model used
 by many authors for modeling patterns across paraphyletic higher taxa and the lower taxon units within
 them (e.g. Patzkowsky, 1995; Foote, 2012).
@@ -462,6 +463,42 @@ records<-lapply(records,fossilRecord2fossilTaxa)
 multiDiv(records,plotMultCurves=TRUE)
 # creates runs full of short lived taxa
 
+# Some more stuff to do with rate formulae!
+
+# The formulae input method for rates allows
+	# for the rate to be a random variable
+
+# For example, we could constantly redraw
+ 		# the branching rate from an exponential
+
+record<-simFossilRecord(p="rexp(n=1,rate=10)", q=0.1, r=0.1, nruns=1,
+	nTotalTaxa=50, plot=TRUE)
+
+# Setting up specific time-variable rates can be laborious though
+	# e.g. one rate during this 10 unit interval, 
+		# another during this interval, etc
+	# The problem is setting this up within a fixed function
+
+# Worked Example
+# What if we want to draw a new rate from a
+	# lognormal distribution every 10 time units?
+
+# Need to randomly draw these rates *before* running simFossilTaxa
+# This means also that we will need to individually do each simFossilTaxa run
+	# since the rates are drawn outside of simFossilTaxa
+
+# Get some reasonable log normal rates:
+rates<-0.1+rlnorm(100,meanlog=1,sdlog=1)/100
+
+# Now paste it into a formulae that describes a function that
+	# will change the rate output every 10 time units
+rateEquation<-paste0("c(",paste0(rates,collapse=","),")[1+(T\%/\%10)]")
+
+# and let's run it
+record <- simFossilRecord(p=rateEquation, q=0.1, r=0.1, nruns=1,
+	totalTime=c(30,40), plot=TRUE)
+
+ 
 ##########################################################
 
 # Speciation Modes
@@ -675,9 +712,6 @@ stop("Runs have extant taxa under conditioning for none?")
 }
 
 }
-\author{
-David W. Bapst, inspired by code written by Peter Smits.
-}
 \references{
 Bapst, D. W. 2013. When Can Clades Be Potentially Resolved with
 Morphology? \emph{PLoS ONE} 8(4):e62312.
@@ -698,7 +732,7 @@ Paleobiology's Perspective.} The Paleontological Society, Lawrence, Kansas.
 Foote, M. 2012. Evolutionary dynamics of taxonomic structure. \emph{Biology Letters} 8(1):135-138.
 
 Gavryushkina, A., D. Welch, T. Stadler, and A. J. Drummond. 2014. Bayesian Inference
-of Sampled Ancestor Trees for Epidemiology and Fossil Calibration. \emph{PLoS Comput Biol.}
+of Sampled Ancestor Trees for Epidemiology and Fossil Calibration. \emph{PLoS.Comput.Biol.}
 10(12):e1003919.
 
 Hartmann, K., D. Wong, and T. Stadler. 2010 Sampling Trees from Evolutionary
@@ -735,4 +769,6 @@ deprecated \code{paleotree} functions \code{simFossilTaxa}, \code{simFossilTaxaS
 \code{simPaleoTrees}, as well as the combined used of \code{simFossilTaxa}
 and \code{sampleRanges} for most models of sampling.
 }
-
+\author{
+David W. Bapst, inspired by code written by Peter Smits.
+}

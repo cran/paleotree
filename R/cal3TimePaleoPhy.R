@@ -14,9 +14,7 @@
 #' distribution of expected waiting times between speciation and first
 #' appearance in the fossil record. This algorithm is extended to apply to
 #' resolving polytomies and designating possible ancestor-descendant
-#' relationships. The full details of this method, its sister method the
-#' sampling-rate-calibrated time-scaling method and the details of the algorithm
-#' will be given in Bapst (in prep for Paleobiology).
+#' relationships. The full details of this method are provided in Bapst (2013, MEE).
 #' 
 #' Briefly, cal3 time-scaling is done by examining each node separately, moving
 #' from the root upwards. Ages of branching nodes are constrained below by the
@@ -91,7 +89,7 @@
 #' Unlike \code{timePaleoPhy}, cal3 methods will always resolve polytomies. In
 #' general, this is done using the rate calibrated algorithm, although if
 #' argument \code{randres = TRUE}, polytomies will be randomly resolved with uniform
-#' probability, ala multi2di from ape. Also, cal3 will always add the terminal
+#' probability, ala \code{multi2di} from ape. Also, cal3 will always add the terminal
 #' ranges of taxa. However, because of the ability to infer potential
 #' ancestor-descendant relationships, the length of terminal branches may be
 #' shorter than taxon ranges themselves, as budding may have occurred during
@@ -154,13 +152,13 @@
 
 #' @inheritParams timePaleoPhy
 
-#' @param brRate Either a single estimate of the instanteous rate of branching
+#' @param brRate Either a single estimate of the instantaneous rate of branching
 #' (also known as the 'per-capita' origination rate, or speciation rate if
 #' taxonomic level of interest is species) or a vector of per-taxon estimates
-#' @param extRate Either a single estimate of the instanteous extinction rate
+#' @param extRate Either a single estimate of the instantaneous extinction rate
 #' (also known as the 'per-capita' extinction rate) or a vector of per-taxon
 #' estimates
-#' @param sampRate Either a single estimate of the instanteous sampling rate or
+#' @param sampRate Either a single estimate of the instantaneous sampling rate or
 #' a vector of per-taxon estimates
 
 #' @param ntrees Number of time-scaled trees to output
@@ -237,10 +235,10 @@
 #' @param adj.obs.wt If the time of observation are before the LAD of a taxon,
 #' should the weight of the time of observation be adjusted to account for the
 #' known observed history of the taxon which occurs AFTER the time of
-#' observation? Should only have an effect if time of observation ISN'T the
+#' observation? Should only have an effect if time of observation \emph{IS NOT} the
 #' LAD, if times of observation for a potential ancestor are earlier than the
 #' first appearance of their potential descendants and if the ancestral weights
-#' for taxa aren't set to zero (so there can be potential ancestors).
+#' for taxa are not set to zero (so there can be potential ancestors).
 
 #' @param root.max Maximum time before the first FAD that the root can be
 #' pushed back to.
@@ -248,7 +246,7 @@
 #' @param step.size Step size of increments used in zipper algorithm to assign
 #' node ages.
 
-#' @param randres Should polytomies be randomly resolved using multi2di in ape
+#' @param randres Should polytomies be randomly resolved using \code{multi2di} in ape
 #' rather than using the cal3 algorithm to weight the resolution of polytomies 
 #' relative to sampling in the fossil record?
 
@@ -263,7 +261,7 @@
 
 #' @param diagnosticMode If \code{TRUE}, \code{cal3timePaleoPhy} will return to the
 #' console and to graphic devices an enormous number of messages, plots and
-#' anciliary information that may be useful or entirely useless to figuring
+#' ancilliary information that may be useful or entirely useless to figuring
 #' out what is going wrong.
 
 #' @param nonstoch.bin If true, dates are not stochastically pulled from
@@ -297,15 +295,16 @@
 #'
 #' Similarly, please account for stratigraphic uncertainty in your analysis.
 #' Unless you have exceptionally resolved data, use a wrapper with the cal3
-#' function, either the provided bin_cal3TimePaleoPhy or code a wrapper
+#' function, either the provided \code{bin_cal3TimePaleoPhy} or code a wrapper
 #' function of your own that accounts for stratigraphic uncertainty in 
 #' your dataset. Remember that the FADs (earliest dates) given to timePaleoPhy
 #'  will *always* be used to calibrate node ages!
 
 #' @author David W. Bapst
 
-#' @seealso \code{\link{timePaleoPhy}}, \code{\link{binTimeData}},
-#' \code{\link{make_durationFreqCont}}, \code{sProb2sRate}, \code{\link{multi2di}}
+#' @seealso \code{\link{timePaleoPhy}}, 
+#' \code{\link{make_durationFreqCont}}, \code{\link{pqr2Ps}},
+#' \code{\link{sProb2sRate}}, \code{\link{multi2di}}
 
 #' @references 
 #' Bapst, D. W. 2013. A stochastic rate-calibrated method for time-scaling
@@ -882,8 +881,10 @@ cal3TimePaleoPhy<-function(tree, timeData, brRate, extRate, sampRate,
 		test1<-all(tipdiffs[,3]<tolerance)
 		test2<-identical(names(sort(-timeData1[,2])),
 				ktree$tip.label[order(node.depth.edgelength(ktree)[1:Ntip(ktree)])])
+		#test 2 does not work if any LADS are same
 		if(length(unique(timeData1[,2]))<Ntip(tree)){
-			test2<-TRUE}	#test 2 does not work if any LADS are same
+			test2<-TRUE
+			}	
 		if(all(c(test1,test2))){
 			ktree$test<-"passed"
 		}else{
@@ -974,8 +975,14 @@ bin_cal3TimePaleoPhy<-function(tree,timeList,brRate,extRate,sampRate,
 			}
 		}	
 	timeList[[2]]<-timeList[[2]][!is.na(timeList[[2]][,1]),]
-	if(any(is.na(timeList[[2]]))){
-		stop("Weird NAs in Data??")}
+	#
+	if(ncol(timeList[[1]])!=2 | ncol(timeList[[2]])!=2){
+		stop("Both timeList[[1]] and timeList[[2]] should have only two columns")}
+	if(any(is.na(timeList[[1]])) | any(is.na(timeList[[2]]))){
+		stop("Unexpected NAs in timeList")}
+	if(any(is.character(timeList[[1]])) | any(is.character(timeList[[2]]))){
+		stop("Unexpected character-type data in timeList")}
+	#
 	if(any(apply(timeList[[1]],1,diff)>0)){
 		stop("timeList[[1]] not in intervals in time relative to modern")}
 	if(any(timeList[[1]][,2]<0)){

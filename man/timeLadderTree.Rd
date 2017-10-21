@@ -9,8 +9,8 @@ timeLadderTree(tree, timeData)
 \arguments{
 \item{tree}{A phylo object}
 
-\item{timeData}{Two-column matrix of per-taxon first and last occurrances in
-absolute continous time}
+\item{timeData}{Two-column matrix of per-taxon first and last occurrences in
+absolute continuous time.}
 }
 \value{
 Returns the modified tree as an object of class phylo, with no edge
@@ -42,7 +42,7 @@ See this blog post for more information:
 http://nemagraptus.blogspot.com/2012/07/resolving-polytomies-according-to.html
 }
 \examples{
-
+\donttest{
 set.seed(444)
 record<-simFossilRecord(p=0.1, q=0.1, nruns=1,
 nTotalTaxa=c(100,200))
@@ -62,12 +62,11 @@ plot(ladderize(tree2),show.tip.label=FALSE)
 axisPhylo() 
 
 layout(1)
-
 }
-\author{
-David W. Bapst
 }
 \seealso{
 \code{\link{di2multi}}
 }
-
+\author{
+David W. Bapst
+}

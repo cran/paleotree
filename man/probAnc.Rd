@@ -25,7 +25,7 @@ mode is "budding".}
 descendants (\code{"directDesc"}) or of sampling indirect descendants (\code{"indirectDesc"}).}
 
 \item{Mmax}{The maximum number of direct descendants (M) to sum over in the function, which
-is ideally meant to be a sum from zero to infinity, like nrep. Unfortunately,
+is ideally meant to be a sum from zero to infinity, like \code{nrep}. Unfortunately,
 \code{(2*M)} is used in a factorial, which means we are limited to a relatively
 small upper bound on M.}
 
@@ -88,4 +88,3 @@ Record. \emph{Paleobiology} \bold{22}(2):141--151.
 \seealso{
 \code{\link{SamplingConv}}
 }
-

@@ -2,10 +2,10 @@
 % Please edit documentation in R/retiolitinae.R
 \docType{data}
 \name{retiolitinae}
-\alias{retioChar}
+\alias{retiolitinae}
 \alias{retioRanges}
 \alias{retioTree}
-\alias{retiolitinae}
+\alias{retioChar}
 \title{Cladogram and Range Data for the Retiolitinae}
 \format{This dataset is composed of three objects:
 
@@ -18,7 +18,7 @@ various genera on the cladogram first and last appear in those graptolite zones.
 \item{\code{retioChar}}{A matrix containing binary presence-absence character states for these 22
 Retiolitinae genera for three characters which they vary in: the presence of extrathecal threads
 (note only one taxon lacks this character state), the presence of determinant growth and the
-secondary loss of a nema via resorbtion. Note these character do not vary within these genera.}
+secondary loss of a nema via resorption. Note these character do not vary within these genera.}
 }}
 \source{
 Source for cladogram and zonal ranges for genera: 
@@ -80,4 +80,3 @@ phyloDiv(ttree)
 For more example graptolite datasets, see \code{\link{graptDisparity}}
 }
 \keyword{datasets}
-

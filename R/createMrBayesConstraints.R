@@ -27,14 +27,25 @@
 
 #' @param file Filename (possibly with path) as a character string
 #' to a file which will be overwritten with the output constraint lines.
-#' If not null, not constraint lines are output to the console.
+#' If \code{NULL}, constraint lines are printed in the console.
+
+#' @param includeIngroupConstraint When writing the \code{prset} line, 
+#' should a group named 'ingroup' be included, which presumes an ingroup
+#' constraint was defined by the user for sake or rooting the tree? This is
+#' mainly used for use with \code{paleotree} function \code{createMrBayesTIpDatingNexus} for automating
+#' the construction of tip-dating analyses, which must constrain the ingroup.
 
 #' @return
 #' If argument \code{file} is \code{NULL}, then the constrain commands
-#' are ouput as a series of character strings.
+#' are output as a series of character strings.
 
 #' @author
-#' David W. Bapst, with some inspiration from Graham Slater.
+#' David W. Bapst, with some inspiration from Graham Slater. This code was 
+#' produced as part of a project funded by National Science Foundation
+#' grant EAR-1147537 to S. J. Carlson.
+
+#' @seealso
+#' \code{\link{createMrBayesTipDatingNexus}}, \code{\link{createMrBayesTipCalibrations}}
 
 #' @references
 #' Slater, G. J. 2013. Phylogenetic evidence for a shift in the mode of mammalian
@@ -56,7 +67,8 @@
 #' @name createMrBayesConstraints
 #' @rdname createMrBayesConstraints
 #' @export
-createMrBayesConstraints<-function(tree,partial=TRUE,file=NULL){
+createMrBayesConstraints<-function(tree,partial=TRUE,file=NULL,
+		includeIngroupConstraint=FALSE){
 	#checks
 	if(!inherits(tree,"phylo")){
 		stop("tree must be of class 'phylo'")
@@ -91,8 +103,13 @@ createMrBayesConstraints<-function(tree,partial=TRUE,file=NULL){
 	#########################################################
 	# create prset line
 	constList<-paste0("node",1:length(splits),collapse=",")
-	prsetLine<-paste0("prset topologypr = constraints(",
-		constList,");")
+	if(includeIngroupConstraint){
+		prsetLine<-paste0("prset topologypr = constraints(",
+			constList,",ingroup);")
+	}else{
+		prsetLine<-paste0("prset topologypr = constraints(",
+			constList,");")
+		}
 	#
 	############################################################
 	#

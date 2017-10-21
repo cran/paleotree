@@ -4,6 +4,7 @@
 \alias{durationFreq}
 \alias{make_durationFreqCont}
 \alias{make_durationFreqDisc}
+\alias{make_durationFreqDisc}
 \title{Models of Sampling and Extinction for Taxonomic Duration Datasets}
 \usage{
 make_durationFreqCont(timeData, groups = NULL, drop.extant = TRUE,
@@ -23,7 +24,8 @@ to the number of taxa and the number of columns equal to the number of 'systems'
 of categories for taxa. Taxonomic membership in different groups is indicated
 by numeric values. For example, a dataset could have a 'groups' matrix composed
 of a column representing thin and thick shelled taxa, coded 1 and 2 respectively,
-while the second column indicates whether taxa live in coastal, shelfal or deep
+while the second column indicates whether taxa live in coastal,
+outer continental shelf, or deep
 marine settings, coded 1-3 respectively. Different combinations of groups will
 be treated as having independent sampling and extinction parameters in the
 default analysis, for example, thinly-shelled deep marine species will have
@@ -172,9 +174,6 @@ optim(parInit(likFun),likFun,lower=parLower(likFun),upper=parUpper(likFun),
    # gets further away from true generating value, r = 0.5 (geesh!)
    # but this *is* a small dataset...
 }
-\author{
-David W. Bapst
-}
 \references{
 Foote, M. 1997 Estimating Taxonomic Durations and Preservation
 Probability. \emph{Paleobiology} \bold{23}(3):278--300.
@@ -186,4 +185,6 @@ ranges of taxa. \emph{Paleobiology} \bold{22}(2):121--140.
 See \code{\link{freqRat}}, \code{\link{sRate2sProb}},
 \code{\link{qsRate2Comp}} \code{\link{sProb2sRate}} and \code{\link{qsProb2Comp}}.
 }
-
+\author{
+David W. Bapst
+}

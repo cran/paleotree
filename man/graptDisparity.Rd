@@ -2,10 +2,10 @@
 % Please edit documentation in R/graptDisparity.R
 \docType{data}
 \name{graptDisparity}
-\alias{graptCharMatrix}
 \alias{graptDisparity}
-\alias{graptDistMat}
+\alias{graptCharMatrix}
 \alias{graptRanges}
+\alias{graptDistMat}
 \title{Morphlogical Character and Range Data for late Ordovician and Early Silurian Graptoloidea}
 \format{This dataset is composed of three objects: 
 
@@ -47,7 +47,7 @@ et al (2012). Interval dates for biostratigraphic zones is taken from Sadler et 
 }
 \details{
 The character matrix contains characters of two differing types with a (very) small but
-non-neglible amount of missing character data for some taxa. This required the
+non-negligible amount of missing character data for some taxa. This required the
 use of an unconventional ad hoc distance metric for the published analysis, resulting
 in a (very slightly) non-Euclidean distance matrix. This breaks some assumptions of
 some statistical analyses or requires special corrections, such as with PCO.
@@ -210,4 +210,3 @@ This data was added mainly to provide an example dataset
 for \code{\link{nearestNeighborDist}}
 }
 \keyword{datasets}
-

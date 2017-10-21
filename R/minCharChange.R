@@ -30,20 +30,22 @@
 #' @param orderedChar If TRUE (not the default), then the character will be reconstructed with a cost (step)
 #' matrix of a linear, ordered character. This is not applicable if \code{type = "ACCTRAN"}, as cost matrices cannot
 #' be used with ACCTRAN in \code{ancestral.pars}, and an error will be returned if \code{orderedChar = TRUE} but
-#' a cost matrix is given, as the only reason to use orderedChar is to produce a cost matrix automatically.
+#' a cost matrix is given, as the only reason to use \code{orderedChar} is to produce a cost matrix automatically.
 
 #' @param type The parsimony algorithm applied by \code{ancestral.pars}, which can apply one of two:
-#' "MPR" (the default) is a relatively fast algorithm developed by Hamazawa et al. (1995) and Narushima
+#' "MPR" (the default) is a relatively fast algorithm developed by Hanazawa et al. (1995) and Narushima
 #' and Hanazawa (1997), which relies on reconstructing the states at each internal node by re-rooting at
 #' that node.  "ACCTRAN", the 'accelerated transitions' algorithm (Swofford and Maddison, 1987), favors
 #' character reversal over independent gains when there is ambiguity. The "ACCTRAN" option in
-#' ancestral.pars avoids repeated rerooting of the tree to search for a smaller set of maximum-parsimony
+#' \code{ancestral.pars} avoids repeated rerooting of the tree to search for a smaller set of maximum-parsimony
 #' solutions that satisfy the ACCTRAN algorithm, but does so by assigning edge weights.
-#' As of phangorn v1.99-12, both of these algorithms apply
-#' the Sankoff parsimony algorithm, which allows multifurcations (polytomies).
+#' As of phangorn v1.99-12, "MPR" is calculated using
+#' the Sankoff parsimony algorithm, which allows multifurcations (polytomies). This is \emph{not} true for
+#' "ACCTRAN", which uses the Fitch algorithm, which does not allow for multifurcations. An error
+#' is returned if a tree with multifurcations is passed and \code{type = "ACCTRAN"}.
  
 #' @param cost A matrix of the cost (i.e. number of steps) necessary to change between states of the input
-#' character trait. If NULL (the
+#' character trait. If \code{NULL} (the
 #' default), the character is assumed to be unordered with equal cost to change from any state to another.
 #' Cost matrices only impact the "MPR" algorithm; if a cost matrix is given but \code{type = "ACCTRAN"}, an error
 #' is issued.
@@ -64,8 +66,8 @@
 #' \code{polySymbol} is used to break up these strings and automatically construct a fitting \code{contrast} table
 #' for use with this data, including for ambiguous character state codings.
 	
-#' @param contrast A matrix of type integer with cells of 0 and 1, where each row is labelled with a string value
-#' used for indicating character states in \code{trait}, and each column is labelled with the formal state label to
+#' @param contrast A matrix of type integer with cells of 0 and 1, where each row is labeled with a string value
+#' used for indicating character states in \code{trait}, and each column is labeled with the formal state label to
 #' be used for assign taxa to particular character states. A value of 1 indicates that the respective coding string for
 #' that row should be interpreted as reflecting the character state listed for that column. A coding could reflect
 #' multiple states (such as might occur when taxa are polymorphic for some morphological character), so the sums of
@@ -127,7 +129,7 @@
 #' for rows and two columns indicating the ancestral and child nodes of that edge, with values indicating the
 #' states inferred for those nodes in a particular solution.}
 
-#' \item{\code{transitionArray}}{A labelled three-dimensional array where for each solution we have a symmetrical
+#' \item{\code{transitionArray}}{A labeled three-dimensional array where for each solution we have a symmetrical
 #' matrix with number of rows and columns equal to the number of character states, with values in each cell
 #' indicating the total number of transitions from one ancestral state (i.e. the rows) to a descendant state
 #' (i.e. the columns).}
@@ -141,7 +143,7 @@
 #' @aliases ancPropStateMat
 
 #' @seealso
-#' The functions described here are effectively wrapers of \code{phangorn}'s function
+#' The functions described here are effectively wrappers of \code{phangorn}'s function
 #' \code{ancestral.pars}.
 
 #' @author David W. Bapst
@@ -177,18 +179,10 @@
 #' 
 #' #unordered, MPR
 #' ancMPR<-ancPropStateMat(retioTree, trait=retioChar[,2], type="MPR")
-#' #unordered, ACCTRAN
-#' ancACCTRAN<-ancPropStateMat(retioTree, trait=retioChar[,2], type="ACCTRAN")
-#' 
-#' #let's compare MPR versus ACCTRAN results
-#' layout(1:2)
 #' quickAncPlotter(retioTree,ancMPR,cex=0.5)
 #' text(x=4,y=5,"type='MPR'",cex=1.5)
-#' quickAncPlotter(retioTree,ancACCTRAN,cex=0.5)
-#' text(x=5,y=5,"type='ACCTRAN'",cex=1.5)
 #' 
 #' minCharChange(retioTree,trait=retioChar[,2],type="MPR")
-#' minCharChange(retioTree,trait=retioChar[,2],type="ACCTRAN")
 #' 
 #' # with simulated data
 #' 
@@ -201,19 +195,19 @@
 #' 
 #' #unordered, MPR
 #' ancMPR<-ancPropStateMat(tree, trait=char, type="MPR")
-#' #unordered, ACCTRAN
-#' ancACCTRAN<-ancPropStateMat(tree, trait=char, type="ACCTRAN")
+#  #unordered, ACCTRAN
+#  ancACCTRAN<-ancPropStateMat(tree, trait=char, type="ACCTRAN")
 #' #ordered, MPR
 #' ancMPRord<-ancPropStateMat(tree, trait=char, orderedChar=TRUE, type="MPR")
 #' 
-#' #let's compare MPR versus ACCTRAN results
-#' layout(1:2)
-#' quickAncPlotter(tree,ancMPR,cex=0.3)
-#' text(x=8,y=15,"type='MPR'",cex=1.5)
-#' quickAncPlotter(tree,ancACCTRAN,cex=0.3)
-#' text(x=9,y=15,"type='ACCTRAN'",cex=1.5)
-#' #MPR has much more uncertainty in node estimates
-#' 	#but that doesn't mean ACCTRAN is preferable
+#  #let's compare MPR versus ACCTRAN results
+#  layout(1:2)
+#  quickAncPlotter(tree,ancMPR,cex=0.3)
+#  text(x=8,y=15,"type='MPR'",cex=1.5)
+#  quickAncPlotter(tree,ancACCTRAN,cex=0.3)
+#  text(x=9,y=15,"type='ACCTRAN'",cex=1.5)
+#  #MPR has much more uncertainty in node estimates
+#  	#but that doesn't mean ACCTRAN is preferable
 #'
 #' #let's compare unordered versus ordered under MPR
 #' layout(1:2)
@@ -238,8 +232,8 @@
 #' #estimating minimum number of transitions with MPR 
 #' minCharChange(tree,trait=char,type="MPR")
 #'
-#' #and now with ACCTRAN
-#' minCharChange(tree,trait=char,type="ACCTRAN")
+#  #and now with ACCTRAN
+#  minCharChange(tree,trait=char,type="ACCTRAN")
 #'
 #' #POLYMORPHISM IN CHARACTER DATA
 #' 
@@ -457,6 +451,9 @@ ancPropStateMat<-function(trait, tree, orderedChar=FALSE, type="MPR", cost=NULL,
 	#return error if cost is not null and type=ACCTRAN
 	if(type=="ACCTRAN" & !is.null(cost)){
 		stop("cost matrix is inapplicable if ACCTRAN algorithm is used")}
+	# return error if tree is not fully resolved and type=ACCTRAN
+	if(type=="ACCTRAN" & !is.binary(tree)){
+		stop("tree must be fully resolved if ACCTRAN algorithm is used")}
 	#return error if cost is not null and orderedChar=TRUE
 	if(orderedChar & !is.null(cost)){
 		stop("Cannot treat character as ordered; cost matrix inapplicable under ACCTRAN")}
