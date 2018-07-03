@@ -1,9 +1,9 @@
 Package: paleotree
 Type: Package
-Version: 3.0.0
+Version: 3.1.0
 Title: Paleontological and Phylogenetic Analyses of Evolution
-Date: 2017-10-20
-Author: David W. Bapst
+Date: 2018-07-02
+Author: David W. Bapst, Peter J. Wagner
 Depends: R (>= 3.0.0), ape (>= 4.1)
 Imports: phangorn (>= 2.0.0), stats, phytools (>= 0.6-00), graphics,
         grDevices, methods, utils
@@ -12,8 +12,8 @@ Maintainer: David W. Bapst <dwbapst@gmail.com>
 Description: Provides tools for transforming, a posteriori time-scaling, and
     modifying phylogenies containing extinct (i.e. fossil) lineages. In particular,
     most users are interested in the functions timePaleoPhy(), bin_timePaleoPhy(),
-    cal3TimePaleoPhy() and bin_cal3TimePaleoPhy(), which a posteriori time-scale cladograms of
-    fossil taxa into dated phylogenies. This package also contains a large number
+    cal3TimePaleoPhy() and bin_cal3TimePaleoPhy(), which date cladograms of
+    fossil taxa using stratigraphic data. This package also contains a large number
     of likelihood functions for estimating sampling and diversification rates from
     different types of data available from the fossil record (e.g. range data,
     occurrence data, etc). paleotree users can also simulate diversification and
@@ -32,6 +32,6 @@ License: CC0
 URL: https://github.com/dwbapst/paleotree
 RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2017-10-21 04:02:21 UTC; dwbapst
+Packaged: 2018-07-02 20:38:04 UTC; adminosaurus
 Repository: CRAN
-Date/Publication: 2017-10-21 13:07:59 UTC
+Date/Publication: 2018-07-03 04:10:03 UTC
