@@ -5,6 +5,8 @@
 #' samples as returned are scaled relative to rate parameters in a separate file. This function attempts to automate
 #' the handling of multiple files (both .t tree files and .p parameter files), as well as multiple files
 #' associated with separate runs, to obtain samples of posterior trees, or summary trees such as the MCCT or MAP.
+#' These resulting trees are now scaled to units of time, but not be placed correctly on an absolute time-scale
+#' if all tips are extinct. See details of output below.
 
 #' @details
 #' This function is most useful for dealing with dating analyses in MrBayes, particularly when tip-dating
@@ -19,9 +21,10 @@
 #' this function probably won't be able to find them.)
 
 #' @param nRuns The number of runs in your analysis. This variable is used for figuring out what 
-#' filenames will be searched for: specify less runs than reality and some runs won't be included.
-#' Specify too many, and this function will throw an error when it cannot find files it expects
-#' but do not exist. The default for this argument (two runs) is based on the default number of runs in MrBayes.
+#' filenames will be searched for: if you specify that you have less runs than you
+#' actually ran in reality, then some runs won't be examined in thi function. Conversely,
+#' specify too many, and this function will throw an error when it cannot find files it expects
+#' but do not exist. The default for this argument (\emph{two} runs) is based on the default number of runs in MrBayes.
 
 #' @param burnin The fraction of trees sampled in the posterior discarded  and not returned
 #' by this function directly, nor included in calculation of summary trees. Must be a numeric
@@ -30,12 +33,22 @@
 #' @param getFixedTimes If \code{TRUE}, this function will also look for, scan, and parse an
 #' associated NEXUS file. Ignoring any commented lines (ie. anything between "[   ]" ), commands
 #' for fixing taxa will be identified, parsed and returned to the user, either as a message
-#' pinted to the R console if output is read to a file, or as a attribute named 'fixed ages'
+#' printed to the R console if output is read to a file, or as a attribute named 'fixed ages'
 #' if output as an R object (formatted as a two-column table of OTU names and their respective fixed ages).
-#' Please note: this code contains a while() loop in it for removing nested series of
-#' square brackets (i.e. treated as comments in NEXUS files) then files with
-#' ridicuously nested series of brackets may cause this code to take a while
+#' If the output is an R object, these objects with 
+#' 
+#' Please note: the code for \code{getFixedTimes = TRUE} contains a \code{while()}
+#' loop in it for removing nested series of
+#' square brackets (i.e. treated as comments in NEXUS files). Thus files with
+#' ridiculously nested series of brackets may cause this code to take a while
 #' to complete, or may even cause it to hang.
+
+#' @param getRootAges \code{FALSE} by default. 
+#' If \code{TRUE}, and \code{getFixedTimes = TRUE} as well as \code{file = NULL}
+#' (such that trees will be assigned within the R memory rather than saved to an external file), the
+#' functions \code{setRootAge} and its wrapper function \code{setRootAges} will be applied to the output
+#' so that all output trees have \code{root.time} elements for use with other functions in \code{paleotree}
+#' as well as other packages.
 
 #' @param originalNexusFile Filename (and possibly path too) to the original NEXUS file for this analysis.
 #' Only tried if \code{getFixedTimes = TRUE}. If \code{NULL} (the default), then this function will
@@ -65,22 +78,37 @@
 #' as a NEXUS file. If \code{NULL} (the default), the output will
 #' instead be directly returned by this function.
 
+
+
 #' @return
-#' Depending on argument \code{file}, this output is either
+#' Depending on argument \code{file}, the output tree or trees is either
 #' returned directly, or instead written out in NEXUS format via
 #' ape's \code{write.NEXUS} function to an external file. The output
 #' will consist either of multiple trees sampled from the post-burnin posterior,
 #' or will consist of a single phylogeny (a summary tree, either the MCCT or the MAP).
 #' 
-#' Users are warned that the resulting dated trees will not have \code{$root.time} elements
-#' for comparison against an absolute time-scale. Most functions for phylogenetics in R (and
+#' If the argument \code{setRootAges = TRUE} is not used,
+#' users are warned that the resulting dated trees will not have \code{$root.time} elements necessary
+#' for comparison against an absolute time-scale. Wile the trees may be scaled to units of absolute
+#' time now, rather than with branch lengths expressed in the rate of character change, the dates
+#' estimated by some phylogenetics functions in R may give inaccurate estimates of when events
+#' occur on the absolute time-scale if all tips are extinct.
+#' This is because most functions for phylogenetics in R (and
 #' elsewhere) will instead presume that the latest tip will be at time 0 (the modern), which
-#' may be wrong if you are using \code{paleotree} for \emph{paleontological} datasets.
+#' may be wrong if you are using \code{paleotree} for analyzing \emph{paleontological} datasets
+#' consisting of entirely extinct taxa. This can be solved by using argument \code{getFixedTimes = TRUE}
+#' to obtain fixed tip ages, and then scaling the resulting output to absolute time using
+#' the argument \code{setRootAges = TRUE}, which obtains a \code{$root.time} element for each tree
+#' using the functions \code{\link{setRootAge}} and \code{\link{setRootAges}} (for single and multiple phylogenies).
 #'
 
 
 #' @seealso
-#' \code{\link[phangorn]{maxCladeCred}} in package phangorn
+#' When the arguments \code{getFixedTimes = TRUE} and \code{setRootAges = TRUE} are used, the resulting output will be scaled to absolute time 
+#' with the available fixed ages using functions \code{\link{setRootAge}} and \code{\link{setRootAges}} (for single and multiple phylogenies).
+#' This is only done if fixed ages are available and if the tree is not being saved to an external file.
+#' 
+#' Maximum Clade Credibility trees are estimated using the function\code{\link[phangorn]{maxCladeCred}} in package phangorn.
 
 #' @author
 #' David Bapst, with rescaling of raw output
@@ -89,10 +117,28 @@
 #' @examples
 #' \dontrun{
 #' 
-#' MCCT<-obtainDatedPosteriorTreesMrB(
-#'  	runFile="C:\\myTipDatingAnalysis\\MrB_run_fossil_05-10-17.nex.run1.t",
-#'  	nRuns=2,burnin=0.5,
-#' 		outputTrees="MCCT",file=NULL)
+#' MCCT <- obtainDatedPosteriorTreesMrB(
+#'  	runFile = "C:\\myTipDatingAnalysis\\MrB_run_fossil_05-10-17.nex.run1.t",
+#'  	nRuns = 2, burnin = 0.5,
+#' 		outputTrees = "MCCT", file = NULL)
+#'
+#' MAP <- obtainDatedPosteriorTreesMrB(
+#'  	runFile = "C:\\myTipDatingAnalysis\\MrB_run_fossil_05-10-17.nex.run1.t",
+#'  	nRuns = 2, burnin = 0.5, getFixedTimes = TRUE,
+#' 		outputTrees = "MAP", file = NULL)
+#'
+#' # get a root age from the fixed ages for tips
+#' setRootAge(tree = MAP)
+#' 
+#' #pull a hundred trees randomly from the posterior
+#' hundredRandomlySelectedTrees <- obtainDatedPosteriorTreesMrB(
+#'  	runFile = "C:\\myTipDatingAnalysis\\MrB_run_fossil_05-10-17.nex.run1.t",
+#'  	nRuns = 2, burnin = 0.5, getFixedTimes = TRUE,
+#'  	getRootAges = TRUE,
+#' 		outputTrees = 100, file = NULL)
+#'
+# # set the root age using the fixed ages
+# setRootAges(trees = hundredRandomlySelectedTrees)
 #' 
 #' }
 #'
@@ -102,15 +148,17 @@
 #' @name obtainDatedPosteriorTreesMrB
 #' @rdname obtainDatedPosteriorTreesMrB
 #' @export
-obtainDatedPosteriorTreesMrB<-function(runFile,nRuns=2,burnin=0.5,
-	outputTrees,labelPostProb=FALSE,
-	getFixedTimes=FALSE,originalNexusFile=NULL,
-	file=NULL){
+obtainDatedPosteriorTreesMrB <- function(runFile,nRuns = 2,burnin = 0.5,
+	outputTrees,labelPostProb = FALSE,
+	getFixedTimes = FALSE,
+	getRootAges = FALSE,
+	originalNexusFile = NULL,
+	file = NULL){
 	#checks
-	if(length(outputTrees)!=1){
+	if(length(outputTrees) != 1){
 		stop("outputTrees must be of length 1")
 		}
-	if(all(outputTrees!=c("all","MCCT","MAP")) & !is.numeric(outputTrees)){
+	if(all(outputTrees != c("all","MCCT","MAP")) & !is.numeric(outputTrees)){
 		stop("outputTrees must be one of 'all', 'MCCT', or a numeric value indicating the number of trees to randomly sample from the posterior")
 		}
 	if(is.numeric(outputTrees)){	
@@ -121,30 +169,37 @@ obtainDatedPosteriorTreesMrB<-function(runFile,nRuns=2,burnin=0.5,
 	if(burnin>1 | burnin<0){
 		stop("burnin must be a value between 0 and 1")
 		}
+	if(getRootAges & !getFixedTimes){
+		stop("Root ages cannot be set for output trees if fixed tip dates are not obtained")
+		}
+	if(getRootAges & !is.null(file)){
+		stop("Root ages cannot be set when files are read to an external file format, please use file = NULL (the default)")
+		}		
+	#
 	# Load tree, paramater and mcmc files produced by MrBayes
 	#
 	# # pick either a .p or .t file; can be either. Used for getting path. 
 	# all needed .p and .t files must be in the same directory as this file
 	#
 	# take indicated file and get the basic run name
-	runPath<-strsplit(runFile,split="\\.run")[[1]]
-	if(length(runPath)!=2){
+	runPath <- strsplit(runFile,split = "\\.run")[[1]]
+	if(length(runPath) != 2){
 		stop("Unable to parse the runPath correctly")
 		}
-	runPath<-runPath[[1]]
+	runPath <- runPath[[1]]
 	# get list of tree files
-	treeFiles<-lapply(1:nRuns,function(x){
-		read.nexus(file=paste0(runPath,".run",x,".t"))}
+	treeFiles <- lapply(1:nRuns,function(x){
+		read.nexus(file = paste0(runPath,".run",x,".t"))}
 		)
 	# get list of .p files
-	parFiles<-lapply(1:nRuns,function(x)
-		read.table(file=paste0(runPath,".run",x,".p"),
-			 header = T, skip=1)
+	parFiles <- lapply(1:nRuns,function(x)
+		read.table(file = paste0(runPath,".run",x,".p"),
+			 header = T, skip = 1)
 		)
 	#############################
 	# checks for length 
 	for(i in 1:nRuns){
-		if(length(treeFiles[[i]])!=nrow(parFiles[[i]])){
+		if(length(treeFiles[[i]]) != nrow(parFiles[[i]])){
 			stop("Parameter data and tree data not of the same length")
 			}
 		}
@@ -165,12 +220,15 @@ obtainDatedPosteriorTreesMrB<-function(runFile,nRuns=2,burnin=0.5,
 	if(getFixedTimes){
 		if(is.null(originalNexusFile)){
 			# file name, if presuming shares run name with 
-			#originalNexusFile<-paste0(runPath,".nex")
-			originalNexusFile<-runPath
+			#originalNexusFile <- paste0(runPath,".nex")
+			originalNexusFile <- runPath
 			}
-		fixedTable<-getMrBFixedAgesFromNexus(originalNexusFile)
+		fixedTable <- getMrBFixedAgesFromNexus(originalNexusFile)
+		if(nrow(fixedTable)==0 & getRootAges){
+			stop("No fixed ages found for obtainting $root.time, cannot use argument getRootAges = TRUE")
+			}
 	}else{
-		fixedTable<-NULL
+		fixedTable <- NULL
 		}
 	####################
 	#
@@ -178,19 +236,19 @@ obtainDatedPosteriorTreesMrB<-function(runFile,nRuns=2,burnin=0.5,
 	sampleStart <- floor(length(treeFiles[[1]])*burnin)
 	#
 	# remove burnin from both
-	treeFilesBurn<-lapply(treeFiles,function(x){
-		startSamp<-floor(length(x)*burnin)
+	treeFilesBurn <- lapply(treeFiles,function(x){
+		startSamp <- floor(length(x)*burnin)
 		x[startSamp:length(x)]
 		}
 	)
-	parFilesBurn<-lapply(parFiles,function(x){
-		startSamp<-floor(nrow(x)*burnin)
+	parFilesBurn <- lapply(parFiles,function(x){
+		startSamp <- floor(nrow(x)*burnin)
 		x[startSamp:nrow(x),]
 		}
 	)
 	# checks for length again
 	for(i in 1:nRuns){
-		if(length(treeFilesBurn[[i]])!=nrow(parFilesBurn[[i]])){
+		if(length(treeFilesBurn[[i]]) != nrow(parFilesBurn[[i]])){
 			stop("Parameter data and tree data not of the same length")
 			}
 		}
@@ -205,7 +263,7 @@ obtainDatedPosteriorTreesMrB<-function(runFile,nRuns=2,burnin=0.5,
 		return(phy)
 		}
 	# now apply it
-	rescaledTrees<-lapply(1:nRuns,function(x){ 
+	rescaledTrees <- lapply(1:nRuns,function(x){ 
 		lapply(1:length(treeFilesBurn[[x]]),function(y){
 			rescaleMrBTree(treeFilesBurn[[x]][[y]],parFilesBurn[[x]][y,])
 			})
@@ -215,40 +273,40 @@ obtainDatedPosteriorTreesMrB<-function(runFile,nRuns=2,burnin=0.5,
 	# attach marginal likelihoods to each tree
 	for(i in 1:nRuns){
 		for(j in 1:length(rescaledTrees[[i]])){
-			rescaledTrees[[i]][[j]]$LnPr<-parFilesBurn[[i]][j,]$LnPr
+			rescaledTrees[[i]][[j]]$LnPr <- parFilesBurn[[i]][j,]$LnPr
 			}
 		}
 	# concatanate trees from each run
-	lumpTrees<-unlist(rescaledTrees,recursive=FALSE)
-	class(lumpTrees)<-"multiPhylo"
+	lumpTrees <- unlist(rescaledTrees,recursive = FALSE)
+	class(lumpTrees) <- "multiPhylo"
 	#
 	##########################################
 	#
-	if(outputTrees=="all"){
-		outTree<-lumpTrees
+	if(outputTrees == "all"){
+		outTree <- lumpTrees
 		if(labelPostProb){
 			# assign posterior probabilities as node labels
-			outTree<-lapply(outTree,getPosteriorProbabiities,postBurninTrees=lumpTrees)
+			outTree <- lapply(outTree,getPosteriorProbabiities,postBurninTrees = lumpTrees)
 			}
 		}
 	#
-	if(outputTrees=="MAP"){
+	if(outputTrees == "MAP"){
 		# get MAP
-		LnPr<-sapply(lumpTrees,function(x) x$LnPr)
-		whichMAP<-which(LnPr==max(LnPr))
-		outTree<-lumpTrees[[whichMAP]]
+		LnPr <- sapply(lumpTrees,function(x) x$LnPr)
+		whichMAP <- which(LnPr == max(LnPr))
+		outTree <- lumpTrees[[whichMAP]]
 		if(labelPostProb){
 			# assign posterior probabilities as node labels
-			outTree<-getPosteriorProbabiities(tree=outTree,postBurninTrees=lumpTrees)
+			outTree <- getPosteriorProbabiities(tree = outTree,postBurninTrees = lumpTrees)
 			}
 		}
 	#
-	if(outputTrees=="MCCT"){
+	if(outputTrees == "MCCT"){
 		# turns out the MCCT isn't the tree with the highest likelihood
-		outTree<-phangorn::maxCladeCred(lumpTrees)
+		outTree <- phangorn::maxCladeCred(lumpTrees)
 		if(labelPostProb){
 			# assign posterior probabilities as node labels
-			outTree<-getPosteriorProbabiities(tree=outTree,postBurninTrees=lumpTrees)
+			outTree <- getPosteriorProbabiities(tree = outTree,postBurninTrees = lumpTrees)
 			}
 		}
 	#
@@ -260,20 +318,20 @@ obtainDatedPosteriorTreesMrB<-function(runFile,nRuns=2,burnin=0.5,
 				") greater than the total number of post-burning trees (",
 				length(lumpTrees),")"))
 			}
-		whichOutput<-sample(length(lumpTrees),outputTrees,replace=FALSE)
-		outTree<-lumpTrees[whichOutput]
+		whichOutput <- sample(length(lumpTrees),outputTrees,replace = FALSE)
+		outTree <- lumpTrees[whichOutput]
 		if(labelPostProb){
 			# assign posterior probabilities as node labels
 			if(outputTrees>1){
-				outTree<-lapply(outTree,getPosteriorProbabiities,postBurninTrees=lumpTrees)
+				outTree <- lapply(outTree,getPosteriorProbabiities,postBurninTrees = lumpTrees)
 			}else{
-				outTree<-getPosteriorProbabiities(tree=outTree,postBurninTrees=lumpTrees)
+				outTree <- getPosteriorProbabiities(tree = outTree,postBurninTrees = lumpTrees)
 				}
 			}
 		}
 	########################################
 	if(!is.null(file)){
-		write.nexus(outTree, file=file)
+		write.nexus(outTree, file = file)
 		if(!is.null(fixedTable)){
 			print("You may need to know which tip ages were fixed to a precise date")
 			print("in order to assign absolute dates to the tree, as follows:")
@@ -281,16 +339,24 @@ obtainDatedPosteriorTreesMrB<-function(runFile,nRuns=2,burnin=0.5,
 			}
 	}else{
 		if(!is.null(fixedTable)){
-			attr(outTree,"fixedTable")<-fixedTable
+			attr(outTree,"fixedTable") <- fixedTable
+			#message("For use in R with paleotree and other packages, you may want to set the root age")
+			if(!is(outTree,"multiPhylo")){
+				#message("Simply use function setRootAges() next")
+				outTree<-setRootAges(outTree)
+			}else{
+				#message("Simply use function setRootAge() next")
+				outTree<-setRootAge(outTree)
+				}
 			}
 		return(outTree)
 		}
 	}
 
-getPosteriorProbabiities<-function(tree,postBurninTrees){
-	cladeFreq<-prop.clades(tree,postBurninTrees)
-	postProbs<-cladeFreq/length(postBurninTrees)
-	tree$node.label<-postProbs
+getPosteriorProbabiities <- function(tree,postBurninTrees){
+	cladeFreq <- prop.clades(tree,postBurninTrees)
+	postProbs <- cladeFreq/length(postBurninTrees)
+	tree$node.label <- postProbs
 	return(tree)
 	}
 

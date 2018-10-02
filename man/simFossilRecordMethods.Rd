@@ -6,6 +6,7 @@
 \alias{fossilRecord2fossilTaxa}
 \alias{fossilRecord2fossilRanges}
 \alias{fossilRecord2fossilTaxa}
+\alias{fossilTaxa2fossilRecord}
 \alias{fossilRecord2fossilRanges}
 \title{Methods for Editing or Converting Output from simFossilRecord}
 \usage{
@@ -13,6 +14,8 @@ timeSliceFossilRecord(fossilRecord, sliceTime, shiftRoot4TimeSlice = FALSE,
   modern.samp.prob = 1, tolerance = 10^-4)
 
 fossilRecord2fossilTaxa(fossilRecord)
+
+fossilTaxa2fossilRecord(fossilTaxa)
 
 fossilRecord2fossilRanges(fossilRecord, merge.cryptic = TRUE,
   ranges.only = TRUE)
@@ -40,6 +43,10 @@ day (to the \code{sliceTime}) are sampled, if 0, none are.}
 
 \item{tolerance}{A small number which sets a range around the \code{sliceTime} within
 which taxa will be considered extant for the purposes of output.}
+
+\item{fossilTaxa}{A \code{fossilTaxa} object, composed of a table
+containing information on the true first and last appearance times of taxa,
+as well as their ancestor-descendant relationships.}
 
 \item{merge.cryptic}{If \code{TRUE}, sampling events for cryptic taxon-units (i.e.
 those in the same cryptic complex) will be merged into sampling events for a single
@@ -72,7 +79,12 @@ are now listed as extant.
 \code{fossilRecord2fossilTaxa} converts a \code{fossilRecordSimulation} object
 to the flat table format of taxon data as was originally output by deprecated function 
 \code{simFossilTaxa}, and can be taken as input by a number of \code{paleotree} functions such as
-\code{sampleRanges},\code{taxa2phylo} and \code{taxa2cladogram}.
+\code{sampleRanges},\code{taxa2phylo} and \code{taxa2cladogram}. 
+
+\code{fossilTaxa2fossilRecord} does the reverse, converting a \code{simFossilTaxa}
+table into a \code{fossilRecordSimulation} list object,
+but returns a \code{fossilRecordSimulation} object that considers each species as un-sampled (as sampling
+information is not contained within a \code{simFossilTaxa} table).
 
 \code{fossilRecord2fossilRanges} converts a \code{fossilRecordSimulation} object
 to the flat table format of observed taxon ranges, as is typically output by processing
@@ -82,18 +94,18 @@ to the flat table format of observed taxon ranges, as is typically output by pro
 \examples{
 
 set.seed(44)
-record <- simFossilRecord(p=0.1, q=0.1, r=0.1, nruns=1,
-	nTotalTaxa=c(20,30) ,nExtant=0, plot=TRUE)
+record <- simFossilRecord(p = 0.1, q = 0.1, r = 0.1, nruns = 1,
+	nTotalTaxa = c(20,30) ,nExtant = 0, plot = TRUE)
 
 # time-slicing
 
 # let's try slicing this record at 940 time-units
-slicedRecord<-timeSliceFossilRecord(fossilRecord = record, sliceTime = 940)
+slicedRecord <- timeSliceFossilRecord(fossilRecord = record, sliceTime = 940)
 # and let's plot it
 divCurveFossilRecordSim(slicedRecord)
 
 # now with shiftRoot4TimeSlice = TRUE to shift the root age
-slicedRecord<-timeSliceFossilRecord(fossilRecord = record, sliceTime = 940,
+slicedRecord <- timeSliceFossilRecord(fossilRecord = record, sliceTime = 940,
 	shiftRoot4TimeSlice = TRUE)
 # and let's plot it
 divCurveFossilRecordSim(slicedRecord)
@@ -102,8 +114,8 @@ divCurveFossilRecordSim(slicedRecord)
 # notice that in both, 'modern' (extant) taxa are sampled with probability = 1
 	#let's try it again, make that probability = 0
 
-# now with shiftRoot4TimeSlice=TRUE
-slicedRecord<-timeSliceFossilRecord(fossilRecord = record, sliceTime = 940,
+# now with shiftRoot4TimeSlice = TRUE
+slicedRecord <- timeSliceFossilRecord(fossilRecord = record, sliceTime = 940,
 	shiftRoot4TimeSlice = TRUE, modern.samp.prob = 0)
 # and let's plot it
 divCurveFossilRecordSim(slicedRecord)
@@ -113,31 +125,31 @@ divCurveFossilRecordSim(slicedRecord)
 # converting to taxa objects and observed ranges
 
 # convert to taxa data
-taxa<-fossilRecord2fossilTaxa(record)
+taxa <- fossilRecord2fossilTaxa(record)
 # convert to ranges
-ranges<-fossilRecord2fossilRanges(record)
+ranges <- fossilRecord2fossilRanges(record)
 
 # plot diversity curves with multiDiv
-multiDiv(list(taxa,ranges),plotMultCurves=TRUE)
+multiDiv(list(taxa,ranges),plotMultCurves = TRUE)
 # should look a lot like what we got earlier
 
 # get the cladogram we'd obtain for these taxa with taxa2cladogram
-cladogram<-taxa2cladogram(taxa,plot=TRUE)
+cladogram <- taxa2cladogram(taxa,plot = TRUE)
 
 # now get the time-scaled phylogenies with taxa2phylo
 
 # first, with tips extending to the true times of extinction
-treeExt<-taxa2phylo(taxa,plot=TRUE)
+treeExt <- taxa2phylo(taxa,plot = TRUE)
 
 # now, with tips extending to the first appearance dates (FADs) of taxa
 	# get the FADs from the ranges
-FADs<-ranges[,1]
-treeFAD<-taxa2phylo(taxa,FADs,plot=TRUE)
+FADs <- ranges[,1]
+treeFAD <- taxa2phylo(taxa,FADs,plot = TRUE)
 
 }
 \seealso{
 \code{\link{simFossilRecord}}
 }
 \author{
-David W. Bapst.
+David W. Bapst
 }

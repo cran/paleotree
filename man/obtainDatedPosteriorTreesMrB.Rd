@@ -5,8 +5,8 @@
 \title{Get the Sample of Posterior Trees from a Dated Phylogenetic Analysis with MrBayes (Or a Summary Tree, such as the MCCT)}
 \usage{
 obtainDatedPosteriorTreesMrB(runFile, nRuns = 2, burnin = 0.5, outputTrees,
-  labelPostProb = FALSE, getFixedTimes = FALSE, originalNexusFile = NULL,
-  file = NULL)
+  labelPostProb = FALSE, getFixedTimes = FALSE, getRootAges = FALSE,
+  originalNexusFile = NULL, file = NULL)
 }
 \arguments{
 \item{runFile}{A filename in the current directory, or a path to a file that is either a .p 
@@ -17,9 +17,10 @@ typical MrBayes file naming conventions. (In other words, if you have renamed yo
 this function probably won't be able to find them.)}
 
 \item{nRuns}{The number of runs in your analysis. This variable is used for figuring out what 
-filenames will be searched for: specify less runs than reality and some runs won't be included.
-Specify too many, and this function will throw an error when it cannot find files it expects
-but do not exist. The default for this argument (two runs) is based on the default number of runs in MrBayes.}
+filenames will be searched for: if you specify that you have less runs than you
+actually ran in reality, then some runs won't be examined in thi function. Conversely,
+specify too many, and this function will throw an error when it cannot find files it expects
+but do not exist. The default for this argument (\emph{two} runs) is based on the default number of runs in MrBayes.}
 
 \item{burnin}{The fraction of trees sampled in the posterior discarded  and not returned
 by this function directly, nor included in calculation of summary trees. Must be a numeric
@@ -46,12 +47,22 @@ this is skipped.}
 \item{getFixedTimes}{If \code{TRUE}, this function will also look for, scan, and parse an
 associated NEXUS file. Ignoring any commented lines (ie. anything between "[   ]" ), commands
 for fixing taxa will be identified, parsed and returned to the user, either as a message
-pinted to the R console if output is read to a file, or as a attribute named 'fixed ages'
+printed to the R console if output is read to a file, or as a attribute named 'fixed ages'
 if output as an R object (formatted as a two-column table of OTU names and their respective fixed ages).
-Please note: this code contains a while() loop in it for removing nested series of
-square brackets (i.e. treated as comments in NEXUS files) then files with
-ridicuously nested series of brackets may cause this code to take a while
+If the output is an R object, these objects with 
+
+Please note: the code for \code{getFixedTimes = TRUE} contains a \code{while()}
+loop in it for removing nested series of
+square brackets (i.e. treated as comments in NEXUS files). Thus files with
+ridiculously nested series of brackets may cause this code to take a while
 to complete, or may even cause it to hang.}
+
+\item{getRootAges}{\code{FALSE} by default. 
+If \code{TRUE}, and \code{getFixedTimes = TRUE} as well as \code{file = NULL}
+(such that trees will be assigned within the R memory rather than saved to an external file), the
+functions \code{setRootAge} and its wrapper function \code{setRootAges} will be applied to the output
+so that all output trees have \code{root.time} elements for use with other functions in \code{paleotree}
+as well as other packages.}
 
 \item{originalNexusFile}{Filename (and possibly path too) to the original NEXUS file for this analysis.
 Only tried if \code{getFixedTimes = TRUE}. If \code{NULL} (the default), then this function will
@@ -64,16 +75,25 @@ as a NEXUS file. If \code{NULL} (the default), the output will
 instead be directly returned by this function.}
 }
 \value{
-Depending on argument \code{file}, this output is either
+Depending on argument \code{file}, the output tree or trees is either
 returned directly, or instead written out in NEXUS format via
 ape's \code{write.NEXUS} function to an external file. The output
 will consist either of multiple trees sampled from the post-burnin posterior,
 or will consist of a single phylogeny (a summary tree, either the MCCT or the MAP).
 
-Users are warned that the resulting dated trees will not have \code{$root.time} elements
-for comparison against an absolute time-scale. Most functions for phylogenetics in R (and
+If the argument \code{setRootAges = TRUE} is not used,
+users are warned that the resulting dated trees will not have \code{$root.time} elements necessary
+for comparison against an absolute time-scale. Wile the trees may be scaled to units of absolute
+time now, rather than with branch lengths expressed in the rate of character change, the dates
+estimated by some phylogenetics functions in R may give inaccurate estimates of when events
+occur on the absolute time-scale if all tips are extinct.
+This is because most functions for phylogenetics in R (and
 elsewhere) will instead presume that the latest tip will be at time 0 (the modern), which
-may be wrong if you are using \code{paleotree} for \emph{paleontological} datasets.
+may be wrong if you are using \code{paleotree} for analyzing \emph{paleontological} datasets
+consisting of entirely extinct taxa. This can be solved by using argument \code{getFixedTimes = TRUE}
+to obtain fixed tip ages, and then scaling the resulting output to absolute time using
+the argument \code{setRootAges = TRUE}, which obtains a \code{$root.time} element for each tree
+using the functions \code{\link{setRootAge}} and \code{\link{setRootAges}} (for single and multiple phylogenies).
 }
 \description{
 MrBayes is not great for getting samples of dated posterior phylogenies, or for obtaining certain summary trees from
@@ -81,6 +101,8 @@ the posterior (specifically the MCCT and MAP, which are specific trees in the po
 samples as returned are scaled relative to rate parameters in a separate file. This function attempts to automate
 the handling of multiple files (both .t tree files and .p parameter files), as well as multiple files
 associated with separate runs, to obtain samples of posterior trees, or summary trees such as the MCCT or MAP.
+These resulting trees are now scaled to units of time, but not be placed correctly on an absolute time-scale
+if all tips are extinct. See details of output below.
 }
 \details{
 This function is most useful for dealing with dating analyses in MrBayes, particularly when tip-dating
@@ -90,16 +112,36 @@ a tree with fossil taxa, as the half-compatibility and all-compatibility summary
 \examples{
 \dontrun{
 
-MCCT<-obtainDatedPosteriorTreesMrB(
- 	runFile="C:\\\\myTipDatingAnalysis\\\\MrB_run_fossil_05-10-17.nex.run1.t",
- 	nRuns=2,burnin=0.5,
-		outputTrees="MCCT",file=NULL)
+MCCT <- obtainDatedPosteriorTreesMrB(
+ 	runFile = "C:\\\\myTipDatingAnalysis\\\\MrB_run_fossil_05-10-17.nex.run1.t",
+ 	nRuns = 2, burnin = 0.5,
+		outputTrees = "MCCT", file = NULL)
+
+MAP <- obtainDatedPosteriorTreesMrB(
+ 	runFile = "C:\\\\myTipDatingAnalysis\\\\MrB_run_fossil_05-10-17.nex.run1.t",
+ 	nRuns = 2, burnin = 0.5, getFixedTimes = TRUE,
+		outputTrees = "MAP", file = NULL)
+
+# get a root age from the fixed ages for tips
+setRootAge(tree = MAP)
+
+#pull a hundred trees randomly from the posterior
+hundredRandomlySelectedTrees <- obtainDatedPosteriorTreesMrB(
+ 	runFile = "C:\\\\myTipDatingAnalysis\\\\MrB_run_fossil_05-10-17.nex.run1.t",
+ 	nRuns = 2, burnin = 0.5, getFixedTimes = TRUE,
+ 	getRootAges = TRUE,
+		outputTrees = 100, file = NULL)
+
 
 }
 
 }
 \seealso{
-\code{\link[phangorn]{maxCladeCred}} in package phangorn
+When the arguments \code{getFixedTimes = TRUE} and \code{setRootAges = TRUE} are used, the resulting output will be scaled to absolute time 
+with the available fixed ages using functions \code{\link{setRootAge}} and \code{\link{setRootAges}} (for single and multiple phylogenies).
+This is only done if fixed ages are available and if the tree is not being saved to an external file.
+
+Maximum Clade Credibility trees are estimated using the function\code{\link[phangorn]{maxCladeCred}} in package phangorn.
 }
 \author{
 David Bapst, with rescaling of raw output
