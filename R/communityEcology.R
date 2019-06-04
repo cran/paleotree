@@ -1,16 +1,20 @@
 #' Miscellaneous Functions for Community Ecology
-#'
+#' 
 #' This is just a small collection of miscellaneous functions
 #' that may be useful, primarily for community ecology analyses,
 #' particularly for paleoecological data. They are here mainly for
 #' pedagogical reasons (i.e. for students) as they don't appear
 #' to be available in other ecology-focused packages.
 
-#' @param x The community abundance matrix. Must be a matrix with two dimensions for
-#' \code{pairwiseSpearmanRho}; if a vector is supplied to \code{HurlbertPIE}, then
-#' it is treated as if it was matrix with a single row and number of columns equal to
-#' its length. Taxonomic units are assumed to be the columns and sites (samples)
-#'  are assumed to be the rows, for both functions.
+#' @param x The community abundance matrix. Taxonomic units are assumed to be
+#' the columns and sites (samples) are assumed to be the rows, for both
+#' functions. The abundances can be absolute counts of specimens for particular
+#' taxa in each sample, or it can be proportional (relative) abundances, where
+#' all taxon abundances at a site are divided by the total number of specimens
+#' collected at that site. For function \code{pairwiseSpearmanRho}, the input
+#' \code{x} should be a matrix with two dimensions. For \code{HurlbertPIE}, a
+#' vector (an object with only one dimension) will be treated as if it was
+#' matrix with a single row and number of columns equal to its length. 
 
 #' @param dropAbsent Should absent taxa be dropped? Must be one of either 'bothAbsent' (drop taxa
 #' absent in both sites for a given pairwise comparison),'eitherAbsent' (drop taxa absent in either
@@ -52,7 +56,7 @@
 #' This behavior can be modified via the arguments for including the diagonal 
 #' and upper triangle of the matrix. Otherwise, a full matrix is returned (by default)
 #' if the \code{asDistance} argument is not enabled. 
-#'
+#' 
 #' \code{HurlbertPIE} provides the 'Probability of Interspecific Encounter' metric for
 #' relative community abundance data, a commonly used metric for evenness of community
 #' abundance data based on derivations in Hurlbert (1971). An optional argument allows
@@ -62,14 +66,14 @@
 #' \code{pairwiseSpearmanRho} will return either a full matrix (the default) or (if
 #' \code{asDistance} is true, a distance matrix, with only the lower triangle
 #' shown (by default). See details.
-#'
+#' 
 #' \code{HurlbertPIE} returns a named vector of PIE values for the input data.
 
-#' @aliases communityEcology pairwiseSpearmanRho HurlbertPIE
+#' @aliases communityEcology pairwiseSpearmanRho HurlbertPIE PIE ProbabilityInterspecificEncounter
 
 #' @seealso
 #' \code{\link{twoWayEcologyCluster}}; example dataset: \code{\link{kanto}}
-#'
+#' 
 
 #' @name communityEcology
 
@@ -80,9 +84,9 @@
 #' a critique and alternative parameters. \emph{Ecology} 52(4):577-586.
 
 #' @examples
-#'
+#' 
 #' # let's load some example data:
-#' # a classic dataset collected by Satoshi and Okido from the Kanto region
+#' # a classic dataset collected by Satoshi & Okido from the Kanto region
 #' 
 #' data(kanto)
 #' 
@@ -145,9 +149,15 @@
 #' #and we can see that the Tower has extremely low unevenness
 #' 	#...overly high abundance of ghosts?
 #' 
+#' # NOTE it doesn't matter whether we use absolute abundances
+#'	# or proportional (relative) abundances
+#' kantoProp<-t(apply(kanto,1,function(x) x/sum(x)))
+#' kantoPropPIE <- HurlbertPIE(kantoProp)
+#' identical(kantoPIE,kantoPropPIE)
+#' 
 #' #let's look at evenness of 5 most abundant taxa
 #' kantoPIE_5 <- HurlbertPIE(kanto,nAnalyze = 5)
-#'
+#' 
 #' #barplot
 #' parX <- par(mar = c(7,5,3,3))
 #' barplot(kantoPIE_5,las = 3,cex.names = 0.7,
@@ -156,8 +166,13 @@
 
 #' @rdname communityEcology
 #' @export
-pairwiseSpearmanRho <- function(x, dropAbsent = "bothAbsent", asDistance = FALSE,
-	diag = NULL, upper = NULL, na.rm = FALSE){
+pairwiseSpearmanRho <- function(
+		x, 
+		dropAbsent = "bothAbsent", 
+		asDistance = FALSE,
+		diag = NULL, upper = NULL,
+		na.rm = FALSE){
+	##############################################################
 	#for ecology: SPECIES ARE COLUMNS, SAMPLES ARE ROWS
 	if(length(dim(x)) != 2){
 		stop('x must be a matrix, with samples as rows')
@@ -253,7 +268,8 @@ HurlbertPIE <- function(x,nAnalyze = Inf){
 		#first need to test there is actually more than one species
 		diversity <- length(samp)
 		if(diversity>1){
-			PIE[i] <- diversity/(diversity-1) * (1-sum((samp/sum(samp))^2))
+			propAbund <- samp / sum(samp)
+			PIE[i] <- (diversity / (diversity-1)) * (1 - sum(propAbund^2))
 		}else{
 			PIE[i] <- 0
 			}

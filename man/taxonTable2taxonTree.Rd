@@ -4,7 +4,7 @@
 \alias{taxonTable2taxonTree}
 \title{Create a Taxonomy-Based Phylogeny ('Taxon Tree') from a Hierarchical Table of Taxonomy Memberships}
 \usage{
-taxonTable2taxonTree(taxonTable, cleanTree = TRUE)
+taxonTable2taxonTree(taxonTable, cleanTree = TRUE, rootLabel = "root")
 }
 \arguments{
 \item{taxonTable}{A matrix of type character and multiple rows and columns, containing the
@@ -13,10 +13,16 @@ columns (reading left-to-right). Invariant columns (i.e. taxa that all
 tip taxa are in) are allowed, but all but the most 'shallow' of such invariant taxa are
 dropped prior to transformation to a taxon-tree phylogeny object.}
 
-\item{cleanTree}{By default, the tree is run through a series of post-processing, including having singles collapsed,
-nodes reordered and being written out as a Newick string and read back in, to ensure functionality with ape functions
-and ape-derived functions. If FALSE, none of this post-processing is done and users should beware, as such trees can
+\item{cleanTree}{When \code{TRUE} (the default), the tree is run through a series of
+post-processing, including having singles collapsed,
+nodes reordered and being written out as a Newick string and read
+back in, to ensure functionality with ape functions
+and ape-derived functions. If \code{FALSE}, none of this post-processing
+is done and users should beware, as such trees can
 lead to hard-crashes of R.}
+
+\item{rootLabel}{If the lowest constant/shared level in the taxonomic hierarchy
+isn't labeled, what label should be given to this level? The default is "root".}
 }
 \value{
 A phylogeny of class 'phylo', where each tip is a taxon listed in the last column of the

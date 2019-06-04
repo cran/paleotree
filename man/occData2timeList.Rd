@@ -2,7 +2,7 @@
 % Please edit documentation in R/occData2timeList.R
 \name{occData2timeList}
 \alias{occData2timeList}
-\title{Converting Occurrences Data to a timeList Data Object}
+\title{Converting Occurrences Data to a \code{timeList} Data Object}
 \usage{
 occData2timeList(occList, intervalType = "dateRange")
 }
@@ -17,8 +17,10 @@ the 'pbdb' vocab or 'com' (compact) vocab for early and late age bounds.}
 "zoneOverlap". Please see details below.}
 }
 \value{
-Returns a standard timeList data object, as used by many other paleotree functions, like
-\code{\link{bin_timePaleoPhy}}, \code{\link{bin_cal3TimePaleoPhy}} and \code{\link{taxicDivDisc}}
+Returns a standard timeList data object, as used by
+many other paleotree functions, like
+\code{\link{bin_timePaleoPhy}}, \code{\link{bin_cal3TimePaleoPhy}}
+and \code{\link{taxicDivDisc}}
 }
 \description{
 This function converts occurrence data, given as a list where each element
@@ -33,7 +35,7 @@ datasets sorted by \code{\link{taxonSortPBDBocc}} or any data object where occur
 (i.e. age bounds for each occurrence) for different taxa is separated into different elements
 of a named list. 
 
-\subsection{The argument intervalType}{
+\subsection{The Usage of the Argument \code{intervalType}}{
 
 The argument \code{intervalType} controls the algorithm used for obtain first and last interval bounds for
 each taxon, of which there are several to select from:intervalType
@@ -76,13 +78,20 @@ endpoints of a taxon's range without ignoring uncertainty from any particular se
 \examples{
 data(graptPBDB)
 
-graptOccSpecies <- taxonSortPBDBocc(graptOccPBDB,rank = "species",onlyFormal = FALSE)
+graptOccSpecies <- taxonSortPBDBocc(
+   data = graptOccPBDB,
+   rank = "species",
+   onlyFormal = FALSE)
 graptTimeSpecies <- occData2timeList(occList = graptOccSpecies)
 
 head(graptTimeSpecies[[1]])
 head(graptTimeSpecies[[2]])
 
-graptOccGenus <- taxonSortPBDBocc(graptOccPBDB,rank = "genus",onlyFormal = FALSE)
+graptOccGenus <- taxonSortPBDBocc(
+   data = graptOccPBDB,
+   rank = "genus",
+   onlyFormal = FALSE
+   )
 graptTimeGenus <- occData2timeList(occList = graptOccGenus)
 
 layout(1:2)
@@ -91,51 +100,60 @@ taxicDivDisc(graptTimeGenus)
 
 # the default interval calculation is "dateRange"
 # let's compare to the other option, "occRange"
-	# for species
+   # but now for graptolite *species*
 
-graptOccRange <- occData2timeList(occList = graptOccSpecies, intervalType = "occRange")
+graptOccRange <- occData2timeList(
+   occList = graptOccSpecies, 
+   intervalType = "occRange"
+   )
 
 #we would expect no change in the diversity curve
-	#because there are only changes in th
-		#earliest bound for the FAD
-		#latest bound for the LAD
+   #because there are only changes in th
+       #earliest bound for the FAD
+       #latest bound for the LAD
 #so if we are depicting ranges within maximal bounds
-	#dateRanges has no effect
+   #dateRanges has no effect
 layout(1:2)
 taxicDivDisc(graptTimeSpecies)
 taxicDivDisc(graptOccRange)
-#yep, identical
+#yep, identical!
 
 #so how much uncertainty was gained by using dateRange?
 
-# write a simple function for getting uncertainty in first and last
-		# appearance dates from a timeList object
+# write a function for getting uncertainty in first and last
+   # appearance dates from a timeList object
 sumAgeUncert <- function(timeList){
-	fourDate <- timeList2fourDate(timeList)
-	perOcc <- (fourDate[,1]-fourDate[,2])+(fourDate[,3]-fourDate[,4])
-	sum(perOcc)
-	}
+   fourDate <- timeList2fourDate(timeList)
+   perOcc <- (fourDate[,1] - fourDate[,2]) +
+       (fourDate[,3] - fourDate[,4])
+   sum(perOcc)
+   }
 
 #total amount of uncertainty in occRange dataset
 sumAgeUncert(graptOccRange)
 #total amount of uncertainty in dateRange dataset
 sumAgeUncert(graptTimeSpecies)
 #the difference
-sumAgeUncert(graptOccRange)-sumAgeUncert(graptTimeSpecies)
+sumAgeUncert(graptOccRange) - sumAgeUncert(graptTimeSpecies)
 #as a proportion
-1-(sumAgeUncert(graptTimeSpecies)/sumAgeUncert(graptOccRange))
+1 - (sumAgeUncert(graptTimeSpecies) / sumAgeUncert(graptOccRange))
 
 #a different way of doing it
-dateChange <- timeList2fourDate(graptTimeSpecies)-timeList2fourDate(graptOccRange)
-apply(dateChange,2,sum)
+dateChange <- timeList2fourDate(graptTimeSpecies) - 
+    timeList2fourDate(graptOccRange)
+apply(dateChange, 2, sum)
 #total amount of uncertainty removed by dateRange algorithm
 sum(abs(dateChange))
 
 layout(1)
+
 }
 \seealso{
-\code{\link{taxonSortPBDBocc}}, \code{\link{plotOccData}} and the
-example graptolite dataset at \code{\link{graptPBDB}}
+Occurrence data as commonly used with \code{paleotree} functions can
+be obtained with \code{link{getPBDBocc}}, and sorted into taxa by 
+\code{\link{taxonSortPBDBocc}}, and further explored with this function and
+\code{\link{plotOccData}}. Also, see the example graptolite dataset
+at \code{\link{graptPBDB}}
 }
 \author{
 David W. Bapst, with the 'dateRange' algorithm suggested by Jon Marcot.

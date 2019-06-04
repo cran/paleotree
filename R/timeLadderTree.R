@@ -21,7 +21,7 @@
 #' included in the output tree.
 #' 
 #' See this blog post for more information:
-#'
+#' 
 #' http://nemagraptus.blogspot.com/2012/07/resolving-polytomies-according-to.html
 #' 
 
@@ -41,7 +41,7 @@
 #' \donttest{
 #' set.seed(444)
 #' record <- simFossilRecord(p = 0.1, q = 0.1, nruns = 1,
-#'	nTotalTaxa = c(100,200))
+#' 	nTotalTaxa = c(100,200))
 #' taxa <- fossilRecord2fossilTaxa(record)
 #' tree <- taxa2cladogram(taxa)
 #' ranges <- sampleRanges(taxa,r = 0.5)
@@ -56,7 +56,7 @@
 #' plot(ladderize(tree),show.tip.label = FALSE)
 #' plot(ladderize(tree2),show.tip.label = FALSE)
 #' axisPhylo() 
-#'
+#' 
 #' layout(1)
 #' }
 
