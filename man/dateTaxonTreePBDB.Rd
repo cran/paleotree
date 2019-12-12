@@ -4,9 +4,14 @@
 \alias{dateTaxonTreePBDB}
 \title{Date a Taxon-Topology from the Paleobiology Database Using Appearance Data from the API}
 \usage{
-dateTaxonTreePBDB(taxaTree, taxaDataPBDB = taxaTree$taxaDataPBDB,
-  minBranchLen = 0, tipTaxonDateUsed = "shallowestAge",
-  dropZeroOccurrenceTaxa = TRUE, plotTree = FALSE)
+dateTaxonTreePBDB(
+  taxaTree,
+  taxaDataPBDB = taxaTree$taxaDataPBDB,
+  minBranchLen = 0,
+  tipTaxonDateUsed = "shallowestAge",
+  dropZeroOccurrenceTaxa = TRUE,
+  plotTree = FALSE
+)
 }
 \arguments{
 \item{taxaTree}{A tree with tip taxon names matching the taxon names
@@ -32,7 +37,7 @@ produced by this function. The default, \code{tipTaxonDateUsed = "shallowestAge"
 will use the minimum age of the last appearance time of that taxon, which if it
 is extant will be 0, and if it is extinct, will be the maximum constraint on the
 age of its last appearance (i.e. the last time we saw it before it went extinct).
-Other options are "deepestAge", which is the oldest possible first appearance time
+A second option is \code{"deepestAge"}, which is the oldest possible first appearance time
 from the PBDB, i.e. the maximum age constraint for the first appearance. As closely
 related taxa often first occur in the same short interval of geologic time, due to
 diversification bursts and/or the heterogeneity of fossil preservation, this may
@@ -88,29 +93,101 @@ plotPhyloPicTree(tree = timeTree,
 
 }
 
+####################################
+
 \dontrun{
 
-# example using strap
-
-rangesFourDate<-timeTree$tipTaxonFourDateRanges
-colnames(rangesMinMax )<-c("FAD","LAD")
+# can also plot dated tree with strap
 
 library(strap)
 #now plot it
 strap::geoscalePhylo(
-	tree=timeTree,
-	direction = "upwards",
-	ages=rangesMinMax,
-	cex.tip=0.7,
-	cex.ts=0.55,
-	cex.age=0.5,
-	width=3,
-	tick.scale = 50,
-	quat.rm=TRUE,
-	boxes = "Period",
-	arotate = 90,
-	units=c("Eon","Period","Era"),
-	x.lim=c(650,-20))
+    tree=timeTree,
+    direction = "upwards",
+    ages=rangesMinMax,
+    cex.tip=0.7,
+    cex.ts=0.55,
+    cex.age=0.5,
+    width=3,
+    tick.scale = 50,
+    quat.rm=TRUE,
+    boxes = "Period",
+    arotate = 90,
+    units=c("Eon","Period","Era"),
+    x.lim=c(650,-20)
+    )
+}
+
+##############################################################
+
+\donttest{
+
+# we can also use this for pre-existing trees
+    # for example, this tree of equuids (horses)
+    # borrowed from UCMP materials on horse evolution
+    # https://evolution.berkeley.edu/evolibrary/images/HorseTree.pdf
+    # (apparently from MacFadden, 1992? Citation above)
+
+# read the tree in as Newick string
+horseTree <- ape::read.tree(file=NULL, 
+    text = paste0(
+         "(Eohippus,(Xenicohippus,(Haplohippus,(Epihippus,",
+         "(Miohippus,(((Hypohippus,Megahippus),(Anchitherium,",
+         "Kalobatippus)),(Archaeohippus,(Desmatippus,(Parahippus,",
+         "(Merychippus,(((Hipparion_Merychippus,(Nannippus,",
+         " Cormohipparion)),(Pseudhipparion,(Neohipparion,",
+         " Hipparion))),(Equine_Merychippus,((Protohippus,Calippus),",
+         "(Pliohippus,(Astrohippus,(Dinohippus,Equus))))))))))))))));"
+         )
+    )
+
+# note there is a message that the tree lacks node names
+    # this is unexpected / atypical for taxon trees
+
+plot(horseTree)
+
+# now let's get data on the tip from the PBDB
+    # using getSpecificTaxaPBDB
+horseData <- getSpecificTaxaPBDB(horseTree$tip.label)
+
+# now we can date the tree with dateTaxonTreePBDB
+
+datedHorseTree <- dateTaxonTreePBDB(
+    taxaTree = horseTree,
+    taxaDataPBDB = horseData,
+    minBranchLen = 1
+    )
+
+# and let's try plotting it!	
+plotPhyloPicTree(
+    tree = datedHorseTree,
+    depthAxisPhylo = TRUE
+    )		
+	
+# a fairly boring phylopic diagram
+    # not many horse phylopics as of 07-16-19?
+}
+
+\dontrun{
+
+# Let's look at this horse tree with strap
+
+library(strap)
+
+geoscalePhylo(
+    tree = datedHorseTree,
+    ages = datedHorseTree$ranges.used,
+    cex.tip = 0.7,
+    cex.ts = 0.7,
+    cex.age = 0.7,
+    width = 4,
+    tick.scale = 15,
+    boxes = "Epoch",
+    erotate = 90,
+    quat.rm = TRUE,
+    units = c("Period","Epoch"),
+    x.lim = c(65,-10)
+    )
 
 }
 
@@ -118,6 +195,10 @@ strap::geoscalePhylo(
 \references{
 Peters, S. E., and M. McClennen. 2015. The Paleobiology Database
 application programming interface. \emph{Paleobiology} 42(1):1-7.
+
+The equuid tree used in the examples is from:
+MacFadden, B. J. 1992. Fossil horses: systematics, paleobiology, and
+evolution of the family Equidae. \emph{Cambridge University Press}.
 }
 \seealso{
 See \code{\link{getDataPBDB}}, \code{\link{makePBDBtaxonTree}},

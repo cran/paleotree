@@ -4,20 +4,23 @@
 \alias{taxa2cladogram}
 \title{Convert Simulated Taxon Data into a Cladogram}
 \usage{
-taxa2cladogram(taxad, drop.cryptic = FALSE, plot = FALSE)
+taxa2cladogram(taxaData, drop.cryptic = FALSE, plot = FALSE)
 }
 \arguments{
-\item{taxad}{A five-column matrix of taxonomic data, as output by
-\code{simFossilRecord}, after transformation with function \code{fossilRecord2fossilTaxa}.}
+\item{taxaData}{A five-column matrix of taxonomic data,
+as output by \code{\link{fossilRecord2fossilTaxa}} via simulations
+produced using \code{\link{simFossilRecord}}. Previously, this was the
+default output of the deprecated function \code{simFossilTaxa}.}
 
 \item{drop.cryptic}{Should cryptic species be dropped (except for the
-first)? Not dropped by default.}
+first; effectively merging the cryptic species complexes into a single apparent species)? 
+\code{drop.cryptic = FALSE} by default, so cryptic species are not dropped by default.}
 
-\item{plot}{Should the result be plotted?}
+\item{plot}{If \code{TRUE} result the output with \code{ape::plot.phylo}.}
 }
 \value{
 The resulting phylogeny without branch lengths is output as an
-object of class phylo.
+object of class \code{phylo}.
 
 The tip labels are the rownames from the simulation input; see documentation
 for \code{simFossilRecord} and \code{fossilRecord2fossilTaxa} documentation for details.

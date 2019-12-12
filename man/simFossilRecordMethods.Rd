@@ -6,18 +6,25 @@
 \alias{fossilRecord2fossilTaxa}
 \alias{fossilRecord2fossilRanges}
 \alias{fossilTaxa2fossilRecord}
-\title{Methods for Editing or Converting Output from simFossilRecord}
+\title{Methods for Editing or Converting Output from Simulated Fossil Record Objects}
 \usage{
-timeSliceFossilRecord(fossilRecord, sliceTime,
-  shiftRoot4TimeSlice = FALSE, modern.samp.prob = 1,
-  tolerance = 10^-4)
+timeSliceFossilRecord(
+  fossilRecord,
+  sliceTime,
+  shiftRoot4TimeSlice = FALSE,
+  modern.samp.prob = 1,
+  tolerance = 10^-6
+)
 
 fossilRecord2fossilTaxa(fossilRecord)
 
 fossilTaxa2fossilRecord(fossilTaxa)
 
-fossilRecord2fossilRanges(fossilRecord, merge.cryptic = TRUE,
-  ranges.only = TRUE)
+fossilRecord2fossilRanges(
+  fossilRecord,
+  merge.cryptic = TRUE,
+  ranges.only = TRUE
+)
 }
 \arguments{
 \item{fossilRecord}{A list object output by \code{simFossilRecord}, often composed
@@ -53,8 +60,9 @@ taxon-unit (with the name of the first taxon in that cryptic complex).}
 
 \item{ranges.only}{If \code{TRUE} (the default), \code{fossilRecord2fossilRanges}
 will return the dates of the first and last sampled occurrences of each taxon-unit
-(i.e. the stratigraphic range of each taxon). If \code{FALSE}, instead a list will be
-output, with each element being a vector of dates for all sampling events of each taxon-unit.}
+(i.e. the stratigraphic range of each taxon).
+If \code{FALSE}, instead a list will be output,
+with each element being a vector of dates for all sampling events of each taxon-unit.}
 }
 \value{
 Depends on the function and the arguments given. See Details.
@@ -77,13 +85,14 @@ are now listed as extant.
 
 \code{fossilRecord2fossilTaxa} converts a \code{fossilRecordSimulation} object
 to the flat table format of taxon data as was originally output by deprecated function 
-\code{simFossilTaxa}, and can be taken as input by a number of \code{paleotree} functions such as
-\code{sampleRanges},\code{taxa2phylo} and \code{taxa2cladogram}. 
+\code{simFossilTaxa}, and can be taken as input
+by a number of \code{paleotree} functions such as
+\code{sampleRanges}, \code{taxa2phylo} and \code{taxa2cladogram}. 
 
 \code{fossilTaxa2fossilRecord} does the reverse, converting a \code{simFossilTaxa}
 table into a \code{fossilRecordSimulation} list object,
 but returns a \code{fossilRecordSimulation} object that
-considers each species as un-sampled (as sampling
+considers each species as \emph{unsampled} (as sampling
 information is not contained within a \code{simFossilTaxa} table).
 
 \code{fossilRecord2fossilRanges} converts a \code{fossilRecordSimulation} object
