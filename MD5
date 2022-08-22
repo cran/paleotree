@@ -1,5 +1,5 @@
-b7e72eb3304a5a22a644ca7cfe70bcb0 *CHANGELOG
-2a398cba3be4766c55d57f10c73912b3 *DESCRIPTION
+a15e32d34937a5f717ca1bcf33877e34 *CHANGELOG
+b194d3da4ee2510b069eef41fe328b3a *DESCRIPTION
 d2d91af35be6ca341715f48342cef37f *NAMESPACE
 e3bfe8508e25f63b614606ad62ac5413 *R/DiversityCurves.R
 3caed8327f979848de794436f0f28d6d *R/RaiaCopesRule.R
@@ -80,7 +80,7 @@ c7d884f1ccf9f91bdd14c1c8e3720430 *R/taxonTable2TaxonTree.R
 07faf0890589f7efbdf0f2ad9e0adb6f *R/termTaxa.R
 5fffb45bae8e346172187f817c77baf6 *R/testEdgeMat.R
 b25bb2fe7e4870ca7cd8b389f857cbec *R/timeLadderTree.R
-1df68b18b1255f898af664af50b9e32b *R/timePaleoPhy.R
+89579fcec3534d23b70d3fefbecb8091 *R/timePaleoPhy.R
 3e4d3d7052b6135e700d3bab711875d9 *R/timeSliceTree.R
 ce87f2cedeb11230fc609b7f79cf8589 *R/tipDatingCompatabilitySummaryMrB.R
 261e98756e0e2e6ea685ace876e76215 *R/treeContradiction.R
@@ -88,7 +88,7 @@ e2f7d8df77599a1da10a8876dac0ff82 *R/twoWayEcologyCluster.R
 d751de03de21b23a07d8a80cc0631741 *R/unitLengthTree.R
 44ad4fb59b97d09682aa7d953b3fff46 *R/writeSimpleSumtNexus.R
 39ea307e8a3edb320e2ff712d7091d61 *README.md
-df2ed0c92657419f5b11d8180973be1d *build/partial.rdb
+0c6ad5b3446721162c89589e8077ab1c *build/partial.rdb
 3f77eef7d0a08b3b97d5cf56cc097564 *data/RaiaCopesRule.rdata
 f0b9ee57abc61714eda148149ec2fbc7 *data/SongZhangDicrano.rdata
 ef3ff58dc33ca33553a6f4ba1f50537e *data/graptDisparity.rdata
@@ -168,7 +168,7 @@ c8b6ee8fa0d6ea0e05ea4044aa08575e *man/termTaxa.Rd
 89daee51d797bbefc248e48706c0e72c *man/testEdgeMat.Rd
 bb4d07749b8b1a056f0df9e5a8b5231d *man/timeLadderTree.Rd
 c22b15f77395a9928208dd438facc1ad *man/timeList2fourDate.Rd
-f0c49e1432018c41230ff7dd0b9a0079 *man/timePaleoPhy.Rd
+3d0c183f2fc9730740d419abe28882cf *man/timePaleoPhy.Rd
 edd11561cf515a8f701cce74ffeeea7c *man/timeSliceTree.Rd
 9f78c688a6d9f0b5285a0612f8db515e *man/tipDatingCompatabilitySummaryMrB.Rd
 d9e00a1e03029c36c0991b79a888de9a *man/treeContradiction.Rd
